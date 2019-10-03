@@ -1,4 +1,5 @@
 from flaskext.mysql import MySQL
+import pymysql
 from biblioapp import app
 
 db = MySQL()
@@ -11,5 +12,5 @@ def get_db() :
 	app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 	db.init_app(app)
 	conn = db.connect()
-	cursor = conn.cursor()	
+	cursor = conn.cursor(pymysql.cursors.DictCursor)	
 	return cursor
