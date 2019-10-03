@@ -16,7 +16,7 @@ def getBook(book_id):
     cursor.execute("SELECT * FROM biblio_book where id=%s",book_id)
     row = cursor.fetchone()
     if row:
-        return render_template('book.html',row=row)
+        return render_template('book.html',book=row)
     #while row is not None:
     #    return row[2]
     abort(404)
