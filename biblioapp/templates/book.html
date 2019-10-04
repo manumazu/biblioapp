@@ -1,16 +1,15 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <title>{{ book['title'] }}</title>
-    </head>
+{% extends "layout.html" %}
 
-    <body>
-        <h1>{{ book['title'] }} - {{ book['author'] }}</h1>
-        <ul>
-        {% for field in book %}
-            <li>{{ book[field] }}</li>
-        {% endfor %}
-        </ul>
-    </body>
-</html>
+{% block title %}{{ book['title'] }}{% endblock %}
+
+{% block body %}
+<h1>{{ book['title'] }} - {{ book['author'] }}</h1>
+<ul>
+{% for field in book %}
+    <li>{{ book[field] }}</li>
+{% endfor %}
+</ul>
+<form action="/locate/" method="post">
+<input type="hidden" name="book_id" value="{{ book['id'] }}">
+<input type="submit" value="Locate now !">
+{% endblock %}
