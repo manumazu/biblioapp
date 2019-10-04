@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    {% block header %}
+        <meta charset="utf-8" />
+        <title>{% block title %}Biblioapp{% endblock %}</title>
+    {% endblock %}
+    </head>
+
+    <body>
+	<h1>{{ self.title() }}</h1>
+	{% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for m in messages %}
+                <li>{{ m }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+        {% block body %}{% endblock %}
+    </body>
+</html>
+
