@@ -7,16 +7,23 @@ from biblioapp import db
 
 cursor = db.get_db()
 
+global arduino_id
+arduino_id = db.get_arduino_id()
+
 @app.route("/")
+@app.route('/<arduino_id>/')
 def home():
-    return render_template('layout.html')
+    return render_template('layout.html',arduino_id=arduino_id)
 
 @app.route('/book/<book_id>')
 def getBook(book_id):
     cursor.execute("SELECT * FROM biblio_book where id=%s",book_id)
     row = cursor.fetchone()
     if row:
-        return render_template('book.html',book=row)
+        if row['id_address']:
+          cursor.execute("SELECT * FROM biblio_address where id=%s",row['id_address'])
+          add = cursor.fetchone()
+        return render_template('book.html',book=row,address=add,arduino_id=arduino_id)
     abort(404)
 
 @app.route('/locate/', methods=['GET', 'POST'])

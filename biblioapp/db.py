@@ -14,3 +14,19 @@ def get_db() :
 	conn = db.connect()
 	cursor = conn.cursor(pymysql.cursors.DictCursor)	
 	return cursor
+
+def get_arduino_id() :
+    cursor = get_db()
+    cursor.execute("SELECT id_arduino FROM biblio_app WHERE id=1")
+    row = cursor.fetchone()
+    if row:
+      return row['id_arduino']
+    return false
+
+def get_book_address(arduino_id,id_address) :
+  cursor = get_db()
+  cursor.execute("SELECT * FROM biblio_address where id=%s",id_address)
+  row = cursor.fetchone()
+  if row:
+    return row
+  return false
