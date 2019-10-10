@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+<h2>Liste of books in your personnal library : </h2>
+
+{% block body %}
+<ul>
+{% for book in books %}
+    <li><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
+{% endfor %}
+</ul>
+
+{% endblock %}
