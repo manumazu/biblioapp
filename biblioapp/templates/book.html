@@ -13,9 +13,9 @@
 {% if address['id'] %}
 <form action="/locate/" method="post">
 <input type="hidden" name="book_id" value="{{ book['id'] }}">
-<input type="hidden" name="col" value="{{ address['col'] }}">
-<input type="hidden" name="line" value="{{ address['line'] }}">
-<input type="hidden" name="space" value="{{ address['space'] }}">
+<input type="hidden" name="column" value="{{ address['column'] }}">
+<input type="hidden" name="row" value="{{ address['row'] }}">
+<input type="hidden" name="range" value="{{ address['range'] }}">
 <input type="hidden" name="arduino_id" value="{{ arduino_id }}">
 <input type="submit" value="Locate now !">
 {% endif %}

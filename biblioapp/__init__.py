@@ -26,6 +26,7 @@ def getBook(book_id):
 @app.route('/locate/', methods=['GET', 'POST'])
 def locateBook():
     if request.method == 'POST':
+      test = db.set_request(request)
       flash('Location requested for book {}'.format(request.form['book_id']))
       return redirect('/')
     

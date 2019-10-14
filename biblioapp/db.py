@@ -1,6 +1,7 @@
 from flaskext.mysql import MySQL
 import pymysql
 from biblioapp import app
+from datetime import datetime
 
 # MySQL configurations
 app.config['MYSQL_DATABASE_USER'] = 'manu'
@@ -50,6 +51,25 @@ def get_address(address_id) :
   cursor.close()
   if row:
     return row
+
+def get_request(arduino_id) :
+  cursor = get_db()
+  cursor.execute("SELECT * FROM biblio_request where id=%s",arduino_id)
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return False
+
+def set_request(request) :
+  now = datetime.now()
+  cursor = get_db()
+  cursor.execute("INSERT INTO biblio_request (`id_arduino`, `row`, `column`, `range`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE date_add=%s", \
+  (request.form.get('arduino_id'), request.form.get('row'), request.form.get('column'), request.form.get('range'), \
+  now.strftime("%Y-%m-%d %H:%M:%S")))
+  conn.commit()
+  cursor.close()
+  return True
 
 def close_conn() :
     conn.close()
