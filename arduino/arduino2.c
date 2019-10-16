@@ -19,7 +19,7 @@ int blueColor = 0;
 
 const int buttonPin = 4;
 int buttonState = 1;
-int stateReset = 0;
+int stateReset = 1;
 
 //for columns
 int outputCols = 0;
@@ -41,7 +41,6 @@ void setup() {
   pinMode(A0, INPUT);//col
   pinMode(A1, INPUT);//row  
   Serial.begin(9600);
-  setColor();
 }
 
 void getLedAddress() {
@@ -96,16 +95,18 @@ void ledsManager(String action, int pos = 0, int line = 0, int space = 0) {
 
 void loop() {
 
+  delay(delayval);
   getLedAddress();
   
   if(outputCols!=currentCol || outputRow!=currentRow) {// new request
     stateReset=1;
+    setColor();
     ledsManager(String("off"));//switch off all
+    
   }
   
   //light asked led  
   if(stateReset==1) { 
-    //delay(delayval);
     ledsManager(String("on"),address[0], address[1], address[2]);
   }
   
