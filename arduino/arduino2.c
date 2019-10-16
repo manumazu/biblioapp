@@ -22,17 +22,17 @@ int buttonState = 1;
 int stateReset = 1;
 
 //for columns
-int outputCols = 0;
+int outputCol = 0;
 int currentCol = 0;
 //for lines
 int outputRow = 0;
 int currentRow = 0;
+//for range
+int outputRange = 1;
+int currentRange = 0;
 
 int num = 1;
 String action;
-
-int address[3];
-int currentadd[3];
 
 void setup() {
   // Initialize the NeoPixel library.
@@ -45,19 +45,21 @@ void setup() {
 
 void getLedAddress() {
   // map it to the range pix of the analog out:
-  outputCols = map(analogRead(A0), 0, 1024, 0, NUMPIXELS1);
-  
+  outputCol = map(analogRead(A0), 0, 1024, 0, NUMPIXELS1);
   // map it to the range lines of the analog out:
-  outputRow = map(analogRead(A1), 0, 1024, 1, 3);  
- 
-  address[0]=outputCols;//pos
-  address[1]=outputRow;//line
-  address[2]=1;//space
+  outputRow = map(analogRead(A1), 0, 1024, 1, 3);
+
+  /*StaticJsonBuffer<200> jsonBuffer;
+  char json[] = "{\"column\": 10, \"date_add\": \"Wed, 16 Oct 2019 22:11:54 GMT\", \"id_arduino\": 123, \"range\": 2, \"row\": 1}";
+  JsonObject& address = jsonBuffer.parseObject(json);
+  outputCol = address["column"];
+  outputRow = address["row"];
+  outputRange = address["range"];*/
   
-  Serial.println(address[0]+(String)'-'+address[1]);
+  Serial.println(outputCol+(String)'-'+outputRow);
 }
 
-void ledsManager(String action, int pos = 0, int line = 0, int space = 0) {
+void ledsManager(String action, int pos = 0, int line = 0, int range = 0) {
    
    for (int j=1; j <= 2; j++) 
    {
@@ -79,13 +81,10 @@ void ledsManager(String action, int pos = 0, int line = 0, int space = 0) {
          currentPix.setPixelColor(i, currentPix.Color(255, 69, 0));
        }   
        if(action.equals("on")){
-         if(line==j && i>=pos && i<=(pos+space-1)) //light on given line
+         if(line==j && i>=pos && i<=(pos+range-1)) //light on given line
         	currentPix.setPixelColor(i, currentPix.Color(redColor, greenColor, blueColor));
             currentCol = pos;
             currentRow = line;
-            currentadd[0]=pos;
-            currentadd[1]=line;
-            currentadd[2]=space;
        }
        currentPix.show();
      }
@@ -98,7 +97,7 @@ void loop() {
   delay(delayval);
   getLedAddress();
   
-  if(outputCols!=currentCol || outputRow!=currentRow) {// new request
+  if(outputCol!=currentCol || outputRow!=currentRow) {// new request
     stateReset=1;
     setColor();
     ledsManager(String("off"));//switch off all
@@ -107,7 +106,7 @@ void loop() {
   
   //light asked led  
   if(stateReset==1) { 
-    ledsManager(String("on"),address[0], address[1], address[2]);
+    ledsManager(String("on"),outputCol, outputRow, outputRange);
   }
   
   //reset mode
