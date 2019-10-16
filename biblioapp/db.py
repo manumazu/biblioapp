@@ -54,7 +54,7 @@ def get_address(address_id) :
 
 def get_request(arduino_id) :
   cursor = get_db()
-  cursor.execute("SELECT * FROM biblio_request where id=%s",arduino_id)
+  cursor.execute("SELECT * FROM biblio_request where id_arduino=%s",arduino_id)
   row = cursor.fetchone()
   cursor.close()
   if row:

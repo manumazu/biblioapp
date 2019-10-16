@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort, flash, redirect
+from flask import Flask, render_template, request, abort, flash, redirect, json
 
 app = Flask(__name__)
 app.secret_key = '2d9-E2.)f&é,A$p@fpa+zSU03êû9_'
@@ -29,6 +29,16 @@ def locateBook():
       test = db.set_request(request)
       flash('Location requested for book {}'.format(request.form['book_id']))
       return redirect('/')
+
+@app.route('/request/')
+def getRequest():
+  data = db.get_request(arduino_id)
+  response = app.response_class(
+        response=json.dumps(data),
+        mimetype='application/json'
+  )
+  return response
+
     
 if __name__ == "__main__":
     app.run(debug=True)
