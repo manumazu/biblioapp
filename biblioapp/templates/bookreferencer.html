@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h1>Book's reference searchin'</h1>
+
+<form action="/bookreferencer/" method="post">
+<label for="isbn">ISBN : </label><input type="text" name="isbn" value="{% if isbn %}{{ isbn }}{% endif %}">
+<input type="submit" value="Search reference">
+
+{% if 'items' in data %}
+<ul>       
+{% for field in data['items'] %}
+    <li>{{ field }} : {{ data['items'][field] }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}

@@ -30,6 +30,8 @@ def locateBook():
       flash('Location requested for book {}'.format(request.form['book_id']))
       return redirect('/')
 
+
+#Perform request for current arduino_id
 @app.route('/request/')
 def getRequest():
   data = db.get_request(arduino_id)
@@ -39,6 +41,17 @@ def getRequest():
   )
   return response
 
+@app.route('/bookreferencer/', methods=['GET', 'POST'])
+def searchBookReference():
+  if request.method == 'POST' and request.form['isbn']:
+    import requests
+    #url = "https://openlibrary.org/api/books?bibkeys=ISBN:"+request.form['isbn'] 
+    url = "https://www.googleapis.com/books/v1/volumes?q=ISBN:"+request.form['isbn']
+    r = requests.get(url)
+    data = json.loads(r.content)
+    return render_template('bookreferencer.html',data=data, isbn=request.form['isbn'])
+  else:
+    return render_template('bookreferencer.html')
     
 if __name__ == "__main__":
     app.run(debug=True)
