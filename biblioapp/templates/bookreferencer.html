@@ -10,7 +10,7 @@
 {% if 'items' in data %}
 <ul>       
 {% for field in data['items'] %}
-    <li>{{ field }} : {{ data['items'][field] }}</li>
+    <li>{{ field['volumeInfo']['authors'] }} {{ field['volumeInfo']['title'] }}</li>
 {% endfor %}
 </ul>
 {% endif %}
