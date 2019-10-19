@@ -41,7 +41,7 @@ def getRequest():
   )
   return response
 
-@app.route('/bookreferencer/', methods=['GET', 'POST'])
+@app.route('/booksearch/', methods=['GET', 'POST'])
 def searchBookReference():
   if request.method == 'POST':
     query = "key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
@@ -56,10 +56,10 @@ def searchBookReference():
     url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
     data = json.loads(r.content)
-    print(url)#data['items'])
-    return render_template('bookreferencer.html',data=data, isbn=request.form['isbn'], inauthor=request.form['inauthor'], intitle=request.form['intitle'])
+    #print(data['items'])
+    return render_template('booksearch.html',data=data, isbn=request.form['isbn'], inauthor=request.form['inauthor'], intitle=request.form['intitle'])
   else:
-    return render_template('bookreferencer.html')
+    return render_template('booksearch.html')
     
 if __name__ == "__main__":
     app.run(debug=True)
