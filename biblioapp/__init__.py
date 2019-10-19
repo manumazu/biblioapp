@@ -43,13 +43,21 @@ def getRequest():
 
 @app.route('/bookreferencer/', methods=['GET', 'POST'])
 def searchBookReference():
-  if request.method == 'POST' and request.form['isbn']:
+  if request.method == 'POST':
+    query = "key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
+    if request.form['isbn']:
+      query += "ISBN:\""+request.form['isbn']+"\"&"
+    if request.form['inauthor']:
+      query += "inauthor:"+request.form['inauthor']+"+"
+    if request.form['intitle']:
+      query += "intitle:"+request.form['intitle']
     import requests
     #url = "https://openlibrary.org/api/books?bibkeys=ISBN:"+request.form['isbn'] 
-    url = "https://www.googleapis.com/books/v1/volumes?q=ISBN:"+request.form['isbn']
+    url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
     data = json.loads(r.content)
-    return render_template('bookreferencer.html',data=data, isbn=request.form['isbn'])
+    print(url)#data['items'])
+    return render_template('bookreferencer.html',data=data, isbn=request.form['isbn'], inauthor=request.form['inauthor'], intitle=request.form['intitle'])
   else:
     return render_template('bookreferencer.html')
     
