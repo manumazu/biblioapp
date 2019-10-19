@@ -3,7 +3,7 @@
 {% block body %}
 <h2>Book's reference search</h2>
 
-<form action="/bookreferencer/" method="post">
+<form action="/booksearch/" method="post">
 <p><label for="isbn">ISBN : </label><input type="text" name="isbn" value="{% if isbn %}{{ isbn }}{% endif %}"></p>
 <p><label for="isbn">Author : </label><input type="text" name="inauthor" value="{% if inauthor %}{{ inauthor }}{% endif %}"></p>
 <p><label for="isbn">Title : </label><input type="text" name="intitle" value="{% if intitle %}{{ intitle }}{% endif %}"></p>
@@ -20,7 +20,7 @@
 	  {% endfor %}
 	{% endif %}
 	<i>{{ field['volumeInfo']['title'] }} </i> - 
-	{{ field['volumeInfo']['publisher'] }} ({{ field['volumeInfo']['publishedDate'] }})
+	{{ field['volumeInfo']['publisher'] }} ({{ field['volumeInfo']['publishedDate'] }}, {{ field['volumeInfo']['pageCount'] }}p)
 	<ul>
 	{% for isbn in field['volumeInfo']['industryIdentifiers'] %}
 	  <li>{{ isbn['identifier'] }}</li>
