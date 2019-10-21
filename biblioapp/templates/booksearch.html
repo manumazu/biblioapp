@@ -21,6 +21,12 @@
 	{% endif %}
 	<i>{{ field['volumeInfo']['title'] }} </i> - 
 	{{ field['volumeInfo']['publisher'] }} ({{ field['volumeInfo']['publishedDate'] }}, {{ field['volumeInfo']['pageCount'] }}p)
+	- {% if 'categories' in field['volumeInfo'] %}
+	    {% for category in field['volumeInfo']['categories'] %}
+		{{ category }}
+	    {% endfor %}
+	{% endif %}
+
 	<ul>
 	{% for isbn in field['volumeInfo']['industryIdentifiers'] %}
 	  <li>{{ isbn['identifier'] }}</li>
