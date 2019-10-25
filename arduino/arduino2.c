@@ -21,18 +21,19 @@ const int buttonPin = 4;
 int buttonState = 1;
 int stateReset = 1;
 
+int node_length = 3;
 //for columns
-int outputCol = 0;
-int currentCol = 0;
+int outputCol[NUMPIXELS1];//biggest band;
+int currentCol[NUMPIXELS1];
 //for lines
-int outputRow = 0;
-int currentRow = 0;
+int outputRow[NUMPIXELS1];
+int currentRow[NUMPIXELS1];
 //for range
-int outputRange = 1;
-int currentRange = 0;
+int outputRange[NUMPIXELS1];
 
 int num = 1;
 String action;
+
 
 void setup() {
   // Initialize the NeoPixel library.
@@ -43,23 +44,36 @@ void setup() {
   Serial.begin(9600);
 }
 
-void getLedAddress() {
+int getLedAddress() {
   // map it to the range pix of the analog out:
-  outputCol = map(analogRead(A0), 0, 1024, 0, NUMPIXELS1);
-  // map it to the range lines of the analog out:
-  outputRow = map(analogRead(A1), 0, 1024, 1, 3);
-
-  /*StaticJsonBuffer<200> jsonBuffer;
-  char json[] = "{\"column\": 10, \"date_add\": \"Wed, 16 Oct 2019 22:11:54 GMT\", \"id_arduino\": 123, \"range\": 2, \"row\": 1}";
-  JsonObject& address = jsonBuffer.parseObject(json);
-  outputCol = address["column"];
-  outputRow = address["row"];
-  outputRange = address["range"];*/
+  /*outputCol[0] = map(analogRead(A0), 0, 1024, 0, NUMPIXELS1);
+  outputCol[1] = 5;
+  outputCol[2] = 8;
   
-  Serial.println(outputCol+(String)'-'+outputRow);
+  // map it to the range lines of the analog out:
+  outputRow[0] = map(analogRead(A1), 0, 1024, 1, 3);
+  outputRow[1] = 2;
+  outputRow[2] = 2;
+  
+  // ranges
+  outputRange[0] = 2;
+  outputRange[1] = 1;
+  outputRange[2] = 2;*/
+  
+  StaticJsonBuffer<200> jsonBuffer;
+  char json[] = "[{\"column\": 8, \"range\": 3, \"row\": 2, \"date_add\": \"Fri, 25 Oct 2019 11:12:05 GMT\", \"id_arduino\": 123} \
+    , {\"column\": 5, \"range\": 2, \"row\": 1, \"date_add\": \"Wed, 23 Oct 2019 18:54:22 GMT\", \"id_arduino\": 123} \
+    , {\"column\": 1, \"range\": 2, \"row\": 2}]";
+  JsonArray& nodes = jsonBuffer.parseArray(json);
+  node_length = nodes.size(); 
+  for(int i=0; i<node_length;i++){
+    outputCol[i] = nodes[i]["column"];
+	outputRow[i] = nodes[i]["row"];
+    outputRange[i] = nodes[i]["range"];
+  }
 }
 
-void ledsManager(String action, int pos = 0, int line = 0, int range = 0) {
+void ledsManager(String action) {
    
    for (int j=1; j <= 2; j++) 
    {
@@ -80,11 +94,21 @@ void ledsManager(String action, int pos = 0, int line = 0, int range = 0) {
        if(action.equals("all")) {
          currentPix.setPixelColor(i, currentPix.Color(255, 69, 0));
        }   
-       if(action.equals("on")){
-         if(line==j && i>=pos && i<=(pos+range-1)) //light on given line
-        	currentPix.setPixelColor(i, currentPix.Color(redColor, greenColor, blueColor));
-            currentCol = pos;
-            currentRow = line;
+       if(action.equals("on"))
+       {
+         //loop on asked position array
+         for (int x=0; x < node_length; x++) {
+           int pos = outputCol[x];
+           int line = outputRow[x];
+           int range = outputRange[x];
+           setColor(x*10);
+           if(line==j && i>=pos && i<=(pos+range-1)){ //light on given line
+              currentPix.setPixelColor(i, currentPix.Color(redColor, greenColor, blueColor));
+              currentCol[x] = pos;
+              currentRow[x] = line;
+           }
+           Serial.println(pos+(String)'-'+line+(String)'-'+range);
+         }
        }
        currentPix.show();
      }
@@ -97,16 +121,14 @@ void loop() {
   delay(delayval);
   getLedAddress();
   
-  if(outputCol!=currentCol || outputRow!=currentRow) {// new request
+  if(outputCol[0]!=currentCol[0] || outputRow[0]!=currentRow[0]) {// new request
     stateReset=1;
-    setColor();
     ledsManager(String("off"));//switch off all
-    
   }
   
   //light asked led  
-  if(stateReset==1) { 
-    ledsManager(String("on"),outputCol, outputRow, outputRange);
+  if(stateReset==1) {
+    ledsManager(String("on"));
   }
   
   //reset mode
@@ -128,8 +150,8 @@ void loop() {
 
 // setColor()
 // picks random values to set for RGB
-void setColor(){
-  redColor = random(0, 255);
-  greenColor = random(0,255);
-  blueColor = random(0, 255);
+void setColor(int x){
+  redColor = random(x, 255);
+  greenColor = random(x,255);
+  blueColor = random(x, 255);
 }
