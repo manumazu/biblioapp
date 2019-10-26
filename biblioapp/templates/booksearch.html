@@ -8,33 +8,72 @@
 <p><label for="isbn">Author : </label><input type="text" name="inauthor" value="{% if inauthor %}{{ inauthor }}{% endif %}"></p>
 <p><label for="isbn">Title : </label><input type="text" name="intitle" value="{% if intitle %}{{ intitle }}{% endif %}"></p>
 <input type="submit" value="Search reference">
+</form>
 
 {% if 'items' in data %}
 <h2>Results</h2>
 <ul>       
 {% for field in data['items'] %}
     <li>
+	<form method="post" action="/bookreferencer/">
+	<input type="hidden" name="reference" value="{{ field['id'] }}">
+
 	{% if 'authors' in field['volumeInfo'] %}
 	  {% for author in field['volumeInfo']['authors'] %}
-	    {{ author }} - 
+	    {{ author }}, 
+	    <input type="hidden" name="authors[]" value="{{ author }}">
 	  {% endfor %}
 	{% endif %}
-	<i>{{ field['volumeInfo']['title'] }} </i> - 
+
+	<input type="hidden" name="title" value="{{ field['volumeInfo']['title'] }}">
+	<input type="hidden" name="editor" value="{{ field['volumeInfo']['publisher'] }}">
+	<input type="hidden" name="pages" value="{{ field['volumeInfo']['pageCount'] }}">
+	<input type="hidden" name="year" value="{{ field['volumeInfo']['publishedDate'] }}">
+	<input type="hidden" name="description" value="{{field['volumeInfo']['description']}}">
+
+	<i><a href="{{ url_for('searchBookReference') }}?ref={{ field['id'] }}">{{ field['volumeInfo']['title'] }}</a> {{field['volumeInfo']['subtitle']}}</i> - 
 	{{ field['volumeInfo']['publisher'] }} ({{ field['volumeInfo']['publishedDate'] }}, {{ field['volumeInfo']['pageCount'] }}p)
+
 	- {% if 'categories' in field['volumeInfo'] %}
 	    {% for category in field['volumeInfo']['categories'] %}
+		<input type="hidden" name="tags[]" value="{{ category }}">
 		{{ category }}
 	    {% endfor %}
 	{% endif %}
 
 	<ul>
 	{% for isbn in field['volumeInfo']['industryIdentifiers'] %}
-	  <li>{{ isbn['identifier'] }}</li>
+	  {% if isbn['type'] == "ISBN_13" %}
+ 	    <input type="hidden" name="isbn" value="{{ isbn['identifier'] }}"> 
+	    <li>ISBN : {{ isbn['identifier'] }}</li>
+	  {% endif %}
 	{% endfor %}
 	</ul>
+
+	<input type="submit" value="add this book !">
+	</form>
    </li>
 {% endfor %}
 </ul>
 {% endif %}
 
+
+{% if bookapi and bookapi['volumeInfo'] %} 
+<ul>
+    {% for field in bookapi['volumeInfo'] %}
+     <li>{{ field}} :: {{ bookapi['volumeInfo'][field] }}</li>
+    {% endfor %}
+</ul>
+
+<form method="post" action="/bookreferencer/">
+  <input type="hidden" name="reference" value="{{ ref }}">
+{% if 'categories' in bookapi['volumeInfo'] %}
+  {% for category in bookapi['volumeInfo']['categories'] %}
+   <input type="hidden" name="tags[]" value="{{ category }}">
+  {% endfor %}
+{% endif %}
+<input type="submit" value="add this !">
+</form>
+{% endif %}
+    
 {% endblock %}

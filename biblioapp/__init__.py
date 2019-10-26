@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, abort, flash, redirect, json
+from flask import Flask, render_template, request, abort, flash, redirect, json, escape
+#from slugify import slugify
 
 app = Flask(__name__)
 app.secret_key = '2d9-E2.)f&é,A$p@fpa+zSU03êû9_'
@@ -43,6 +44,8 @@ def getRequest():
 
 @app.route('/booksearch/', methods=['GET', 'POST'])
 def searchBookReference():
+  import requests
+  '''search on api'''
   if request.method == 'POST':
     query = "key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
     if request.form['isbn']:
@@ -51,15 +54,37 @@ def searchBookReference():
       query += "inauthor:"+request.form['inauthor']+"+"
     if request.form['intitle']:
       query += "intitle:"+request.form['intitle']
-    import requests
-    #url = "https://openlibrary.org/api/books?bibkeys=ISBN:"+request.form['isbn'] 
     url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
-    data = json.loads(r.content)
+    data = r.json()
     #print(data['items'])
     return render_template('booksearch.html',data=data, isbn=request.form['isbn'], inauthor=request.form['inauthor'], intitle=request.form['intitle'])
+  '''get detail on api'''
+  if request.method == 'GET' and request.args.get('ref'):
+    ref = request.args.get('ref')
+    r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
+    data = r.json()
+    #print(data)
+    return render_template('booksearch.html',bookapi=data, ref=ref)
   else:
     return render_template('booksearch.html')
-    
+
+@app.route('/bookreferencer/', methods=['POST'])
+def bookReferencer():
+  if request.method == 'POST':
+    tagIds = db.set_tags(request.form.getlist('tags[]'))
+    bookapi={}
+    bookapi['author'] = ','.join(request.form.getlist('authors[]'))
+    bookapi['title'] = request.form['title']
+    bookapi['reference'] = request.form['reference']
+    bookapi['isbn'] = request.form['isbn']
+    bookapi['description'] = request.form['description']
+    bookapi['editor'] = request.form['editor']
+    bookapi['pages'] = request.form['pages']
+    bookapi['year'] = request.form['year']
+    bookId = db.set_book(bookapi)
+    print(tagIds)
+  return render_template('bookreferencer.html')
+   
 if __name__ == "__main__":
     app.run(debug=True)

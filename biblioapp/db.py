@@ -55,7 +55,7 @@ def get_address(address_id) :
 def get_request(arduino_id) :
   cursor = get_db()
   cursor.execute("SELECT * FROM biblio_request where id_arduino=%s",arduino_id)
-  row = cursor.fetchone()
+  row = cursor.fetchall()
   cursor.close()
   if row:
     return row
@@ -70,6 +70,55 @@ def set_request(request) :
   conn.commit()
   cursor.close()
   return True
+
+''' manage book '''
+def get_book(bookapi):
+  cursor = get_db()
+  cursor.execute("SELECT id FROM biblio_book WHERE `reference`=%s", bookapi['reference'])
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return False
+
+def set_book(bookapi) :
+  hasBook = get_book(bookapi)
+  if hasBook is False:
+    datepub = datetime.strptime(bookapi['year'],'%Y-%m-%dT%H:%M:%S+02:00')
+    cursor = get_db()
+    cursor.execute("INSERT INTO biblio_book (`isbn`, `title`, `author`, `editor`, `year`, `pages`, `reference`, `description`) \
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s )", (bookapi['isbn'], bookapi['title'], bookapi['author'], bookapi['editor'], datepub.year, \
+    bookapi['pages'], bookapi['reference'], bookapi['description']))
+    conn.commit()
+    cursor.execute("SELECT LAST_INSERT_ID() as id")
+    hasBook = cursor.fetchone()
+    cursor.close()
+  return hasBook
+
+''' manage taxonomy '''
+def get_tag(tag):
+  cursor = get_db()
+  cursor.execute("SELECT id, tag FROM biblio_tags WHERE tag=%s", tag)
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return False
+
+def set_tags(tags):
+  tag_ids = []
+  for tag in tags:
+    hasTag = get_tag(tag)
+    tag_ids.append(hasTag)
+    if hasTag is False:
+      cursor = get_db()
+      cursor.execute("INSERT INTO biblio_tags (`tag`) VALUES (%s)", tag)
+      conn.commit()
+      cursor.execute("SELECT LAST_INSERT_ID() as id")
+      row = cursor.fetchone()
+      tag_ids.append(row)
+      cursor.close()
+  return tag_ids
 
 def close_conn() :
     conn.close()
