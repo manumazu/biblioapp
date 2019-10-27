@@ -1,12 +1,13 @@
 {% extends "layout.html" %}
+{% block title %}Book's search{% endblock %}
 
 {% block body %}
 <h2>Book's reference search</h2>
 
 <form action="/booksearch/" method="post">
 <p><label for="isbn">ISBN : </label><input type="text" name="isbn" value="{% if isbn %}{{ isbn }}{% endif %}"></p>
-<p><label for="isbn">Author : </label><input type="text" name="inauthor" value="{% if inauthor %}{{ inauthor }}{% endif %}"></p>
-<p><label for="isbn">Title : </label><input type="text" name="intitle" value="{% if intitle %}{{ intitle }}{% endif %}"></p>
+<p><label for="inauthor">Author : </label><input type="text" name="inauthor" value="{% if inauthor %}{{ inauthor }}{% endif %}"></p>
+<p><label for="intitle">Title : </label><input type="text" name="intitle" value="{% if intitle %}{{ intitle }}{% endif %}"></p>
 <input type="submit" value="Search reference">
 </form>
 
@@ -94,5 +95,7 @@
 <input type="submit" value="add this !">
 </form>
 {% endif %}
+
+{{ super() }}
     
 {% endblock %}

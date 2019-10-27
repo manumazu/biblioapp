@@ -28,7 +28,7 @@ def get_arduino_id() :
 def get_books(arduino_id) :
   cursor = get_db()
   cursor.execute("SELECT * FROM biblio_book bb \
-	left join biblio_address ba on bb.id_address=ba.id \
+	left join biblio_address ba on ba.id_book=bb.id \
 	inner join biblio_app app on ba.id_app=app.id \
 	where app.id_arduino=%s",arduino_id)
   rows = cursor.fetchall()

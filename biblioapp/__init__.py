@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape
-#from slugify import slugify
+from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
 app.secret_key = '2d9-E2.)f&é,A$p@fpa+zSU03êû9_'
+Bootstrap(app)
 
 from biblioapp import db, tools
 
@@ -13,6 +14,7 @@ arduino_id = db.get_arduino_id()
 @app.route('/<arduino_id>/')
 def home():
     books = db.get_books(arduino_id)
+    #print(books)
     return render_template('index.html',arduino_id=arduino_id, books=books)
 
 @app.route('/book/<book_id>')
@@ -59,7 +61,6 @@ def searchBookReference():
     url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
     data = r.json()
-    print(url)
     #print(data['items'])
     return render_template('booksearch.html',data=data, isbn=request.form['isbn'], inauthor=request.form['inauthor'], intitle=request.form['intitle'])
   '''get detail on api'''

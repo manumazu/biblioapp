@@ -1,14 +1,61 @@
 {% extends "layout.html" %}
+{% block title %}Biblioapp{% endblock %}
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='range.css')}}">
+{% endblock %}
 
 {% block body %}
+
+{% if arduino_id %}
+	<h1>Welcome {{ arduino_id }} !!</h1>
+{% else %}
+	<h1>{{ self.title() }}</h1>
+{% endif %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+    <ul>
+    {% for m in messages %}
+        <li>{{ m }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% endwith %}
+
+{% block content %}
+
 <h2>Liste of books in your personnal library : </h2>
 
-<ul>
-{% for book in books %}
-    <li><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
-{% endfor %}
-</ul>
+<div class="demo">
+    <p>Book to range</p>    
+    <ul id="draggable">
+    {% for book in books %}
+        <li><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
+    {% endfor %}
+    </ul>
+    
+    <p>Tidy books</p>
+    <ul id="droppable">
+    {% for book in books %}
+        <li><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
+    {% endfor %}
+    </ul>
+    
+</div>
 
 <a href="{{ url_for('searchBookReference') }}">Add new reference</a>
 
+
+
+
+
 {% endblock %}
+
+{% block scripts %}
+{{super()}}
+  <script src="{{url_for('static', filename='range.js')}}"></script>
+{% endblock %}
+
+{% endblock %}
+

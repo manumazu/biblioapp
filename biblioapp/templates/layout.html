@@ -1,29 +1,21 @@
-<!DOCTYPE html>
-<html>
-    <head>
-    {% block header %}
-        <meta charset="utf-8" />
-        <title>{% block title %}Biblioapp{% endblock %}</title>
-    {% endblock %}
-    </head>
+{% extends "bootstrap/base.html" %}
 
-    <body>
-	{% if arduino_id %}
-		<h1>Welcome {{ arduino_id }} !!</h1>
-	{% else %}
-		<h1>{{ self.title() }}</h1>
-	{% endif %}
+{% block head %}
+  <meta charset="utf-8" />
+  {{ super() }}
+{% endblock %}
 
-	{% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-            {% for m in messages %}
-                <li>{{ m }}</li>
-            {% endfor %}
-            </ul>
-        {% endif %}
-        {% endwith %}
-        {% block body %}{% endblock %}
-    </body>
-</html>
+{% block styles %}
+{{super()}}
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+{% endblock %}
 
+
+{% block body %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+{% endblock %}
+
+{% endblock %}
