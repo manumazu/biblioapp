@@ -18,6 +18,8 @@
 <input type="hidden" name="range" value="{{ address['range'] }}">
 <input type="hidden" name="arduino_id" value="{{ arduino_id }}">
 <input type="submit" value="Locate now !">
+{% else %}
+ <input type="submit" value="Range this !">
 {% endif %}
 
 {% endblock %}

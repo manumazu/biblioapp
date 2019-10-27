@@ -1,7 +1,7 @@
 from flaskext.mysql import MySQL
 import pymysql
 from biblioapp import app
-from datetime import datetime
+from biblioapp import tools
 
 # MySQL configurations
 app.config['MYSQL_DATABASE_USER'] = 'manu'
@@ -62,7 +62,7 @@ def get_request(arduino_id) :
   return False
 
 def set_request(request) :
-  now = datetime.now()
+  now = tools.getNow()
   cursor = get_db()
   cursor.execute("INSERT INTO biblio_request (`id_arduino`, `row`, `column`, `range`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE date_add=%s", \
   (request.form.get('arduino_id'), request.form.get('row'), request.form.get('column'), request.form.get('range'), \
@@ -72,7 +72,7 @@ def set_request(request) :
   return True
 
 ''' manage book '''
-def get_book(bookapi):
+def get_bookapi(bookapi):
   cursor = get_db()
   cursor.execute("SELECT id FROM biblio_book WHERE `reference`=%s", bookapi['reference'])
   row = cursor.fetchone()
@@ -82,16 +82,23 @@ def get_book(bookapi):
   return False
 
 def set_book(bookapi) :
-  hasBook = get_book(bookapi)
+  hasBook = get_bookapi(bookapi)
+  datepub = tools.getYear(bookapi['year'])
   if hasBook is False:
-    datepub = datetime.strptime(bookapi['year'],'%Y-%m-%dT%H:%M:%S+02:00')
     cursor = get_db()
     cursor.execute("INSERT INTO biblio_book (`isbn`, `title`, `author`, `editor`, `year`, `pages`, `reference`, `description`) \
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s )", (bookapi['isbn'], bookapi['title'], bookapi['author'], bookapi['editor'], datepub.year, \
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s )", (bookapi['isbn'], bookapi['title'], bookapi['author'], bookapi['editor'], datepub, \
     bookapi['pages'], bookapi['reference'], bookapi['description']))
     conn.commit()
     cursor.execute("SELECT LAST_INSERT_ID() as id")
     hasBook = cursor.fetchone()
+    cursor.close()
+  else:
+    cursor = get_db()
+    cursor.execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, `reference`=%s, \
+    `description`=%s WHERE id=%s", (bookapi['isbn'], bookapi['title'], bookapi['author'], bookapi['editor'], datepub, \
+    bookapi['pages'], bookapi['reference'], bookapi['description'], hasBook['id']))
+    conn.commit()
     cursor.close()
   return hasBook
 
@@ -119,6 +126,14 @@ def set_tags(tags):
       tag_ids.append(row)
       cursor.close()
   return tag_ids
+
+def set_tag_node(node, tagIds):
+  cursor = get_db()
+  for tag in tagIds:
+    cursor.execute("INSERT INTO biblio_tag_node (`node_type`, `id_node`, `id_tag`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE id_tag=%s", \
+    ('book', node['id'], tag['id'], tag['id']))
+    conn.commit()
+  cursor.close()
 
 def close_conn() :
     conn.close()
