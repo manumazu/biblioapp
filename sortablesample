@@ -1,0 +1,260 @@
+<?php
+ini_set('memory_limit', '512M');
+
+include(dirname(__FILE__).'/../../config/config.inc.php');
+include(dirname(__FILE__).'/../../init.php');
+
+global $cookie,$smarty,$link ;
+
+function coupeChaine($text, $max) {
+	if (strlen($text) >= $max) {
+	  $text = ereg_replace("<[^>]*>", "", $text);
+	  $text = substr($text, 0, $max);
+	  $positionEspace = strrpos($text, " ");
+	  $text = substr($text, 0, $positionEspace)."...";
+	}
+	return $text;
+}
+
+$id_categorie = intval($_GET['id_cat']);
+
+
+$no_version = _PS_VERSION_ ;
+$tab_version = explode(".",$no_version) ;
+if ($tab_version[0]>1) {
+	$jqueryfile = "jquery-1.4.4.min.js" ;
+} else {
+	if ($tab_version[0]==1 && $tab_version[1]>3) {
+		$jqueryfile = "jquery-1.11.0.min.js";//jquery-1.4.4.min.js" ;
+	} else {
+		$jqueryfile = "jquery-1.2.6.pack.js" ;
+	}
+}
+
+$products = Product::getProducts(intval($cookie->id_lang), 0, 0, 'position', 'asc', $id_categorie, false);
+
+$products_actifs = array();
+$products_non_actifs = array();
+
+foreach ($products as $o => $product) {
+	if ($product['active']) {
+		$products_actifs[] = $product['id_product'] ;
+	} else {
+		$products_non_actifs[] = $product['id_product'] ;				
+	}
+}
+
+$nouvelle_position = 0;
+
+foreach($products_actifs as $position => $id_product) {
+	if (!DB::getInstance()->Execute('UPDATE `'._DB_PREFIX_.'category_product` SET `position` = '.$nouvelle_position.' WHERE `'._DB_PREFIX_.'category_product`.`id_category` ='.$id_categorie.' AND `'._DB_PREFIX_.'category_product`.`id_product` ='.$id_product)) 
+	return false;
+	$nouvelle_position++;
+}
+
+foreach($products_non_actifs as $position => $id_product) {
+	if (!DB::getInstance()->Execute('UPDATE `'._DB_PREFIX_.'category_product` SET `position` = '.$nouvelle_position.' WHERE `'._DB_PREFIX_.'category_product`.`id_category` ='.$id_categorie.' AND `'._DB_PREFIX_.'category_product`.`id_product` ='.$id_product)) 
+	return false;
+	$nouvelle_position++;
+}
+
+$products = Product::getProducts(intval($cookie->id_lang), 0, 0, 'position', 'asc', $id_categorie, true);
+
+$nbre_products_page = (int)Configuration::get('PS_PRODUCTS_PER_PAGE');
+
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+  <script type="text/javascript" src="<?php echo __PS_BASE_URI__ ; ?>js/jquery/<?php echo $jqueryfile; ?>"></script>
+  <link rel="stylesheet" type="text/css" href="<?php echo __PS_BASE_URI__ ; ?>css/jquery-ui-1.8.10.custom.css" />
+  <!--script type="text/javascript" src="<?php echo __PS_BASE_URI__ ; ?>js/jquery/plugins/jquery.sortable.js"></script-->  
+  <!--script type="text/javascript" src="<?php echo __PS_BASE_URI__ ; ?>js/jquery/jquery-ui-1.8.10.custom.min.js"></script-->
+  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <script type="text/javascript">
+		$(function(){
+		  $("#liste-photos-wrapper #list-photos").sortable({	        
+				update: function(event, ui) {
+			        // POST to server using $.ajax
+			        var order = $('#list-photos').sortable('serialize'); 
+					$.ajax({
+			            data: order,
+			            type: 'POST',
+			            url: '<?php echo __PS_BASE_URI__.'modules/easylistsorting/recordsort.php?id_cat='.$id_categorie; ?>'
+					});
+				}				
+			});
+		  	$("#list-photos").disableSelection();
+	      	$("#marques-pages").height( $("#list-photos").height());		  
+		  });
+   </script>  
+  <style type="text/css">
+			/************
+			STYLE DE LA LISTE A TRIER
+			************/
+			#liste-photos-wrapper{
+				position: absolute;	
+				width: 1120px;
+			}
+			ul#list-photos{
+				position: relative;
+				z-index: 1;
+				list-style:none;
+				height:140px;
+			}
+			ul#list-photos li{
+			  border:1px solid #ddd;
+			  padding:10px;
+			  cursor:move;
+			  height:138px;
+			  width:75px;
+			  float:left;
+			  margin-right:10px;
+			  margin-top:24px;
+			  background:#fff;
+			  color:#212326;
+			  font-size:12px;
+			  /* -moz-box-shadow:2px 2px 5px #ccc; */
+			  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.5);
+		 	  -moz-box-shadow: 0 1px 2px rgba(0,0,0,.5);
+		 	  box-shadow: 0 1px 2px rgba(0,0,0,.5);
+		 	  -webkit-border-radius: .5em;
+		      -moz-border-radius: .5em;
+		 	  border-radius: .5em;
+		 	  z-index: 5;
+			}
+			ul#list-photos li.ui-state-highlight{
+			  background:#f2f2f2;
+			  border:1px dashed #212326;
+			}
+			
+			ul#marques-pages {
+				position: absolute;	
+				z-index: 0;
+				list-style:none;
+				top:0;
+				left:0;
+			}
+			
+			ul#marques-pages li {
+				display:block;
+				height:122px;
+			  	float:left;
+			}
+			
+			ul#list-photos .img_prod{
+				height:56px;
+				width:56px;
+			}
+			
+			ul#marques-pages li.bloc-produit {
+			  	width:96px;
+			  	margin-right:11px;
+			  	margin-top:62px;
+			}
+			
+			ul#marques-pages li.marque-page {
+			  	width:2px;
+			  	height:70px;
+			  	margin-right:0;
+			  	margin-top: 9px;
+			  	margin-left:-4px;
+			  	background-color: pink;
+			
+			}
+			ul#marques-pages li.marque-page span {
+				display: block;
+				white-space: nowrap;
+				background-color: pink;
+				color: black;
+				font-size: 11px;
+				margin: -4px 0 0;
+				width: 20px;
+				height:14px;
+				padding: 0px 5px;
+				font-family: sans-serif;
+				font-weight: bold;	
+			    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.5);
+		 	    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.5);
+		 	    box-shadow: 0 1px 2px rgba(0,0,0,.5);
+		 	    -webkit-border-radius: .5em;
+		        -moz-border-radius: .5em;
+				border-radius: .5em;
+			}
+			.stock {
+				position: absolute;
+				padding-top: 132px;
+				width: 75px;
+				text-align: center;
+			}
+			.reference {
+				position: absolute; 
+				padding-top: 116px; 
+				width: 75px; 
+				text-align: center;
+			}
+  </style>
+</head>
+	<body>
+	<div id="liste-photos-wrapper">
+		<ul id="list-photos" >
+<?php
+		
+		$cp = 0;
+		foreach($products As $key => $product) {
+				$productId = $product['id_product'];
+
+				$activer = $product['active'];
+				if ($activer!=1) {
+					$path_puce = __PS_BASE_URI__.'modules/easylistsorting/red.gif';
+				} else {
+					$path_puce = __PS_BASE_URI__.'modules/easylistsorting/green.gif';				
+				}
+				
+				$stock = Attribute::getAttributeQty($productId);
+				$reference = $product['reference'];
+				
+				$images = Image::getImages(intval($cookie->id_lang), $productId);
+				if (empty($images)) {
+						$path_to_image = '';
+				} else {
+					if (isset($images[0]['id_image'])) {
+						$image = new Image((int)$images[0]['id_image']);
+						$path_to_image = __PS_BASE_URI__.'img/p/'.$image->getExistingImgPath().'-medium_default.jpg';
+					} else
+						$path_to_image = __PS_BASE_URI__.'img/p/'.$productId.(isset($image[0]['id_image']) ? '-'.(int)$image[0]['id_image'] : '').'-medium.jpg';
+				}
+	?>		
+
+	<li id="photo_<?php echo $productId ?>"  class="produit">
+	<span class="stock"><?php echo $stock ?></span>
+	<span class="reference"><strong><?php echo $reference ?></strong></span>
+	<img class="img_prod" src="<?php echo $path_to_image ?>" alt="" />
+	<img src="<?php echo $path_puce ?>" alt="" style="float: right;"/>
+	<p><?php echo coupeChaine($product['name'],30) ?></p>
+	
+	</li>
+
+<?php			
+			$cp++;
+		}
+?>
+		</ul>	
+		<ul id="marques-pages" >
+		<?php
+			$page = 1;
+			for($i=0;$i<$cp;$i++) {
+				if ($i%($nbre_products_page+1) == 0) {
+					echo '<li class="marque-page"><span>P'.$page.'</span></li>';
+					$page++;
+				} else {
+					echo '<li class="bloc-produit" ></li>';
+				}
+			
+			}
+		?>
+		</ul>
+	</div>
+	</body>
+</html>
