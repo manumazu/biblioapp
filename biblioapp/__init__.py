@@ -13,9 +13,10 @@ arduino_id = db.get_arduino_id()
 @app.route("/")
 @app.route('/<arduino_id>/')
 def home():
-    books = db.get_books(arduino_id)
+    tidybooks = db.get_tidybooks(arduino_id) #books with addresses
+    bookstorange = db.get_bookstorange(arduino_id) #books with addresses
     #print(books)
-    return render_template('index.html',arduino_id=arduino_id, books=books)
+    return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange)
 
 @app.route('/book/<book_id>')
 def getBook(book_id):

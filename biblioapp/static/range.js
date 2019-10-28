@@ -52,4 +52,17 @@ $(document).ready(function() {
         }
     });
 
+   $("#droppable").sortable({	        
+	update: function(e, ui) {
+	// POST to server using $.ajax
+	var order = $('#droppable').sortable('serialize'); 
+	console.log(order2;
+	/*$.ajax({
+	    data: order,
+	    type: 'POST',
+	    url: ''
+	});*/
+       }
+   });
+
 });

@@ -25,12 +25,23 @@ def get_arduino_id() :
     if row:
       return row['id_arduino']
 
-def get_books(arduino_id) :
+def get_tidybooks(arduino_id) :
+  cursor = get_db()
+  cursor.execute("SELECT * FROM biblio_book bb \
+	inner join biblio_address ba on ba.id_book=bb.id \
+	inner join biblio_app app on ba.id_app=app.id \
+	where app.id_arduino=%s",arduino_id)
+  rows = cursor.fetchall()
+  cursor.close()
+  if rows:
+    return rows
+
+def get_bookstorange(arduino_id) :
+  #@todo : books without address are not linked with arduino id ! 
   cursor = get_db()
   cursor.execute("SELECT * FROM biblio_book bb \
 	left join biblio_address ba on ba.id_book=bb.id \
-	inner join biblio_app app on ba.id_app=app.id \
-	where app.id_arduino=%s",arduino_id)
+	where ba.id_book is null order by bb.title")
   rows = cursor.fetchall()
   cursor.close()
   if rows:

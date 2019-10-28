@@ -30,15 +30,15 @@
 <div class="demo">
     <p>Book to range</p>    
     <ul id="draggable">
-    {% for book in books %}
-        <li><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
+    {% for book in bookstorange %}
+        <li id="book_{{book['id']}}"><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
     {% endfor %}
     </ul>
     
     <p>Tidy books</p>
     <ul id="droppable">
-    {% for book in books %}
-        <li><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
+    {% for book in tidybooks %}
+        <li id="book_{{book['id']}}"><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
     {% endfor %}
     </ul>
     
