@@ -28,8 +28,8 @@ def get_arduino_id() :
 def get_tidybooks(arduino_id) :
   cursor = get_db()
   cursor.execute("SELECT * FROM biblio_book bb \
-	inner join biblio_address ba on ba.id_book=bb.id \
-	inner join biblio_app app on ba.id_app=app.id \
+	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
+	inner join biblio_app app on bp.id_app=app.id\
 	where app.id_arduino=%s",arduino_id)
   rows = cursor.fetchall()
   cursor.close()
@@ -40,8 +40,8 @@ def get_bookstorange(arduino_id) :
   #@todo : books without address are not linked with arduino id ! 
   cursor = get_db()
   cursor.execute("SELECT * FROM biblio_book bb \
-	left join biblio_address ba on ba.id_book=bb.id \
-	where ba.id_book is null order by bb.title")
+	left join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
+	where bp.id_item is null order by bb.title")
   rows = cursor.fetchall()
   cursor.close()
   if rows:
@@ -55,13 +55,14 @@ def get_book(book_id) :
   if row:
     return row
 
-def get_address(address_id) :
+def get_position(book_id) :
   cursor = get_db()
-  cursor.execute("SELECT * FROM biblio_address where id=%s",address_id)
+  cursor.execute("SELECT * FROM biblio_position where id_item=%s and item_type='book'",book_id)
   row = cursor.fetchone()
   cursor.close()
   if row:
     return row
+  return False
 
 def get_request(arduino_id) :
   cursor = get_db()

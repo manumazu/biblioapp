@@ -14,7 +14,7 @@ arduino_id = db.get_arduino_id()
 @app.route('/<arduino_id>/')
 def home():
     tidybooks = db.get_tidybooks(arduino_id) #books with addresses
-    bookstorange = db.get_bookstorange(arduino_id) #books with addresses
+    bookstorange = db.get_bookstorange(arduino_id) #books with position
     #print(books)
     return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange)
 
@@ -22,10 +22,7 @@ def home():
 def getBook(book_id):
     book = db.get_book(book_id)
     if book:
-        if book['id_address']:
-          address = db.get_address(book['id_address'])
-        else:
-          address = False
+        address = db.get_position(book['id'])
         return render_template('book.html',book=book,address=address,arduino_id=arduino_id)
     abort(404)
 
