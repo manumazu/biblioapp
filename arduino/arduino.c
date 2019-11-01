@@ -5,13 +5,14 @@
 #define PIN2 3	 // input pin Neopixel2 is attached to
 
 #define NUMPIXELS1      12 // number of neopixels in strip
-#define NUMPIXELS2      4 // number of neopixel2 in strip
+#define NUMPIXELS2      12 // number of neopixel2 in strip
 
 Adafruit_NeoPixel pixels1 = Adafruit_NeoPixel(NUMPIXELS1, PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel pixels2 = Adafruit_NeoPixel(NUMPIXELS2, PIN2, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel currentPix;
+int numStrip = 2;
 
-int delayval = 500; // timing delay in milliseconds
+int delayval = 250; // timing delay in milliseconds
 
 int redColor = 0;
 int greenColor = 0;
@@ -19,81 +20,136 @@ int blueColor = 0;
 
 const int buttonPin = 4;
 int buttonState = 1;
-int stateReset = 2;
+int stateReset = 1;
 
-int sensorValue = 0;
-int outputValue = 0;
-int current = 0;
-int num = 1;
-String action;
-
-int address[3];
+int node_length = 3;
+//for columns
+int outputCol[NUMPIXELS1];//biggest band;
+int currentCol[NUMPIXELS1];
+//for lines
+int outputRow[NUMPIXELS1];
+int currentRow[NUMPIXELS1];
+//for range
+int outputRange[NUMPIXELS1];
 
 void setup() {
   // Initialize the NeoPixel library.
   pixels1.begin();
   pinMode(buttonPin, INPUT_PULLUP); //reset/start
-  pinMode(A0, INPUT);
+  pinMode(A0, INPUT);//col
+  pinMode(A1, INPUT);//row  
   Serial.begin(9600);
 }
 
-void getLedAddress() {
-  sensorValue = analogRead(A0);
-  // map it to the range of the analog out:
-  outputValue = map(sensorValue, 0, 1023, 0, NUMPIXELS1);
- 
-  address[0]=outputValue;//pos
-  address[1]=1;//line
-  address[2]=2;//space
+int getLedAddress() {
+  // map it to the range pix of the analog out:
+  outputCol[0] = map(analogRead(A0), 0, 1024, 0, NUMPIXELS1);
+  outputCol[1] = 5;
+  outputCol[2] = 8;
+  
+  // map it to the range lines of the analog out:
+  outputRow[0] = map(analogRead(A1), 0, 1024, 1, 3);
+  outputRow[1] = 2;
+  outputRow[2] = 2;
+  
+  // ranges
+  outputRange[0] = 2;
+  outputRange[1] = 1;
+  outputRange[2] = 2;
+  
+  /*StaticJsonBuffer<200> jsonBuffer;
+  char json[] = "[{\"column\": 8, \"range\": 3, \"row\": 2, \"date_add\": \"Fri, 25 Oct 2019 11:12:05 GMT\", \"id_arduino\": 123} \
+    , {\"column\": 5, \"range\": 2, \"row\": 1, \"date_add\": \"Wed, 23 Oct 2019 18:54:22 GMT\", \"id_arduino\": 123} \
+    , {\"column\": 1, \"range\": 2, \"row\": 2}]";
+  JsonArray& nodes = jsonBuffer.parseArray(json);
+  node_length = nodes.size(); 
+  for(int i=0; i<node_length;i++){
+    outputCol[i] = nodes[i]["column"];
+	outputRow[i] = nodes[i]["row"];
+    outputRange[i] = nodes[i]["range"];
+  }*/
 }
 
-void ledsManager(String action, int pos = 0, int line = 0, int space = 0) {
-  
+void ledsAll() {
+  for (int j=1; j <= numStrip; j++) 
+  {
+     switch(j) {
+        case 1:
+          currentPix = pixels1;
+          break;
+        case 2:
+          currentPix = pixels2;
+          break;
+      }
+      for (int i=0; i < NUMPIXELS1; i++) 
+      {
+          currentPix.setPixelColor(i, currentPix.Color(255, 69, 0));
+      }
+      currentPix.show();
+   }
+}
+
+void ledsOff() {
+  for (int j=1; j <= numStrip; j++) 
+  {
+      switch(j) {
+        case 1:
+          currentPix = pixels1;
+          break;
+        case 2:
+          currentPix = pixels2;
+          break;
+       }
+       currentPix.clear();
+   }
+}
+
+void ledsOn() {
+   
    for (int j=1; j <= 2; j++) 
    {
-      if (j==1) {
-          num = NUMPIXELS1;
+     switch(j) {
+        case 1:
           currentPix = pixels1;
-      }
-      if (j==2) {
-          num = NUMPIXELS2;
+          break;
+        case 2:
           currentPix = pixels2;
+          break;
       }
-
-     for (int i=0; i < num; i++) 
+     //loop on asked position array
+     for (int x=0; x < node_length; x++) 
      {
-       if(action.equals("off")) {
-         currentPix.setPixelColor(i, currentPix.Color(0, 0, 0));
+       int pos = outputCol[x];
+       int line = outputRow[x];
+       int range = outputRange[x];
+       setColor(x*10);
+       if(line==j) {
+         for (int i=pos; i<=(pos+range-1); i++) { //light on given line
+           currentPix.setPixelColor(i, currentPix.Color(redColor, greenColor, blueColor));
+         }
+         currentCol[x] = pos;
+         currentRow[x] = line;
+         Serial.println(pos+(String)'-'+line+(String)'-'+range);
        }
-       if(action.equals("all")) {
-         currentPix.setPixelColor(i, currentPix.Color(255, 69, 0));
-       }   
-       if(action.equals("on")){
-          if(line==j && i>=pos && i<=(pos+space-1)) //light on given line
-        	currentPix.setPixelColor(i, currentPix.Color(redColor, greenColor, blueColor));
-          current = pos;
-       }
-       currentPix.show();
      }
-
-   } 
+     currentPix.show();
+   }
 }
 
 
 void loop() {
-  
+
+  delay(delayval);
   getLedAddress();
   
-  if(outputValue!=current) {// new request
+  if(outputCol[0]!=currentCol[0] || outputRow[0]!=currentRow[0]) {// new request
     stateReset=1;
-    ledsManager(String("off"));//switch off all
-  }  
+    ledsOff();//switch off all
+  }
   
   //light asked led  
-  if(stateReset==1) { 
-    //delay(delayval);
-    setColor(); 
-    ledsManager(String("on"),address[0], address[1], address[2]);
+  if(stateReset==1) {
+    ledsOn();
   }
   
   //reset mode
@@ -101,7 +157,7 @@ void loop() {
   if (stateReset==1 && buttonState == LOW) {
     Serial.println("PUSH");
     stateReset = 2;
-    ledsManager(String("all"));
+    ledsAll();
   }
   
   /*buttonState = digitalRead(buttonPin);
@@ -115,8 +171,8 @@ void loop() {
 
 // setColor()
 // picks random values to set for RGB
-void setColor(){
-  redColor = random(0, 255);
-  greenColor = random(0,255);
-  blueColor = random(0, 255);
+void setColor(int x){
+  redColor = random(x, 255);
+  greenColor = random(x,255);
+  blueColor = random(x, 255);
 }
