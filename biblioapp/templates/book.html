@@ -10,7 +10,7 @@
 {% endfor %}
 </ul>
 
-{% if address['id'] %}
+{% if address['id_item'] %}
 <form action="/locate/" method="post">
 <input type="hidden" name="book_id" value="{{ book['id'] }}">
 <input type="hidden" name="column" value="{{ address['column'] }}">

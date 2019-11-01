@@ -30,19 +30,20 @@
 <div class="demo">
     <p>Book to range</p>    
     <ul id="draggable">
-    {% for book in books %}
-        <li><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
+    {% for book in bookstorange %}
+        <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
     {% endfor %}
     </ul>
+</div>
     
     <p>Tidy books</p>
     <ul id="droppable">
-    {% for book in books %}
-        <li><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['title'] }}</a></li>
+    {% for book in tidybooks %}
+        <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
     {% endfor %}
     </ul>
     
-</div>
+
 
 <a href="{{ url_for('searchBookReference') }}">Add new reference</a>
 
