@@ -47,6 +47,8 @@
 	  {% if isbn['type'] == "ISBN_13" %}
  	    <input type="hidden" name="isbn" value="{{ isbn['identifier'] }}"> 
 	    <li>ISBN : {{ isbn['identifier'] }}</li>
+	  {% else %}
+	    <input type="hidden" name="isbn" value="">
 	  {% endif %}
 	{% endfor %}
 	</ul>

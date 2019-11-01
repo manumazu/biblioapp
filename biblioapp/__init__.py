@@ -13,8 +13,8 @@ arduino_id = db.get_arduino_id()
 @app.route("/")
 @app.route('/<arduino_id>/')
 def home():
-    tidybooks = db.get_tidybooks(arduino_id) #books with addresses
-    bookstorange = db.get_bookstorange(arduino_id) #books with position
+    tidybooks = db.get_tidy_books(arduino_id) #books with addresses
+    bookstorange = db.get_books_to_range(arduino_id) #books with position
     #print(books)
     return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange)
 
@@ -111,8 +111,9 @@ def bookReferencer():
     bookapi['pages'] = request.form['pages']
     bookapi['year'] = request.form['year']
     bookId = db.set_book(bookapi)
-    if bookId and tagIds:
+    if len(tagIds)>0:
       db.set_tag_node(bookId, tagIds)
+    return redirect('/')
   return render_template('bookreferencer.html')
    
 if __name__ == "__main__":

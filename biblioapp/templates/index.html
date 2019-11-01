@@ -26,26 +26,24 @@
 {% block content %}
 
 <h2>Liste of books in your personnal library : </h2>
-
-<div class="demo">
-    <p>Book to range</p>    
-    <ul id="draggable">
-    {% for book in bookstorange %}
-        <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
-    {% endfor %}
-    </ul>
-</div>
-    
+   
     <p>Tidy books</p>
     <ul id="droppable">
     {% for book in tidybooks %}
         <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
     {% endfor %}
     </ul>
+
+<p><a href="{{ url_for('searchBookReference') }}">Add new reference</a></p>
     
+    <p>Book to range</p>    
+    <ul id="draggable">
+    {% for book in bookstorange %}
+        <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
+    {% endfor %}
+    </ul>
 
 
-<a href="{{ url_for('searchBookReference') }}">Add new reference</a>
 
 
 

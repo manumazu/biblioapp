@@ -13,6 +13,7 @@ $(document).ready(function() {
         ui.draggable.draggable('option','revert',true); 
 	ui.draggable.clone().appendTo(this);
         ui.draggable.remove();
+        //$(ui.draggable).addClass('ui-sortable-handle');
      }
      }).sortable({
       items: "li",

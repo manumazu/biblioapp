@@ -25,7 +25,7 @@ def get_arduino_id() :
     if row:
       return row['id_arduino']
 
-def get_tidybooks(arduino_id) :
+def get_tidy_books(arduino_id) :
   cursor = get_db()
   cursor.execute("SELECT * FROM biblio_book bb \
 	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
@@ -36,12 +36,12 @@ def get_tidybooks(arduino_id) :
   if rows:
     return rows
 
-def get_bookstorange(arduino_id) :
+def get_books_to_range(arduino_id) :
   #@todo : books without address are not linked with arduino id ! 
   cursor = get_db()
   cursor.execute("SELECT * FROM biblio_book bb \
 	left join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
-	where bp.id_item is null order by bb.title")
+	where bp.id_item is null order by bb.author, bb.title")
   rows = cursor.fetchall()
   cursor.close()
   if rows:
@@ -149,7 +149,6 @@ def set_tags(tags):
   tag_ids = []
   for tag in tags:
     hasTag = get_tag(tag)
-    tag_ids.append(hasTag)
     if hasTag is False:
       cursor = get_db()
       cursor.execute("INSERT INTO biblio_tags (`tag`) VALUES (%s)", tag)
@@ -158,6 +157,8 @@ def set_tags(tags):
       row = cursor.fetchone()
       tag_ids.append(row)
       cursor.close()
+    else:
+      tag_ids.append(hasTag)
   return tag_ids
 
 def set_tag_node(node, tagIds):
