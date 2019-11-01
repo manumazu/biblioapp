@@ -30,7 +30,7 @@ def get_tidybooks(arduino_id) :
   cursor.execute("SELECT * FROM biblio_book bb \
 	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
 	inner join biblio_app app on bp.id_app=app.id\
-	where app.id_arduino=%s",arduino_id)
+	where app.id_arduino=%s order by position",arduino_id)
   rows = cursor.fetchall()
   cursor.close()
   if rows:
@@ -114,6 +114,27 @@ def set_book(bookapi) :
     cursor.close()
   return hasBook
 
+''' manage position '''
+def sort_items(items) :
+  cursor = get_db()
+  i=0
+  sortable={}
+  for item_id in items :
+    i+=1
+    cursor.execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, `position`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE position=%s", \
+  (1, item_id, 'book', i, i))
+    conn.commit()
+    sortable[i]={'book':item_id,'position':i}
+  cursor.close()
+  return sortable
+
+def del_item_position(item) :
+  cursor = get_db()
+  cursor.execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=1", (item[1], item[0]))
+  conn.commit()
+  cursor.close()
+  return True
+
 ''' manage taxonomy '''
 def get_tag(tag):
   cursor = get_db()
@@ -141,6 +162,7 @@ def set_tags(tags):
 
 def set_tag_node(node, tagIds):
   cursor = get_db()
+  #print(node, tagIds)
   for tag in tagIds:
     cursor.execute("INSERT INTO biblio_tag_node (`node_type`, `id_node`, `id_tag`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE id_tag=%s", \
     ('book', node['id'], tag['id'], tag['id']))

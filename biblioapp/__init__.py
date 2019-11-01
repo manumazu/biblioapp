@@ -18,6 +18,32 @@ def home():
     #print(books)
     return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange)
 
+@app.route('/ajax_sort/', methods=['POST'])
+def ajaxSort():
+  if request.method == 'POST':
+    book_ids = request.form.getlist('book[]')
+    sortable = db.sort_items(book_ids)
+    response = app.response_class(
+        response=json.dumps(sortable),
+        mimetype='application/json'
+    )
+  return response
+
+@app.route('/ajax_del_position/', methods=['POST'])
+def ajaxDelPosition():
+  if request.method == 'POST':
+    for elem in request.form:
+       book = elem.split('_')
+       if db.del_item_position(book):
+         ret={'success':True}
+       else:
+         ret={'success':False}
+  response = app.response_class(
+        response=json.dumps(ret),
+        mimetype='application/json'
+  )
+  return response
+
 @app.route('/book/<book_id>')
 def getBook(book_id):
     book = db.get_book(book_id)
@@ -26,6 +52,7 @@ def getBook(book_id):
         return render_template('book.html',book=book,address=address,arduino_id=arduino_id)
     abort(404)
 
+#post request from app
 @app.route('/locate/', methods=['GET', 'POST'])
 def locateBook():
     if request.method == 'POST':
@@ -33,8 +60,7 @@ def locateBook():
       flash('Location requested for book {}'.format(request.form['book_id']))
       return redirect('/')
 
-
-#Perform request for current arduino_id
+#get request from arduino for current arduino_id
 @app.route('/request/')
 def getRequest():
   data = db.get_request(arduino_id)
@@ -59,7 +85,7 @@ def searchBookReference():
     url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
     data = r.json()
-    #print(data['items'])
+    #print(url)
     return render_template('booksearch.html',data=data, isbn=request.form['isbn'], inauthor=request.form['inauthor'], intitle=request.form['intitle'])
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):
