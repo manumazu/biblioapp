@@ -28,8 +28,10 @@ ul#draggable li, ul#droppable li {
 
 #droppable li .del {
   float:right;
-  margin-left:10px;
+  margin-left:5px;
   color:red;
+  font-size:13px;
+  font-weight:bold;
 }
 
 #draggable li .del {
