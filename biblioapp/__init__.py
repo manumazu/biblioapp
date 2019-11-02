@@ -15,14 +15,14 @@ arduino_id = db.get_arduino_id()
 def home():
     tidybooks = db.get_tidy_books(arduino_id) #books with addresses
     bookstorange = db.get_books_to_range(arduino_id) #books with position
-    #print(books)
     return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange)
 
 @app.route('/ajax_sort/', methods=['POST'])
 def ajaxSort():
   if request.method == 'POST':
+    current_row = request.form['row'] 
     book_ids = request.form.getlist('book[]')
-    sortable = db.sort_items(book_ids)
+    sortable = db.sort_items(book_ids, current_row)
     response = app.response_class(
         response=json.dumps(sortable),
         mimetype='application/json'

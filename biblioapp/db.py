@@ -30,11 +30,16 @@ def get_tidy_books(arduino_id) :
   cursor.execute("SELECT * FROM biblio_book bb \
 	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
 	inner join biblio_app app on bp.id_app=app.id\
-	where app.id_arduino=%s order by position",arduino_id)
+	where app.id_arduino=%s order by row, position",arduino_id)
   rows = cursor.fetchall()
   cursor.close()
+  from collections import defaultdict
+  books = defaultdict(dict)
+  for row in rows:
+    books[row['row']][row['position']]={'id':row['id'], 'title':row['title'], 'author':row['author']}
+  #print(books)
   if rows:
-    return rows
+    return books
 
 def get_books_to_range(arduino_id) :
   #@todo : books without address are not linked with arduino id ! 
@@ -115,14 +120,14 @@ def set_book(bookapi) :
   return hasBook
 
 ''' manage position '''
-def sort_items(items) :
+def sort_items(items, row) :
   cursor = get_db()
   i=0
   sortable={}
   for item_id in items :
     i+=1
-    cursor.execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, `position`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE position=%s", \
-  (1, item_id, 'book', i, i))
+    cursor.execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, `position`, `row`) VALUES (%s, %s, %s, %s, %s) \
+    ON DUPLICATE KEY UPDATE position=%s, row=%s", (1, item_id, 'book', i, row , i, row))
     conn.commit()
     sortable[i]={'book':item_id,'position':i}
   cursor.close()
