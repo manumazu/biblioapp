@@ -104,7 +104,7 @@ def set_book(bookapi) :
   if hasBook is False:
     cursor = get_db()
     cursor.execute("INSERT INTO biblio_book (`isbn`, `title`, `author`, `editor`, `year`, `pages`, `reference`, `description`) \
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s )", (bookapi['isbn'], bookapi['title'], bookapi['author'], bookapi['editor'], datepub, \
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s )", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], datepub, \
     bookapi['pages'], bookapi['reference'], bookapi['description']))
     conn.commit()
     cursor.execute("SELECT LAST_INSERT_ID() as id")
@@ -113,7 +113,7 @@ def set_book(bookapi) :
   else:
     cursor = get_db()
     cursor.execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, `reference`=%s, \
-    `description`=%s WHERE id=%s", (bookapi['isbn'], bookapi['title'], bookapi['author'], bookapi['editor'], datepub, \
+    `description`=%s WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], datepub, \
     bookapi['pages'], bookapi['reference'], bookapi['description'], hasBook['id']))
     conn.commit()
     cursor.close()

@@ -7,8 +7,8 @@
   border-radius: .7em;
 }
 
-ul { width: 99%; height: 200px; padding: 1em; margin: 5px; color:#ddd; list-style: none; }
-ul li { cursor: pointer; }
+ul.droppable, ul#draggable { width: 99%; height: 200px; padding: 1em; margin: 5px; color:#ddd; list-style: none; }
+ul.droppable li { cursor: pointer; }
 
 #draggable { 
   background: #fff;

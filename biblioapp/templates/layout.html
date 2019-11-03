@@ -10,8 +10,29 @@
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 {% endblock %}
 
-
 {% block body %}
+
+{% block navbar %}
+	{{ super() }}
+	{% if arduino_id %}
+		<h1>Welcome {{ arduino_id }} !!</h1>
+	{% else %}
+		<h1>{{ self.title() }}</h1>
+	{% endif %}
+	<ul id="navigation">
+	   <li><a href="{{ url_for('searchBookReference') }}">Add new reference</a></li>
+	</ul>
+
+	{% with messages = get_flashed_messages() %}
+	{% if messages %}
+	    <ul>
+	    {% for m in messages %}
+		<li>{{ m }}</li>
+	    {% endfor %}
+	    </ul>
+	{% endif %}
+	{% endwith %}
+{% endblock %}
 
 {% block scripts %}
 {{ super() }}
