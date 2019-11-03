@@ -7,20 +7,20 @@
   border-radius: .7em;
 }
 
-ul { width: 99%; height: 220px; padding: 1em; margin: 5px; color:#ddd; list-style: none; }
+ul { width: 99%; height: 200px; padding: 1em; margin: 5px; color:#ddd; list-style: none; }
 ul li { cursor: pointer; }
 
 #draggable { 
   background: #fff;
 }
 
-#droppable_1, #droppable_2 { 
+.droppable { 
   background: #fff; 
   border-radius: .7em;
   overflow-y: scroll;
 }
 
-ul#draggable li, ul#droppable_1 li, ul#droppable_2 li {
+ul#draggable li, ul.droppable li {
   background: #eedc9a; 
   border:1px solid #ddd;
   padding:5px;
@@ -36,7 +36,7 @@ ul#draggable li, ul#droppable_1 li, ul#droppable_2 li {
   /*z-index: 5;*/
 }
 
-#droppable_1 li .del, #droppable_2 li .del {
+.droppable li .del {
   float:right;
   margin-left:5px;
   color:red;

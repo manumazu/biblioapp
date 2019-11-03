@@ -8,14 +8,15 @@ Bootstrap(app)
 from biblioapp import db, tools
 
 global arduino_id
-arduino_id = db.get_arduino_id()
+arduino_map = db.get_arduino_map()
+arduino_id = arduino_map['id_arduino']
 
 @app.route("/")
 @app.route('/<arduino_id>/')
 def home():
     tidybooks = db.get_tidy_books(arduino_id) #books with addresses
     bookstorange = db.get_books_to_range(arduino_id) #books with position
-    return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange)
+    return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
 
 @app.route('/ajax_sort/', methods=['POST'])
 def ajaxSort():

@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-   var selectedClass = 'ui-state-default', droppableElements=['#droppable_1', '#droppable_2'];
+   var selectedClass = 'ui-state-default';//, droppableElements=['#droppable_1', '#droppable_2', '#droppable_3'];
    var i = 0;
    var order = [];
 

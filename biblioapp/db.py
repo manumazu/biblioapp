@@ -17,13 +17,13 @@ def get_db() :
   cursor = conn.cursor(pymysql.cursors.DictCursor)	
   return cursor
 
-def get_arduino_id() :
+def get_arduino_map() :
     cursor = get_db()
-    cursor.execute("SELECT id_arduino FROM biblio_app WHERE id=1")
+    cursor.execute("SELECT * FROM biblio_app WHERE id=1")
     row = cursor.fetchone()
     cursor.close()
     if row:
-      return row['id_arduino']
+      return row
 
 def get_tidy_books(arduino_id) :
   cursor = get_db()

@@ -28,10 +28,13 @@
 <h2>Liste of books in your personnal library : </h2>
   
 <div class="biblio">
-    
-{% for row in tidybooks %}
-<ul id="droppable_{{row}}">
-  {% for position,book in tidybooks[row].items() %}
+{% set lines=range(biblio_nb_rows) %} 
+
+<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line+1)}}',{% endfor %}];</script>
+
+{% for line in lines %}
+<ul id="droppable_{{(line+1)}}" class="droppable">
+  {% for position,book in tidybooks[(line+1)].items() %}
      <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
   {% endfor %}
 </ul>
