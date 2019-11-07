@@ -1,28 +1,43 @@
 {% extends "layout.html" %}
-
 {% block title %}{{ book['title'] }}{% endblock %}
 
 {% block body %}
-<h1>{{ book['title'] }} - {{ book['author'] }}</h1>
-<ul>
-{% for field in book %}
-    <li>{{ book[field] }}</li>
-{% endfor %}
-</ul>
 
-{% if address['id_item'] %}
-<form action="/locate/" method="post">
-<input type="hidden" name="book_id" value="{{ book['id'] }}">
-<input type="hidden" name="column" value="{{ address['column'] }}">
-<input type="hidden" name="row" value="{{ address['row'] }}">
-<input type="hidden" name="range" value="{{ address['range'] }}">
-<input type="hidden" name="arduino_id" value="{{ arduino_id }}">
-<input type="submit" value="Locate now !">
-{% else %}
- <input type="submit" value="Range this !">
-{% endif %}
-</form>
+{% block navbar %}
+    {{super()}}
+{% endblock %}
 
-{{ super() }}
+{% block content %}
+	<div class="container">
+
+	<h2>{{ book['title'] }} - {{ book['author'] }}</h2>
+	<ul>
+	{% for field in book %}
+	    <li>{{ book[field] }}</li>
+	{% endfor %}
+	</ul>
+
+	{% if address['id_item'] %}
+	<form action="/locate/" method="post">
+	<input type="hidden" name="book_id" value="{{ book['id'] }}">
+	<input type="hidden" name="column" value="{{ address['column'] }}">
+	<input type="hidden" name="row" value="{{ address['row'] }}">
+	<input type="hidden" name="range" value="{{ address['range'] }}">
+	<input type="hidden" name="arduino_id" value="{{ arduino_id }}">
+	<input type="submit" value="Locate now !" class="btn btn-primary btn-sm">
+	{% else %}
+	 <input type="submit" value="Range this !" class="btn btn-primary btn-sm">
+	{% endif %}
+	</form>
+
+
+	{{ super() }}
+
+	</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}
 
 {% endblock %}

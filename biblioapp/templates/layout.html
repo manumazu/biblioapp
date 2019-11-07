@@ -8,20 +8,60 @@
 {% block styles %}
 {{super()}}
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='app.css')}}">
 {% endblock %}
 
 {% block body %}
 
 {% block navbar %}
-	{{ super() }}
-	{% if arduino_id %}
-		<h1>Welcome {{ arduino_id }} !!</h1>
-	{% else %}
-		<h1>{{ self.title() }}</h1>
-	{% endif %}
-	<ul id="navigation">
-	   <li><a href="{{ url_for('searchBookReference') }}">Add new reference</a></li>
-	</ul>
+
+	<nav class="navbar navbar-default">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+		<span class="sr-only">Toggle navigation</span>
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+		<span class="icon-bar"></span>
+	      </button>
+	      <a class="navbar-brand" href="/">Biblio App</a>
+	    </div>
+
+	    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	      <ul class="nav navbar-nav">
+		{% if arduino_id %}
+			<li class="active"><a href="#">Welcome {{ arduino_id }}<span class="sr-only">(current)</span> !!</a></li>
+		{% else %}
+			<li><a href="#">Login</a></li>
+		{% endif %}
+		<!--li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+		<li><a href="#">Link</a></li-->
+		<li class="dropdown">
+		 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Menu <span class="caret"></span></a>
+		  <ul class="dropdown-menu" role="menu">
+		    <li><a class="dropdown-item" href="{{ url_for('searchBookReference') }}">Add new reference</a></li>
+		    <!--li><a href="#">Another action</a></li>
+		    <li><a href="#">Something else here</a></li>
+		    <li class="divider"></li>
+		    <li><a href="#">Separated link</a></li>
+		    <li class="divider"></li>
+		    <li><a href="#">One more separated link</a></li-->
+		  </ul>
+		</li>
+	      </ul>
+	      <form class="navbar-form navbar-left" role="search" action="{{ url_for('searchBookReference') }}" method="POST">
+		<div class="form-group">
+		  Add new book reference :
+		  <input class="form-control" placeholder="Search reference" type="text" name="query">
+		</div>
+		<button type="submit" class="btn btn-default">Submit</button>
+	      </form>
+	      <!--ul class="nav navbar-nav navbar-right">
+		<li><a href="#">Link</a></li>
+	      </ul-->
+	    </div>
+	  </div>
+	</nav>
 
 	{% with messages = get_flashed_messages() %}
 	{% if messages %}
@@ -32,6 +72,7 @@
 	    </ul>
 	{% endif %}
 	{% endwith %}
+
 {% endblock %}
 
 {% block scripts %}

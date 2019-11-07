@@ -13,36 +13,34 @@
 
 {% block content %}
 
-<h2>Liste of books in your personnal library : </h2>
-  
-<div class="biblio">
-{% set lines=range(biblio_nb_rows) %} 
+<div class="container text-center">
+  <h1 class="mt-5 text-white font-weight-light">Liste of books in your personnal library :</h1>
+  <p class="lead text-white-50">An attractive yet subtle dropdown animation for dropdown menus loacated within a Bootstrap navbar</p>
+ 
+	<div class="biblio">
+	{% set lines=range(biblio_nb_rows) %} 
 
-<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line+1)}}',{% endfor %}];</script>
+	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line+1)}}',{% endfor %}];</script>
 
-{% for line in lines %}
-<ul id="droppable_{{(line+1)}}" class="droppable">
-  {% for position,book in tidybooks[(line+1)].items() %}
-     <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
-  {% endfor %}
-</ul>
-{% endfor %}
+	{% for line in lines %}
+	<ul id="droppable_{{(line+1)}}" class="droppable">
+	  {% for position,book in tidybooks[(line+1)].items() %}
+	     <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
+	  {% endfor %}
+	</ul>
+	{% endfor %}
 
-</div>
+	</div>
 
     
-<p>Book to range</p>    
-<ul id="draggable">
-{% for book in bookstorange %}
-<li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
-{% endfor %}
-</ul>
+	<p>Book to range</p>    
+	<ul id="draggable">
+	{% for book in bookstorange %}
+	<li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
+	{% endfor %}
+	</ul>
 
-
-
-
-
-
+</div>
 
 {% endblock %}
 

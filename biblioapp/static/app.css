@@ -1,0 +1,13 @@
+/* Change this breakpoint if you change the breakpoint of the navbar */
+
+/* Other styles for the page not related to the animated dropdown */
+
+body {
+  background: #2b3e50;
+  background: linear-gradient(to right, #2b3e50, #4e5d6c);
+  color:#fff;
+}
+
+.navbar, submit, button, input {
+  color:#777;
+}
