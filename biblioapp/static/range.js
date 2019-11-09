@@ -16,10 +16,9 @@ $(document).ready(function() {
 		ui.draggable.remove();
 		ui.draggable.detach().css({top: 0,left: 0}).appendTo($(this));
  
-		ajax_postOrder(element);
-
-		//specific event for deleting dropped item
-		ui.draggable.find('span').one('click', function() {
+		//specific event after dropped item
+		ajax_postOrder(element); //order new item
+		ui.draggable.find('span').one('click', function() { //delete new item
 		   ajax_supprItem($( this ));
 		});
 	     }
@@ -32,7 +31,6 @@ $(document).ready(function() {
 
 	   $(element).delay( 1000 ).sortable({
 		update: function(e, ui) {
-		// POST to server using $.ajax for given row
 		ajax_postOrder(element);
 	       }
 	   });
