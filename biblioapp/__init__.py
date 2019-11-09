@@ -77,18 +77,18 @@ def searchBookReference():
   '''search on api'''
   if request.method == 'POST':
     query = "key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
-    if 'isbn' in request.form:
+    if 'isbn' in request.form and request.form['isbn']:
       query += "ISBN:\""+request.form['isbn']+"\"&"
-    if 'inauthor' in request.form:
+    if 'inauthor' in request.form and request.form['inauthor']:
       query += "inauthor:"+request.form['inauthor']+"+"
-    if 'intitle' in request.form:
+    if 'intitle' in request.form and request.form['intitle']:
       query += "intitle:"+request.form['intitle']
     if 'query' in request.form:
       query += request.form['query']
     url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
     data = r.json()
-    #print(url)
+    print(url)
     return render_template('booksearch.html',data=data, req=request.form)
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):

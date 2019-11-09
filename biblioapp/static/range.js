@@ -13,12 +13,13 @@ $(document).ready(function() {
 	      accept: '#draggable li',
 	      drop: function( event, ui ) {
 		i++;
-		ui.draggable.remove();
+		//ui.draggable.remove();
 		ui.draggable.detach().css({top: 0,left: 0}).appendTo($(this));
  
 		ajax_postOrder(element);
+
 		//specific event for deleting dropped item
-		ui.draggable.find('span').click(function() {
+		ui.draggable.find('span').one('click', function() {
 		   ajax_supprItem($( this ));
 		});
 	     }
@@ -37,13 +38,14 @@ $(document).ready(function() {
 	   });
 
 	   //remove book from list
-	   $(element+" li span").click(function() {
+	   $(element+" li span").one('click', function() {
 		ajax_supprItem($( this ));
+		$('#draggable li').draggable({scope: "d1"}); //set list draggable again
 	   });
-
    });
 
-   $('#draggable li').draggable({
+
+  $('#draggable li').draggable({
     appendTo: "body",
     //helper: "clone",
     revert: true,
@@ -80,7 +82,7 @@ $(document).ready(function() {
       $.ajax({
 	    data: elem.parent().attr('id'),
 	    type: 'POST',
-	    url: '/ajax_del_position/'
+	    url: '/ajax_del_position/',
       });
   }
 });
