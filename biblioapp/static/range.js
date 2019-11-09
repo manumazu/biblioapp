@@ -13,7 +13,7 @@ $(document).ready(function() {
 	      accept: '#draggable li',
 	      drop: function( event, ui ) {
 		i++;
-		//ui.draggable.remove();
+		ui.draggable.remove();
 		ui.draggable.detach().css({top: 0,left: 0}).appendTo($(this));
  
 		ajax_postOrder(element);
@@ -30,7 +30,7 @@ $(document).ready(function() {
 	      }
 	   });
 
-	   $(element).sortable({
+	   $(element).delay( 1000 ).sortable({
 		update: function(e, ui) {
 		// POST to server using $.ajax for given row
 		ajax_postOrder(element);
