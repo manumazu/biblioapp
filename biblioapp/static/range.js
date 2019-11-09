@@ -40,7 +40,6 @@ $(document).ready(function() {
 	   //remove book from list
 	   $(element+" li span").one('click', function() {
 		ajax_supprItem($( this ));
-		$('#draggable li').draggable({scope: "d1"}); //set list draggable again
 	   });
    });
 
@@ -84,5 +83,6 @@ $(document).ready(function() {
 	    type: 'POST',
 	    url: '/ajax_del_position/',
       });
+      $('#draggable li').draggable({scope: "d1"}); //set list draggable again
   }
 });
