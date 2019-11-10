@@ -16,6 +16,12 @@ arduino_id = arduino_map['id_arduino']
 def home():
     tidybooks = db.get_tidy_books(arduino_id) #books with addresses
     bookstorange = db.get_books_to_range(arduino_id) #books with position
+    #search requested books in tidy books 
+    requested_books = db.get_request(arduino_id)
+    for request in requested_books:
+      if request['row'] in tidybooks:
+        if request['column'] in tidybooks[request['row']]:
+           tidybooks[request['row']][request['column']]['requested']=True
     return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
 
 @app.route('/ajax_sort/', methods=['POST'])

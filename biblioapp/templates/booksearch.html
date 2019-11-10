@@ -23,6 +23,7 @@
 	</form>
 
 	{% if 'items' in data %}
+	<!-- Api search results -->
 	<h2>Results</h2>
 	<ul>       
 	{% for field in data['items'] %}
@@ -73,23 +74,36 @@
 
 
 	{% if bookapi and bookapi['volumeInfo'] %} 
+        <!-- Detail book search results -->
+        <h2>{{bookapi['volumeInfo']['title']}}</h2>
 	<ul>
+	     {% if 'imageLinks' in bookapi['volumeInfo'] %}
+                 {% set image_format = namespace() %}
+                 {% for imageLink in bookapi['volumeInfo']['imageLinks'] %}
+                    <!--li>{{imageLink}} :: {{bookapi['volumeInfo']['imageLinks'][imageLink]}}</li-->
+                    {% if imageLink == 'small' or imageLink == 'thumbnail' %}
+                       {% set image_format.value = imageLink %}
+                    {% endif %}
+                 {% endfor %}
+                 <li><img src="{{bookapi['volumeInfo']['imageLinks'][image_format.value]}}"></li>
+             {% endif %}
 	    {% for field in bookapi['volumeInfo'] %}
-	     <li>{{ field}} :: {{ bookapi['volumeInfo'][field] }}</li>
+                {% if field != 'imageLinks' %}
+	        <!--li>{{ field}} :: {{ bookapi['volumeInfo'][field] }}</li-->
+                {% endif %}
 	    {% endfor %}
 	</ul>
 
 	<form method="post" action="/bookreferencer/">
-	  <input type="hidden" name="title" value="{{ bookapi['volumeInfo']['title'] }}">
-	  <input type="hidden" name="editor" value="{{ bookapi['volumeInfo']['publisher'] }}">
-	  <input type="hidden" name="pages" value="{{ bookapi['volumeInfo']['pageCount'] }}">
-	  <input type="hidden" name="year" value="{{ bookapi['volumeInfo']['publishedDate'] }}">
-	  <input type="hidden" name="description" value="{{bookapi['volumeInfo']['description']}}">
-	  <input type="hidden" name="reference" value="{{ ref }}">
+	  <div class="form-group"><label for="title">Title</label> <input type="text" name="title" id="title" value="{{ bookapi['volumeInfo']['title'] }}"></div>
+	  <div class="form-group"><label for="pages">Pages</label> <input type="text" name="pages" id="pages" value="{{ bookapi['volumeInfo']['pageCount'] }}"></div>
+	  <div class="form-group"><label for="year">Year</label> <input type="text" name="year" id="year" value="{{ bookapi['volumeInfo']['publishedDate'] }}"></div>
 	{% if 'authors' in bookapi['volumeInfo'] %}
+           <div class="form-group"><label for="author">Author</label> 
 	  {% for author in bookapi['volumeInfo']['authors'] %}
-	    <input type="hidden" name="authors[]" value="{{ author }}">
+	    <input type="text" name="authors[]" value="{{ author }}">
 	  {% endfor %}
+           </div>
 	{% endif %}
 	{% if 'categories' in bookapi['volumeInfo'] %}
 	  {% for category in bookapi['volumeInfo']['categories'] %}
@@ -105,6 +119,9 @@
 	{% else %}
 	  <input type="hidden" name="isbn" value="">
 	{% endif %}
+	<input type="hidden" name="description" value="{{bookapi['volumeInfo']['description']}}">
+	<input type="hidden" name="reference" value="{{ ref }}">
+	<input type="hidden" name="editor" value="{{ bookapi['volumeInfo']['publisher'] }}">
 	<input type="submit" value="add this !" class="btn btn-primary btn-sm">
 	</form>
 	{% endif %}

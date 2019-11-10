@@ -25,7 +25,11 @@
 	{% for line in lines %}
 	<ul id="droppable_{{(line+1)}}" class="droppable">
 	  {% for position,book in tidybooks[(line+1)].items() %}
-	     <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
+	     <li id="book_{{book['id']}}">
+               {% if book['requested'] %}R{% endif %}
+               <span class="del">x</span>
+               <a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
+            </li>
 	  {% endfor %}
 	</ul>
 	{% endfor %}

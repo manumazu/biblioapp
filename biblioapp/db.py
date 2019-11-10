@@ -27,7 +27,7 @@ def get_arduino_map() :
 
 def get_tidy_books(arduino_id) :
   cursor = get_db()
-  cursor.execute("SELECT * FROM biblio_book bb \
+  cursor.execute("SELECT bb.id, bb.title, bb.author, bp.position, bp.row FROM biblio_book bb \
 	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
 	inner join biblio_app app on bp.id_app=app.id\
 	where app.id_arduino=%s order by row, position",arduino_id)

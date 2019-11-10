@@ -20,9 +20,9 @@
 	{% if address['id_item'] %}
 	<form action="/locate/" method="post">
 	<input type="hidden" name="book_id" value="{{ book['id'] }}">
-	<input type="hidden" name="column" value="{{ address['column'] }}">
+	<input type="hidden" name="column" value="{{ address['position'] }}">
 	<input type="hidden" name="row" value="{{ address['row'] }}">
-	<input type="hidden" name="range" value="{{ address['range'] }}">
+	<input type="hidden" name="range" value="{{ led_range(book['pages']) }}">
 	<input type="hidden" name="arduino_id" value="{{ arduino_id }}">
 	<input type="submit" value="Locate now !" class="btn btn-primary btn-sm">
 	{% else %}
