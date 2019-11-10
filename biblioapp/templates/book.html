@@ -11,11 +11,14 @@
 	<div class="container">
 
 	<h2>{{ book['title'] }} - {{ book['author'] }}</h2>
-	<ul>
+
+        {% include '_book_form.html' %}
+
+	<!--ul>
 	{% for field in book %}
 	    <li>{{ book[field] }}</li>
 	{% endfor %}
-	</ul>
+	</ul-->
 
 	{% if address['id_item'] %}
 	<form action="/locate/" method="post">

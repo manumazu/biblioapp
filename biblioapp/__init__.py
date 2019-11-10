@@ -103,7 +103,7 @@ def searchBookReference():
     r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
     data = r.json()
     #print(data['volumeInfo'])
-    return render_template('booksearch.html',bookapi=data, ref=ref)
+    return render_template('booksearch.html',book=data['volumeInfo'], ref=ref)
   else:
     return render_template('booksearch.html')
 

@@ -1,0 +1,75 @@
+<form method="post" action="/bookreferencer/">
+{% if 'pageCount' in book %}
+  {% set pages = book['pageCount'] %}
+{% elif 'pages' in book %}
+  {% set pages = book['pages'] %}
+{% endif %}
+
+{% if 'publishedDate' in book %}
+  {% set year = book['publishedDate'] %}
+{% elif 'year' in book %}
+  {% set year = book['year'] %}
+{% endif %}
+
+{% if 'authors' in book %}
+  {% set authors = book['authors'] %}
+{% else %}
+  {% set authors = book['author'].split(', ') %}
+{% endif %}
+
+{% if 'publisher' in book %}
+  {% set editor = book['publisher'] %}
+{% elif 'editor' in book %}
+  {% set editor = book['editor'] %}
+{% endif %}
+
+{% if ref %}
+  {% set reference = ref %}
+{% elif 'reference' in book %}
+  {% set reference = book['reference'] %}
+{% endif %}
+
+
+         <div class="form-group"><label for="author">Author</label> 
+         {% if authors|length > 0 %}
+	   {% for author in authors %}
+	    <input type="text" name="authors[]" value="{{ author }}">
+	   {% endfor %}
+         {% else %}
+	    <input type="text" name="authors[]" value="{{ author }}">
+         {% endif %}
+         </div>
+
+	 <div class="form-group"><label for="title">Title</label> <input type="text" name="title" id="title" value="{{ book['title'] }}"></div>
+	 <div class="form-group"><label for="pages">Pages</label> <input type="text" name="pages" id="pages" value="{{ pages }}"></div>
+	 <div class="form-group"><label for="year">Year</label> <input type="text" name="year" id="year" value="{{ year }}"></div>
+
+        <div class="form-group"><label for="editor">Editor</label> 
+	  <input type="text" name="editor" value="{{ editor }}">
+        </div>
+
+	{% if 'industryIdentifiers' in book %}
+	{% for isbn in book['industryIdentifiers'] %}
+	  {% if isbn['type'] == "ISBN_13" %}
+	   <input type="hidden" name="isbn" value="{{ isbn['identifier'] }}"> 
+	  {% endif %}
+	{% endfor %}
+	{% else %}
+         <div class="form-group"><label for="isbn">ISBN</label> 
+	  <input type="text" id="isbn" name="isbn" value="{{ book['isbn'] }}">
+         </div>
+	{% endif %}
+
+	{% if 'categories' in book %}
+	  {% for category in book['categories'] %}
+	   <input type="hidden" name="tags[]" value="{{ category }}">
+	  {% endfor %}
+	{% endif %}
+
+        {% if 'id' in book %}
+        <input type="hidden" name="id" value="{{ book['id'] }}">
+	{% endif %}
+	<input type="hidden" name="description" value="{{book['description']}}">
+	<input type="hidden" name="reference" value="{{ reference }}">
+	<input type="submit" value="Edit and save this !" class="btn btn-primary btn-sm">
+</form>
