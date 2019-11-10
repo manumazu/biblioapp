@@ -141,6 +141,15 @@ def del_item_position(item) :
   return True
 
 ''' manage taxonomy '''
+def get_tag_for_node(id_node):
+  cursor = get_db()
+  cursor.execute("SELECT id, tag FROM biblio_tags bt INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag WHERE btn.id_node=%s", id_node)
+  row = cursor.fetchall()
+  cursor.close()
+  if row:
+    return row
+  return False
+
 def get_tag(tag):
   cursor = get_db()
   cursor.execute("SELECT id, tag FROM biblio_tags WHERE tag=%s", tag)

@@ -23,7 +23,7 @@
 	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line+1)}}',{% endfor %}];</script>
 
 	{% for line in lines %}
-	<ul id="droppable_{{(line+1)}}" class="droppable">
+	<ul id="droppable_{{(line+1)}}" class="droppable success">
 	  {% for position,book in tidybooks[(line+1)].items() %}
 	     <li id="book_{{book['id']}}">
                {% if book['requested'] %}R{% endif %}

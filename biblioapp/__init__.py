@@ -57,7 +57,8 @@ def getBook(book_id):
     book = db.get_book(book_id)
     if book:
         address = db.get_position(book['id'])
-        return render_template('book.html',book=book,address=address,arduino_id=arduino_id)
+        tags = db.get_tag_for_node(book['id'])
+        return render_template('book.html',book=book,address=address,tags=tags,arduino_id=arduino_id)
     abort(404)
 
 #post request from app

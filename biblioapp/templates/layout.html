@@ -8,6 +8,7 @@
 {% block styles %}
 {{super()}}
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='app.css')}}">
 {% endblock %}
 
@@ -65,11 +66,12 @@
 
 	{% with messages = get_flashed_messages() %}
 	{% if messages %}
-	    <ul>
+	    <div class="alert alert-dismissible alert-success">
 	    {% for m in messages %}
-		<li>{{ m }}</li>
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		<a href="#" class="alert-link">{{ m }}</a>.
 	    {% endfor %}
-	    </ul>
+	    </div>
 	{% endif %}
 	{% endwith %}
 

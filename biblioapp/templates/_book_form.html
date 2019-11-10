@@ -1,4 +1,6 @@
-<form method="post" action="/bookreferencer/">
+<div class="panel panel-default">
+<div class="panel-body">
+<form method="post" action="/bookreferencer/" class="form-horizontal">
 {% if 'pageCount' in book %}
   {% set pages = book['pageCount'] %}
 {% elif 'pages' in book %}
@@ -11,9 +13,10 @@
   {% set year = book['year'] %}
 {% endif %}
 
+{% set authors = '' %}
 {% if 'authors' in book %}
   {% set authors = book['authors'] %}
-{% else %}
+{% elif 'author' in book %}
   {% set authors = book['author'].split(', ') %}
 {% endif %}
 
@@ -29,24 +32,27 @@
   {% set reference = book['reference'] %}
 {% endif %}
 
-
-         <div class="form-group"><label for="author">Author</label> 
+<fieldset>
+         <div class="form-group"><label for="author" class="col-lg-1 control-label">Author</label> 
          {% if authors|length > 0 %}
 	   {% for author in authors %}
-	    <input type="text" name="authors[]" value="{{ author }}">
+	    <div class="col-lg-3">
+	      <input type="text" name="authors[]" value="{{ author }}" class="form-control">
+	    </div>
 	   {% endfor %}
-         {% else %}
-	    <input type="text" name="authors[]" value="{{ author }}">
          {% endif %}
          </div>
 
-	 <div class="form-group"><label for="title">Title</label> <input type="text" name="title" id="title" value="{{ book['title'] }}"></div>
-	 <div class="form-group"><label for="pages">Pages</label> <input type="text" name="pages" id="pages" value="{{ pages }}"></div>
-	 <div class="form-group"><label for="year">Year</label> <input type="text" name="year" id="year" value="{{ year }}"></div>
-
-        <div class="form-group"><label for="editor">Editor</label> 
-	  <input type="text" name="editor" value="{{ editor }}">
-        </div>
+	 <div class="form-group"><label for="title" class="col-lg-1 control-label">Title</label> 
+	   <div class="col-lg-5">
+		<input type="text" name="title" id="title" value="{{ book['title'] }}" class="form-control">
+	    </div>
+         </div>
+         <div class="form-group"><label for="editor" class="col-lg-1 control-label">Editor</label> 
+	   <div class="col-lg-5">
+	        <input type="text" name="editor" value="{{ editor }}" class="form-control">
+	    </div>
+         </div>
 
 	{% if 'industryIdentifiers' in book %}
 	{% for isbn in book['industryIdentifiers'] %}
@@ -55,10 +61,23 @@
 	  {% endif %}
 	{% endfor %}
 	{% else %}
-         <div class="form-group"><label for="isbn">ISBN</label> 
-	  <input type="text" id="isbn" name="isbn" value="{{ book['isbn'] }}">
+         <div class="form-group"><label for="isbn" class="col-lg-1 control-label">ISBN</label> 
+	   <div class="col-lg-5">
+	    <input type="text" id="isbn" name="isbn" value="{{ book['isbn'] }}" class="form-control">
+	    </div>
          </div>
 	{% endif %}
+
+	 <div class="form-group"><label for="pages" class="col-lg-1 control-label">Pages</label> 
+	   <div class="col-lg-2">
+		<input type="text" name="pages" id="pages" value="{{ pages }}" class="form-control">
+	    </div>
+         </div>
+	 <div class="form-group"><label for="year" class="col-lg-1 control-label">Year</label> 
+	   <div class="col-lg-2">
+		<input type="text" name="year" id="year" value="{{ year }}" class="form-control">
+	    </div>
+         </div>
 
 	{% if 'categories' in book %}
 	  {% for category in book['categories'] %}
@@ -71,5 +90,9 @@
 	{% endif %}
 	<input type="hidden" name="description" value="{{book['description']}}">
 	<input type="hidden" name="reference" value="{{ reference }}">
-	<input type="submit" value="Edit and save this !" class="btn btn-primary btn-sm">
+	<input type="submit" value="Edit and save this !" class="btn btn-info">
+
+</fieldset>
 </form>
+</div>
+</div>

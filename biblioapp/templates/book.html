@@ -14,12 +14,6 @@
 
         {% include '_book_form.html' %}
 
-	<!--ul>
-	{% for field in book %}
-	    <li>{{ book[field] }}</li>
-	{% endfor %}
-	</ul-->
-
 	{% if address['id_item'] %}
 	<form action="/locate/" method="post">
 	<input type="hidden" name="book_id" value="{{ book['id'] }}">
@@ -27,11 +21,32 @@
 	<input type="hidden" name="row" value="{{ address['row'] }}">
 	<input type="hidden" name="range" value="{{ led_range(book['pages']) }}">
 	<input type="hidden" name="arduino_id" value="{{ arduino_id }}">
-	<input type="submit" value="Locate now !" class="btn btn-primary btn-sm">
+	<input type="submit" value="Locate now !" class="btn btn-success">
 	{% else %}
-	 <input type="submit" value="Range this !" class="btn btn-primary btn-sm">
+	 <input type="submit" value="Range this !" class="btn btn-warning">
 	{% endif %}
 	</form>
+
+	<blockquote>
+	  <p>Description</p>
+	  <small>{{ book['description'] }}</small>
+	</blockquote>
+
+
+	<!--ul>
+	{% for field in book %}
+	    <li>{{ book[field] }}</li>
+	{% endfor %}
+	</ul-->
+        
+	{% if tags %}
+        <h3>Association</h3>
+        <ul>
+	{% for tag in tags %}
+	  <li>{{ tag['tag'] }}</li>
+	{% endfor %}
+	</ul>
+        {% endif %}
 
 
 	{{ super() }}
