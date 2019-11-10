@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le :  mar. 05 nov. 2019 à 21:24
+-- Généré le :  Dim 10 nov. 2019 à 16:22
 -- Version du serveur :  10.3.17-MariaDB-0+deb10u1
 -- Version de PHP :  7.3.9-1~deb10u1
 
@@ -23,21 +23,6 @@ SET time_zone = "+00:00";
 --
 CREATE DATABASE IF NOT EXISTS `bibliobus` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `bibliobus`;
-
--- --------------------------------------------------------
-
---
--- Structure de la table `biblio_address`
---
-
-CREATE TABLE `biblio_address` (
-  `id` int(11) NOT NULL,
-  `id_arduino` int(11) NOT NULL COMMENT 'fkey of biblio_app',
-  `id_book` int(11) NOT NULL COMMENT 'fkey of bibli_book',
-  `column` smallint(5) NOT NULL,
-  `row` smallint(5) NOT NULL,
-  `range` smallint(5) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -126,12 +111,6 @@ CREATE TABLE `biblio_tag_node` (
 --
 
 --
--- Index pour la table `biblio_address`
---
-ALTER TABLE `biblio_address`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Index pour la table `biblio_app`
 --
 ALTER TABLE `biblio_app`
@@ -154,7 +133,7 @@ ALTER TABLE `biblio_position`
 -- Index pour la table `biblio_request`
 --
 ALTER TABLE `biblio_request`
-  ADD UNIQUE KEY `id_arduino` (`id_arduino`,`column`,`row`,`range`);
+  ADD UNIQUE KEY `id_arduino` (`id_arduino`,`column`,`row`);
 
 --
 -- Index pour la table `biblio_tags`
@@ -172,12 +151,6 @@ ALTER TABLE `biblio_tag_node`
 --
 -- AUTO_INCREMENT pour les tables déchargées
 --
-
---
--- AUTO_INCREMENT pour la table `biblio_address`
---
-ALTER TABLE `biblio_address`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `biblio_app`

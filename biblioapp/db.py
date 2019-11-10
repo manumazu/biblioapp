@@ -81,9 +81,9 @@ def get_request(arduino_id) :
 def set_request(request) :
   now = tools.getNow()
   cursor = get_db()
-  cursor.execute("INSERT INTO biblio_request (`id_arduino`, `row`, `column`, `range`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE date_add=%s", \
+  cursor.execute("INSERT INTO biblio_request (`id_arduino`, `row`, `column`, `range`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s", \
   (request.form.get('arduino_id'), request.form.get('row'), request.form.get('column'), request.form.get('range'), \
-  now.strftime("%Y-%m-%d %H:%M:%S")))
+  now.strftime("%Y-%m-%d %H:%M:%S"), request.form.get('range')))
   conn.commit()
   cursor.close()
   return True
