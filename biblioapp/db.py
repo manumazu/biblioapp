@@ -159,13 +159,23 @@ def get_tag(tag):
     return row
   return False
 
-def set_tags(tags):
+def get_id_taxonomy(label):
+  cursor = get_db()
+  cursor.execute("SELECT id, label FROM biblio_taxonomy WHERE label=%s", label)
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return False
+
+def set_tags(tags, taxonomy_label):
   tag_ids = []
+  taxonomy = get_id_taxonomy(taxonomy_label)
   for tag in tags:
     hasTag = get_tag(tag)
     if hasTag is False:
       cursor = get_db()
-      cursor.execute("INSERT INTO biblio_tags (`tag`) VALUES (%s)", tag)
+      cursor.execute("INSERT INTO biblio_tags (`tag`, `id_taxonomy`) VALUES (%s, %s)", (tag, taxonomy['id']))
       conn.commit()
       cursor.execute("SELECT LAST_INSERT_ID() as id")
       row = cursor.fetchone()

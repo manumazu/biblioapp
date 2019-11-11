@@ -111,9 +111,9 @@ def searchBookReference():
 @app.route('/bookreferencer/', methods=['POST'])
 def bookReferencer():
   if request.method == 'POST':
-    tagIds = db.set_tags(request.form.getlist('tags[]'))
+    authors = request.form.getlist('authors[]')
     bookapi={}
-    bookapi['author'] = ', '.join(request.form.getlist('authors[]'))
+    bookapi['author'] = ', '.join(authors)
     bookapi['title'] = request.form['title']
     bookapi['reference'] = request.form['reference']
     bookapi['isbn'] = request.form['isbn']
@@ -122,8 +122,14 @@ def bookReferencer():
     bookapi['pages'] = request.form['pages']
     bookapi['year'] = request.form['year']
     bookId = db.set_book(bookapi)
-    if len(tagIds)>0:
-      db.set_tag_node(bookId, tagIds)
+    '''manage tags + taxonomy'''
+    authorTags = tools.getLastnameFirstname(authors)
+    authorTagids = db.set_tags(authorTags,'Authors')
+    catTagIds = db.set_tags(request.form.getlist('tags[]'),'Categories')
+    if len(catTagIds)>0:
+      db.set_tag_node(bookId, catTagIds)
+    if len(authorTagids)>0:
+      db.set_tag_node(bookId, authorTagids)
     return redirect('/')
   return render_template('bookreferencer.html')
    

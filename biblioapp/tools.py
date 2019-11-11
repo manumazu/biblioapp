@@ -15,6 +15,16 @@ def getYear(datestr):
 def getNow():
   return datetime.now()
 
+def getLastnameFirstname(names):
+  lnfn=[]
+  for name in names:
+    namearr = name.split(' ')
+    if len(namearr)>1:
+      lnfn.append(' '.join(namearr[::-1])) #reverse names array
+    else:
+      lnfn.append(namearr[0])
+  return lnfn
+
 @app.context_processor
 def utility_processor():
     def led_range(nb_pages):
