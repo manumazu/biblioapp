@@ -25,8 +25,8 @@
 	{% for line in lines %}
 	<ul id="droppable_{{(line+1)}}" class="droppable success">
 	  {% for position,book in tidybooks[(line+1)].items() %}
-	     <li id="book_{{book['id']}}">
-               {% if book['requested'] %}R{% endif %}
+	     <li id="book_{{book['id']}}" class="ui-state-default">
+               {% if book['requested'] %}[R]{% endif %}
                <span class="del">x</span>
                <a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
             </li>
@@ -40,7 +40,9 @@
 	<ul id="draggable">
     	{% if bookstorange %}
 	   {% for book in bookstorange %}
-	     <li id="book_{{book['id']}}"><span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a></li>
+	     <li id="book_{{book['id']}}" class="ui-state-default">
+		<span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
+	     </li>
 	   {% endfor %}
     	{% endif %}
 	</ul>
@@ -50,6 +52,7 @@
 
 {% block scripts %}
 {{super()}}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
   <script src="{{url_for('static', filename='range.js')}}"></script>
 {% endblock %}
 
