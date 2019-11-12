@@ -25,12 +25,18 @@ def get_arduino_map() :
     if row:
       return row
 
-def get_tidy_books(arduino_id) :
+def get_tidy_books(arduino_id, line = None) :
   cursor = get_db()
+  if line == None:
+    where = "app.id_arduino=%s"
+    args = arduino_id
+  else:
+    where = "app.id_arduino=%s and bp.row=%s"
+    args = (arduino_id,line)
   cursor.execute("SELECT bb.id, bb.title, bb.author, bp.position, bp.row FROM biblio_book bb \
 	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
 	inner join biblio_app app on bp.id_app=app.id\
-	where app.id_arduino=%s order by row, position",arduino_id)
+	where "+ where +" order by row, position",args)
   rows = cursor.fetchall()
   cursor.close()
   from collections import defaultdict

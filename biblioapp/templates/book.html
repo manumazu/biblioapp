@@ -22,15 +22,32 @@
 	<input type="hidden" name="range" value="{{ led_range(book['pages']) }}">
 	<input type="hidden" name="arduino_id" value="{{ arduino_id }}">
 	<input type="submit" value="Locate now !" class="btn btn-success">
-	{% else %}
-	 <input type="submit" value="Range this !" class="btn btn-warning">
-	{% endif %}
 	</form>
+	{% else %}
+	<form class="form-horizontal">
+	  <fieldset>
+	 <a href="javascript:void(0);" class="btn btn-warning" id="rangebook-{{ book['id'] }}">Range this !</a>
+	 {% set lines=range(biblio_nb_rows) %} 
+	 <div class="form-group" id="shelf-num">
+	      <label for="select" class="col-lg-2 control-label">Select a shelf:</label>
+	      <div class="col-lg-3">
+		<select class="form-control" id="select-shelf">
+		  <option selected="selected">Shelf number</option>
+     		{% for line in lines %}
+		  <option value="{{line+1}}">Shelf {{line+1}}</option>
+	 	{% endfor %}
+		</select>
+	      </div>
+	 </div>
+         </fieldset>
+	</form>
+	{% endif %}
 
 	<blockquote>
 	  <p>Description</p>
 	  <small>{{ book['description'] }}</small>
 	</blockquote>
+
 
 
 	<!--ul>
@@ -55,7 +72,8 @@
 {% endblock %}
 
 {% block scripts %}
-{{super()}}
+  {{super()}}
+  <script src="{{url_for('static', filename='book.js')}}"></script>
 {% endblock %}
 
 {% endblock %}

@@ -13,16 +13,28 @@ arduino_id = arduino_map['id_arduino']
 
 @app.route("/")
 @app.route('/<arduino_id>/')
+@app.route("/ajax_positions_inline/", methods=['GET'])
 def home():
-    tidybooks = db.get_tidy_books(arduino_id) #books with addresses
-    bookstorange = db.get_books_to_range(arduino_id) #books with position
-    #search requested books in tidy books 
-    requested_books = db.get_request(arduino_id)
-    if requested_books:
-     for request in requested_books:
-       if request['row'] in tidybooks:
-         if request['column'] in tidybooks[request['row']]:
-           tidybooks[request['row']][request['column']]['requested']=True
+  if request.method == 'GET' and request.args.get('row'):
+    row = request.args.get('row')
+  else:
+    row = None
+  tidybooks = db.get_tidy_books(arduino_id, row) #books with addresses
+  bookstorange = db.get_books_to_range(arduino_id) #books with position
+  #search requested books in tidy books 
+  requested_books = db.get_request(arduino_id)
+  if requested_books:
+   for requested in requested_books:
+     if requested['row'] in tidybooks:
+       if requested['column'] in tidybooks[requested['row']]:
+         tidybooks[requested['row']][requested['column']]['requested']=True
+  if request.method == 'GET' and request.args.get('row'):
+    response = app.response_class(
+      response=json.dumps(tidybooks[int(row)]),
+      mimetype='application/json'
+    )
+    return response
+  else:
     return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
 
 @app.route('/ajax_sort/', methods=['POST'])
@@ -58,7 +70,7 @@ def getBook(book_id):
     if book:
         address = db.get_position(book['id'])
         tags = db.get_tag_for_node(book['id'])
-        return render_template('book.html',book=book,address=address,tags=tags,arduino_id=arduino_id)
+        return render_template('book.html', book=book, address=address, tags=tags, arduino_id=arduino_id, biblio_nb_rows=arduino_map['nb_lines'])
     abort(404)
 
 #post request from app
@@ -96,7 +108,7 @@ def searchBookReference():
     url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
     data = r.json()
-    print(url)
+    #print(url)
     return render_template('booksearch.html',data=data, req=request.form)
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):
