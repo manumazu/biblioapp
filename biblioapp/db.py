@@ -42,7 +42,7 @@ def get_tidy_books(arduino_id, line = None) :
   from collections import defaultdict
   books = defaultdict(dict)
   for row in rows:
-    books[row['row']][row['position']]={'id':row['id'], 'title':row['title'], 'author':row['author']}
+    books[row['row']][row['position']]={'id':row['id'], 'title':row['title'], 'author':row['author'], 'url':'/book/'+str(row['id'])}
   #print(books)
   if rows:
     return books
