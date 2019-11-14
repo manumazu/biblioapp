@@ -2,6 +2,7 @@ $(document).ready(function() {
 
   $('#shelf-num').hide();
   $('#droppable_0').hide();
+  $('#save-pos').hide();
   var drop_selector = 'ul[id^="droppable"]';
 
   $('a[id^="rangebook"]').on('click', function() 
@@ -15,11 +16,12 @@ $(document).ready(function() {
       {
         $(drop_selector).html('');//clear list
         //add current book to list
-        $(drop_selector).append('<li><span class="del">x</span><a href="'+book_url+'"> \
-          '+book_author+' - '+book_title+'</li>');
-        $(drop_selector).show();        
+        $(drop_selector).append('<li id="book_'+bookid+'" class="ui-state-highlight"> \
+          <a href="'+book_url+'">'+book_author+' - '+book_title+'</li>');
+        $(drop_selector).show();      
         //change droppable id
         $(drop_selector).attr('id', "droppable_"+shelfnum);
+        var current_selector = '#'+$(drop_selector).attr('id');  
         //add other books for current shelf
         $.ajax({
   	      data: 'row='+shelfnum,
@@ -30,8 +32,9 @@ $(document).ready(function() {
   		      var json=$.parseJSON(res.responseText);
   		      $.each(json, function(key,book){
               $(drop_selector).append('<li id="book_'+book['id']+'" class="ui-state-default"> \
-                <span class="del">x</span><a href="'+book['url']+'">'+book['author']+' - '+book['title']+'</li>');
+                <a href="'+book['url']+'">'+book['author']+' - '+book['title']+'</li>');
             });
+            //ajax_postOrder(current_selector); //add new item
   	      }
 	      });
 
@@ -39,7 +42,20 @@ $(document).ready(function() {
     });
   });
 
-  $(drop_selector).sortable();
+  $(drop_selector).sortable({
+      //items: "li",
+      /*update: function(e, ui) {
+        //get id for current shelf element
+      },*/
+      stop: function(e, ui) {
+        $('#save-pos').show();
+      }
+  });
   $(drop_selector).disableSelection();
+
+  $('#save-pos').on('click', function() {
+    var current_selector = '#'+$(drop_selector).attr('id'); 
+    ajax_postOrder(current_selector);
+  });
 
 });
