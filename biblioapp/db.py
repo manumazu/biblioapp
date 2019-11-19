@@ -66,15 +66,6 @@ def get_book(book_id) :
   if row:
     return row
 
-def get_position(book_id) :
-  cursor = get_db()
-  cursor.execute("SELECT * FROM biblio_position where id_item=%s and item_type='book'",book_id)
-  row = cursor.fetchone()
-  cursor.close()
-  if row:
-    return row
-  return False
-
 def get_request(arduino_id) :
   cursor = get_db()
   cursor.execute("SELECT * FROM biblio_request where id_arduino=%s",arduino_id)
@@ -83,6 +74,15 @@ def get_request(arduino_id) :
   if row:
     return row
   return False
+
+def get_request_for_position(arduino_id, position, row) :
+  cursor = get_db()
+  cursor.execute("SELECT * FROM biblio_request where id_arduino=%s and `column`=%s and `row`=%s",(arduino_id, position, row))
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return False  
 
 def set_request(request) :
   now = tools.getNow()
@@ -93,6 +93,14 @@ def set_request(request) :
   conn.commit()
   cursor.close()
   return True
+
+def del_request(arduino_id, column, row) :
+  cursor = get_db()
+  cursor.execute("DELETE FROM biblio_request where id_arduino=%s and `column`=%s and `row`=%s",(arduino_id, column,row))
+  conn.commit()
+  cursor.close()
+  return True
+
 
 ''' manage book '''
 def get_bookapi(bookapi):
@@ -126,6 +134,16 @@ def set_book(bookapi) :
   return hasBook
 
 ''' manage position '''
+def get_position_for_book(book_id) :
+  cursor = get_db()
+  cursor.execute("SELECT * FROM biblio_position where id_item=%s and item_type='book'",book_id)
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return False
+
+
 def sort_items(items, row) :
   cursor = get_db()
   i=0
@@ -139,11 +157,16 @@ def sort_items(items, row) :
   cursor.close()
   return sortable
 
-def del_item_position(item) :
-  cursor = get_db()
-  cursor.execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=1", (item[1], item[0]))
-  conn.commit()
-  cursor.close()
+def del_item_position(item, arduino_id) :
+  position = get_position_for_book(item[1])
+  if position:
+    cursor = get_db()
+    cursor.execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=1", (item[1], item[0]))
+    conn.commit()
+    cursor.close()
+  has_request = get_request_for_position(arduino_id, position['position'], position['row'])
+  if has_request:
+    del_request(arduino_id, position['position'], position['row'])
   return True
 
 ''' manage taxonomy '''

@@ -54,7 +54,7 @@ def ajaxDelPosition():
   if request.method == 'POST':
     for elem in request.form:
        book = elem.split('_')
-       if db.del_item_position(book):
+       if db.del_item_position(book, arduino_id):
          ret={'success':True}
        else:
          ret={'success':False}
@@ -68,7 +68,7 @@ def ajaxDelPosition():
 def getBook(book_id):
     book = db.get_book(book_id)
     if book:
-        address = db.get_position(book['id'])
+        address = db.get_position_for_book(book['id'])
         tags = db.get_tag_for_node(book['id'])
         return render_template('book.html', book=book, address=address, tags=tags, arduino_id=arduino_id, biblio_nb_rows=arduino_map['nb_lines'])
     abort(404)
