@@ -133,11 +133,20 @@ def set_book(bookapi) :
     cursor.close()
   return hasBook
 
-''' manage position '''
+''' manage items position '''
 def get_position_for_book(book_id) :
   cursor = get_db()
-  cursor.execute("SELECT * FROM biblio_position where id_item=%s and item_type='book'",book_id)
+  cursor.execute("SELECT * FROM biblio_position where id_app=1 and id_item=%s and item_type='book'",book_id)
   row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return False
+
+def get_positions_for_row(row) :
+  cursor = get_db()
+  cursor.execute("SELECT id_item FROM biblio_position where id_app=%s and `row`=%s order by `position`",(1, row))
+  row = cursor.fetchall()
   cursor.close()
   if row:
     return row
@@ -148,7 +157,11 @@ def sort_items(items, row) :
   cursor = get_db()
   i=0
   sortable={}
-  for item_id in items :
+  for item in items :
+    if 'id_item' in item:
+      item_id=item['id_item']
+    else:
+      item_id=item
     i+=1
     cursor.execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, `position`, `row`) VALUES (%s, %s, %s, %s, %s) \
     ON DUPLICATE KEY UPDATE position=%s, row=%s", (1, item_id, 'book', i, row , i, row))
@@ -157,6 +170,13 @@ def sort_items(items, row) :
   cursor.close()
   return sortable
 
+'''
+manage position suppression for one item
+- check current postion
+- check and delete requested postion on arduino
+- decrement remaining positions
+- delete current position
+'''
 def del_item_position(item, arduino_id) :
   position = get_position_for_book(item[1])
   if position:
@@ -165,8 +185,12 @@ def del_item_position(item, arduino_id) :
     conn.commit()
     cursor.close()
   has_request = get_request_for_position(arduino_id, position['position'], position['row'])
+  #remove request
   if has_request:
     del_request(arduino_id, position['position'], position['row'])
+  #get list for remaining items and sort them again
+  items = get_positions_for_row(position['row'])
+  sort_items(items, position['row'])
   return True
 
 ''' manage taxonomy '''
