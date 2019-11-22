@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, abort, flash, redirect, json,
 from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
-app.secret_key = '2d9-E2.)f&é,A$p@fpa+zSU03êû9_'
+app.config.from_object("config")
+
 Bootstrap(app)
 
 from biblioapp import db, tools

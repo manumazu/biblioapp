@@ -3,12 +3,6 @@ import pymysql
 from biblioapp import app
 from biblioapp import tools
 
-# MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = 'manu'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'mdp'
-app.config['MYSQL_DATABASE_DB'] = 'bibliobus'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-
 db = MySQL()
 db.init_app(app)
 conn = db.connect()
