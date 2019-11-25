@@ -74,6 +74,14 @@ class Arduino():
             str(analog_value)))).encode()
         self.conn.write(command) 
 
+    def serial_write(self, value):
+        command = (''.join(('<', str(value),'>'))).encode()
+        self.conn.write(command) 
+
+    def serial_read(self):
+        line_received = self.conn.readline().decode().strip()
+        print(line_received)
+
     def close(self):
         """
         To ensure we are properly closing our connection to the

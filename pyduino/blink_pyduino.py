@@ -18,7 +18,10 @@ if __name__ == '__main__':
     time.sleep(3)
     # sleep to ensure ample time for computer to make serial connection 
 
-    PIN = 3
+    a.serial_write('putain de merde')
+    a.serial_read()
+
+    '''PIN = 3
     a.set_pin_mode(PIN,'O')
     # initialize the digital pin as output
 
@@ -30,5 +33,4 @@ if __name__ == '__main__':
             a.digital_write(PIN,1) # turn LED on 
         else:
             a.digital_write(PIN,0) # turn LED off
-
-        time.sleep(1)
+        time.sleep(1)'''
