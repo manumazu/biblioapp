@@ -8,5 +8,6 @@ setup(
         'flask',
         'requests',
 	'flask_bootstrap',
+        'flask-mysql'
     ],
 )
