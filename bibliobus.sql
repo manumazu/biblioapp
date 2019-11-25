@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost
--- Généré le :  Dim 10 nov. 2019 à 16:22
--- Version du serveur :  10.3.17-MariaDB-0+deb10u1
--- Version de PHP :  7.3.9-1~deb10u1
+-- Généré le :  lun. 25 nov. 2019 à 19:32
+-- Version du serveur :  10.3.18-MariaDB-0+deb10u1
+-- Version de PHP :  7.3.11-1~deb10u1
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -21,8 +21,6 @@ SET time_zone = "+00:00";
 --
 -- Base de données :  `bibliobus`
 --
-CREATE DATABASE IF NOT EXISTS `bibliobus` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-USE `bibliobus`;
 
 -- --------------------------------------------------------
 
@@ -91,7 +89,8 @@ CREATE TABLE `biblio_request` (
 
 CREATE TABLE `biblio_tags` (
   `id` int(11) NOT NULL,
-  `tag` varchar(255) NOT NULL
+  `tag` varchar(255) NOT NULL,
+  `id_taxonomy` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -104,6 +103,17 @@ CREATE TABLE `biblio_tag_node` (
   `node_type` varchar(10) NOT NULL,
   `id_node` int(11) NOT NULL,
   `id_tag` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `biblio_taxonomy`
+--
+
+CREATE TABLE `biblio_taxonomy` (
+  `id` int(11) NOT NULL,
+  `label` varchar(64) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -127,7 +137,8 @@ ALTER TABLE `biblio_book`
 --
 ALTER TABLE `biblio_position`
   ADD UNIQUE KEY `id_app` (`id_app`,`id_item`,`item_type`),
-  ADD KEY `id_item` (`id_item`,`position`,`row`);
+  ADD KEY `id_item` (`id_item`,`position`,`row`),
+  ADD KEY `id_item_2` (`id_item`,`row`);
 
 --
 -- Index pour la table `biblio_request`
@@ -140,13 +151,20 @@ ALTER TABLE `biblio_request`
 --
 ALTER TABLE `biblio_tags`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `tag` (`tag`);
+  ADD UNIQUE KEY `tag` (`tag`),
+  ADD KEY `id_taxonomy` (`id_taxonomy`);
 
 --
 -- Index pour la table `biblio_tag_node`
 --
 ALTER TABLE `biblio_tag_node`
   ADD UNIQUE KEY `node_type` (`node_type`,`id_node`,`id_tag`);
+
+--
+-- Index pour la table `biblio_taxonomy`
+--
+ALTER TABLE `biblio_taxonomy`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT pour les tables déchargées
@@ -168,6 +186,12 @@ ALTER TABLE `biblio_book`
 -- AUTO_INCREMENT pour la table `biblio_tags`
 --
 ALTER TABLE `biblio_tags`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `biblio_taxonomy`
+--
+ALTER TABLE `biblio_taxonomy`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
