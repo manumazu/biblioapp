@@ -75,7 +75,8 @@ class Arduino():
         self.conn.write(command) 
 
     def serial_write(self, value):
-        command = (''.join(('<', str(value),'>'))).encode()
+        #command = str(value).encode()
+        command =(''.join(('<', str(value),'>'))).encode()
         self.conn.write(command) 
 
     def serial_read(self):

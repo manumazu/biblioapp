@@ -18,7 +18,8 @@ if __name__ == '__main__':
     time.sleep(3)
     # sleep to ensure ample time for computer to make serial connection 
 
-    a.serial_write('putain de merde')
+    a.serial_write(json)
+    time.sleep(1)
     a.serial_read()
 
     '''PIN = 3
