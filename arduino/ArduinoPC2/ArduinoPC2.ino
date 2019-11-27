@@ -19,6 +19,9 @@ byte bytesRecvd = 0;
 boolean readInProgress = false;
 boolean newDataFromPC = false;
 
+boolean ledStatus = false;
+int switchstate = 0;
+
 char messageFromPC[buffSize] = {0};
 int newFlashInterval = 0;
 float servoFraction = 0.0; // fraction of servo range to move
@@ -34,11 +37,15 @@ unsigned long replyToPCinterval = 1000;
 void setup() {
   Serial.begin(9600);
 
-    // flash LEDs so we know we are alive
+  // declare LEDs as output
   for (byte n = 0; n < numLEDs; n++) {
      pinMode(ledPin[n], OUTPUT);
     // digitalWrite(ledPin[n], HIGH);
   }
+
+  // declare the switch pin as an input
+  pinMode(7, INPUT);
+  
   /*delay(500); // delay() is OK in setup as it only happens once
   
   for (byte n = 0; n < numLEDs; n++) {
@@ -52,6 +59,12 @@ void setup() {
 //=============
 
 void loop() {
+  //set stop button
+  switchstate = digitalRead(7);
+  if (switchstate == HIGH) {
+    //force ledstatus off
+    ledStatus = false;
+  }
   curMillis = millis();
   getDataFromPC();
   updateFlashInterval();
@@ -117,6 +130,7 @@ void parseData() {
 void replyToPC() {
 
   if (newDataFromPC) {
+    ledStatus = true;
     newDataFromPC = false;
     Serial.print("<Msg ");
     Serial.print(messageFromPC);
@@ -165,11 +179,17 @@ void updateLED2() {
 //=============
 
 void flashLEDs() {
-
-  for (byte n = 0; n < numLEDs; n++) {
-    if (curMillis - prevLEDmillis[n] >= LEDinterval[n]) {
-       prevLEDmillis[n] += LEDinterval[n];
-       digitalWrite( ledPin[n], !digitalRead( ledPin[n]) );
+  if (ledStatus==true) {
+    for (byte n = 0; n < numLEDs; n++) {
+      if (curMillis - prevLEDmillis[n] >= LEDinterval[n]) {
+         prevLEDmillis[n] += LEDinterval[n];
+         digitalWrite( ledPin[n], !digitalRead( ledPin[n]) );
+      }
+    }
+  }
+  else {
+    for (byte n = 0; n < numLEDs; n++) {
+       digitalWrite( ledPin[n], LOW );
     }
   }
 }

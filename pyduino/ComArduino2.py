@@ -162,7 +162,7 @@ waitForArduino()
 
 
 testData = []
-testData.append("<LED1,200,0.2>")
+testData.append("<LED1,1000,0.2>")
 testData.append("<LED2,500,0.7>")
 testData.append("<LED3,500,0.5>")
 testData.append("<LED1,3000,0.2>")
