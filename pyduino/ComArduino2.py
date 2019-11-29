@@ -47,9 +47,15 @@
 #         search for the lines 
 #               serPort = "/dev/ttyS80"
 #               baudRate = 9600
-#               ser = serial.Serial(serPort, baudRate)
+#               conn = serial.Serial(serPort, baudRate)
 #
 
+import time
+
+global startMarker, endMarker
+
+startMarker = 60
+endMarker = 62
 
 #=====================================
 
@@ -57,14 +63,13 @@
 
 #=====================================
 
-def sendToArduino(sendStr):
-    ser.write(sendStr.encode('utf-8')) # change for Python3
+def sendToArduino(conn, sendStr):
+    conn.write(sendStr.encode('utf-8')) # change for Python3
 
 
 #======================================
 
-def recvFromArduino():
-    global startMarker, endMarker
+def recvFromArduino(conn):
     
     ck = ""
     x = "z" # any value that is not an end- or startMarker
@@ -72,41 +77,39 @@ def recvFromArduino():
     
     # wait for the start character
     while  ord(x) != startMarker: 
-        x = ser.read()
+        x = conn.read()
     
     # save data until the end marker is found
     while ord(x) != endMarker:
         if ord(x) != startMarker:
             ck = ck + x.decode("utf-8") # change for Python3
             byteCount += 1
-        x = ser.read()
+        x = conn.read()
     
     return(ck)
 
 
 #============================
 
-def waitForArduino():
+def waitForArduino(conn):
 
     # wait until the Arduino sends 'Arduino Ready' - allows time for Arduino reset
     # it also ensures that any bytes left over from a previous message are discarded
     
-    global startMarker, endMarker
-    
     msg = ""
     while msg.find("Arduino is ready") == -1:
 
-        while ser.inWaiting() == 0:
+        while conn.inWaiting() == 0:
             pass
         
-        msg = recvFromArduino()
+        msg = recvFromArduino(conn)
 
         print (msg) # python3 requires parenthesis
         print ()
         
 #======================================
 
-def runTest(td):
+def runTest(conn, td):
     numLoops = len(td)
     waitingForReply = False
 
@@ -115,16 +118,16 @@ def runTest(td):
         teststr = td[n]
 
         if waitingForReply == False:
-            sendToArduino(teststr)
+            sendToArduino(conn, teststr)
             print ("Sent from PC -- LOOP NUM " + str(n) + " TEST STR " + teststr)
             waitingForReply = True
 
         if waitingForReply == True:
 
-            while ser.inWaiting() == 0:
+            while conn.inWaiting() == 0:
                 pass
             
-            dataRecvd = recvFromArduino()
+            dataRecvd = recvFromArduino(conn)
             print ("Reply Received  " + dataRecvd)
             n += 1
             waitingForReply = False
@@ -132,45 +135,3 @@ def runTest(td):
             print ("===========")
 
         time.sleep(5)
-
-
-#======================================
-
-# THE DEMO PROGRAM STARTS HERE
-
-#======================================
-
-import serial
-import time
-
-print ()
-print ()
-
-# NOTE the user must ensure that the serial port and baudrate are correct
-# serPort = "/dev/ttyS80"
-serPort = "/dev/ttyACM0"
-baudRate = 9600
-ser = serial.Serial(serPort, baudRate)
-print ("Serial port " + serPort + " opened  Baudrate " + str(baudRate))
-
-
-startMarker = 60
-endMarker = 62
-
-
-waitForArduino()
-
-
-testData = []
-testData.append("<LED1,1000,0.2>")
-testData.append("<LED2,500,0.7>")
-testData.append("<LED3,500,0.5>")
-testData.append("<LED1,3000,0.2>")
-testData.append("<LED2,1500,0.7>")
-testData.append("<LED3,750,0.7>")
-
-runTest(testData)
-
-
-ser.close
-
