@@ -71,15 +71,23 @@ def getBook(book_id):
     if book:
         address = db.get_position_for_book(book['id'])
         tags = db.get_tag_for_node(book['id'])
-        return render_template('book.html', book=book, address=address, tags=tags, arduino_id=arduino_id, biblio_nb_rows=arduino_map['nb_lines'])
+        hasRequest = False
+        if address:
+          hasRequest = db.get_request_for_position(arduino_id, address['position'], address['row'])
+        return render_template('book.html', book=book, address=address, tags=tags, arduino_id=arduino_id,  \
+          biblio_nb_rows=arduino_map['nb_lines'], hasRequest = hasRequest)
     abort(404)
 
 #post request from app
 @app.route('/locate/', methods=['GET', 'POST'])
 def locateBook():
     if request.method == 'POST':
-      test = db.set_request(request)
-      flash('Location requested for book {}'.format(request.form['book_id']))
+      if 'remove_request' in request.form:
+        db.del_request(arduino_id,request.form['column'], request.form['row'])
+        flash('Location removed for book {}'.format(request.form['book_id']))
+      else:
+        test = db.set_request(request)
+        flash('Location requested for book {}'.format(request.form['book_id']))
       return redirect('/')
 
 #get request from arduino for current arduino_id
