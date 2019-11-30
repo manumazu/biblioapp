@@ -77,8 +77,11 @@ void loop() {
 
 void lightLEDs() {
 
-  if (ledStatus==true) {   
-     digitalWrite(ledPin[newLedColumn-1], HIGH ); 
+  if (ledStatus==true) { 
+     if(newLedColumn==0) //when nothing is requested
+      ledStatus=false;
+     else 
+      digitalWrite(ledPin[newLedColumn-1], HIGH ); 
   }
   else {
     for (byte n = 0; n < numLEDs; n++) {

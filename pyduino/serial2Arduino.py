@@ -13,9 +13,12 @@ r = requests.get(url)
 datas = r.json()
 
 testData = []
-for data in datas:
-  msg = "<%d,%d000,0.2>" % (data['column'],data['column'])
-  testData.append(msg)
+if datas:
+  for data in datas:
+    msg = "<%d,%d000,0.2>" % (data['column'],data['column'])
+    testData.append(msg)
+else:
+  testData.append("<0>")
 
 # NOTE the user must ensure that the serial port and baudrate are correct
 # serPort = "/dev/ttyS80"
