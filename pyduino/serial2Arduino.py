@@ -14,7 +14,7 @@ datas = r.json()
 
 testData = []
 for data in datas:
-  msg = "<LED%d,%d000,0.2>" % (data['column'],data['column'])
+  msg = "<%d,%d000,0.2>" % (data['column'],data['column'])
   testData.append(msg)
 
 # NOTE the user must ensure that the serial port and baudrate are correct

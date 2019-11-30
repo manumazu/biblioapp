@@ -148,6 +148,14 @@ void replyToPC() {
 
 void updateFlashInterval() {
 
+  /*for (int n = 0; n < numLEDs; n++) {
+    char led = "LED"+n;
+    if (strcmp(messageFromPC, led) == 0) 
+      digitalWrite( ledPin[n], HIGH );
+    else
+      digitalWrite( ledPin[n], LOW );
+  }*/
+
    // this illustrates using different inputs to call different functions
   if (strcmp(messageFromPC, "LED1") == 0) {
      updateLED1();
@@ -155,6 +163,10 @@ void updateFlashInterval() {
   
   if (strcmp(messageFromPC, "LED2") == 0) {
      updateLED2();
+  }
+
+  if (strcmp(messageFromPC, "LED3") == 0) {
+     updateLED3();
   }
 }
 
@@ -170,6 +182,13 @@ void updateLED1() {
 //=============
 
 void updateLED2() {
+
+  if (newFlashInterval > 100) {
+    LEDinterval[1] = newFlashInterval;
+  }
+}
+
+void updateLED3() {
 
   if (newFlashInterval > 100) {
     LEDinterval[1] = newFlashInterval;
