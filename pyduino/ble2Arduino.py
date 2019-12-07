@@ -6,12 +6,14 @@
 
 import pexpect, time, requests
 
+#get requested position of items int app
 url='https://bibliobus.bearstech.com/request/'
 r = requests.get(url)
 datas = r.json()
 
+#manage hexadecimal conversion for position to send
 testData = []
-initStr = teststr = ' '.join(hex(ord(x)) for x in '<0>')
+initStr = teststr = ' '.join(hex(ord(x)) for x in '<0>') #init <0> = "0x3c 0x30 0x3e"
 testData.append(initStr)
 if datas:
   for data in datas:
@@ -19,30 +21,18 @@ if datas:
     teststr = ' '.join(hex(ord(x)) for x in msg)
     testData.append(teststr)
 
+#manage bluetoothctl wrapper
 serverMACAddress = '4C:24:98:E6:99:DB' #HC08
 
 child = pexpect.spawn('bluetoothctl')
 child.sendline('connect '+serverMACAddress)
 time.sleep(.5)
-child.sendline('menu gatt')
-time.sleep(.5)
+child.sendline('menu gatt') #search for UUID 0xFFE1
 child.sendline('select-attribute 0000ffe1-0000-1000-8000-00805f9b34fb')
-time.sleep(1)
+time.sleep(0.5)
 for data in testData:
    child.sendline('write "'+data+'"')
 time.sleep(.5)
 child.sendline('back')
 child.sendline('disconnect '+serverMACAddress)
-time.sleep(.5)
 child.sendline('exit')
-
-
-
-
-'''testData = []
-testData.append("<LED1,100,0.2>")
-testData.append("<LED2,200,0.7>")
-testData.append("<LED3,300,0.5>")
-testData.append("<LED1,1000,0.2>")
-testData.append("<LED2,1500,0.7>")
-testData.append("<LED3,3000,0.7>")'''
