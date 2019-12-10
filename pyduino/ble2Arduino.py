@@ -26,10 +26,10 @@ serverMACAddress = '4C:24:98:E6:99:DB' #HC08
 
 child = pexpect.spawn('bluetoothctl')
 child.sendline('connect '+serverMACAddress)
-time.sleep(.5)
+time.sleep(0.5)
 child.sendline('menu gatt') #search for UUID 0xFFE1
 child.sendline('select-attribute 0000ffe1-0000-1000-8000-00805f9b34fb')
-#time.sleep(0.5)
+time.sleep(.5)
 for data in testData:
    child.sendline('write "'+data+'"')
 #time.sleep(.5)
