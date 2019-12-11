@@ -197,6 +197,16 @@ def get_tag_for_node(id_node):
     return row
   return False
 
+def get_author(letter):
+  cursor = get_db()
+  searchLetter = letter+"%"
+  cursor.execute("SELECT id, tag FROM `biblio_tags` WHERE id_taxonomy=2 and tag like %s", searchLetter)
+  row = cursor.fetchall()
+  cursor.close()
+  if row:
+    return row
+  return False
+
 def get_tag(tag):
   cursor = get_db()
   cursor.execute("SELECT id, tag FROM biblio_tags WHERE tag=%s", tag)

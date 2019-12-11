@@ -13,7 +13,7 @@ arduino_map = db.get_arduino_map()
 arduino_id = arduino_map['id_arduino']
 
 @app.route("/")
-@app.route('/<arduino_id>/')
+@app.route("/app/")
 @app.route("/ajax_positions_inline/", methods=['GET'])
 def home():
   if request.method == 'GET' and request.args.get('row'):
@@ -37,6 +37,11 @@ def home():
     return response
   else:
     return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
+
+
+@app.route('/authors/')
+def listAuthors():
+  return render_template('authors.html',db=db)
 
 @app.route('/ajax_sort/', methods=['POST'])
 def ajaxSort():
