@@ -197,6 +197,15 @@ def get_tag_for_node(id_node):
     return row
   return False
 
+def get_node_for_tag(id_tag):
+  cursor = get_db()
+  cursor.execute("SELECT id_node FROM biblio_tag_node btn INNER JOIN biblio_tags bt ON bt.id = btn.id_tag WHERE btn.id_tag=%s and btn.node_type='book'", id_tag)
+  row = cursor.fetchall()
+  cursor.close()
+  if row:
+    return row
+  return False
+
 def get_author(letter):
   cursor = get_db()
   searchLetter = letter+"%"

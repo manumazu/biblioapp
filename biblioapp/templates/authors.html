@@ -21,7 +21,7 @@
 		  {% if authors %}
 		    <ul>
 		  	{%for author in authors %}
-		  	  <li>{{ author['tag'] }}</li>
+			<li><a href="/tag/{{ author['id'] }}">{{ author['tag'] }}</a></li>
 		  	{% endfor %}
 		    </ul>
 		  {% endif %}
