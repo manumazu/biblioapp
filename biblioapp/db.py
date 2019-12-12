@@ -225,6 +225,15 @@ def get_tag(tag):
     return row
   return False
 
+def get_tag_by_id(tag_id):
+  cursor = get_db()
+  cursor.execute("SELECT id, tag FROM biblio_tags WHERE id=%s", tag_id)
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return False  
+
 def get_id_taxonomy(label):
   cursor = get_db()
   cursor.execute("SELECT id, label FROM biblio_taxonomy WHERE label=%s", label)

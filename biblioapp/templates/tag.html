@@ -13,7 +13,24 @@
 {% block content %}
 	<div class="container">
 
-	  <ul></ul>
+	<h1>{{ author }} book's</h1>
+
+	  {%if books %}
+	  <ul>
+	  	{% for id in books %}
+	  		{% set book = books[id] %}
+	  		<li>{{ book['title'] }}
+	  			{% if book['address'] %}
+	  			
+	  				{% set address = book['address'] %}
+	  				{% set hasRequest = book['hasRequest'] %}
+					{% include '_locate_form.html' %}
+	  				
+				{% endif %}
+			</li>
+	  	{% endfor %}
+	  </ul>
+	  {% endif %}	
 
 	{{ super() }}
 	</div>

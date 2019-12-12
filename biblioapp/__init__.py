@@ -37,21 +37,6 @@ def home():
     return response
   else:
     return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
-
-
-@app.route('/authors/')
-def listAuthors():
-  return render_template('authors.html',db=db)
-
-@app.route('/tag/<tag_id>')
-def listNode(tag_id):
-  nodes = db.get_node_for_tag(tag_id)
-  if nodes:
-      books = {}
-      for node in nodes:
-          book = db.get_book(node['id_node'])
-          books[node['id_node']]=book
-  return render_template('tag.html',books=books)
   
 @app.route('/ajax_sort/', methods=['POST'])
 def ajaxSort():
@@ -80,6 +65,26 @@ def ajaxDelPosition():
   )
   return response
 
+@app.route('/authors/')
+def listAuthors():
+  return render_template('authors.html',db=db)
+
+@app.route('/tag/<tag_id>')
+def listNode(tag_id):
+  nodes = db.get_node_for_tag(tag_id)
+  tag = db.get_tag_by_id(tag_id)
+  if nodes:
+      books = {}
+      for node in nodes:
+          book = db.get_book(node['id_node'])
+          books[book['id']] = book
+          address = db.get_position_for_book(book['id'])
+          if address:
+            hasRequest = db.get_request_for_position(arduino_id, address['position'], address['row'])
+            books[book['id']]['address'] = address
+            books[book['id']]['hasRequest'] = hasRequest         
+  return render_template('tag.html', books=books, arduino_id=arduino_id, author=tag['tag'])  
+
 @app.route('/book/<book_id>')
 def getBook(book_id):
     book = db.get_book(book_id)
@@ -103,7 +108,9 @@ def locateBook():
       else:
         test = db.set_request(request)
         flash('Location requested for book {}'.format(request.form['book_id']))
-      return redirect('/')
+        if(request.referrer.find('tag')):
+          redirect('/authors')
+        return redirect('/')
 
 #get request from arduino for current arduino_id
 @app.route('/request/')
