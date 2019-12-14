@@ -19,7 +19,7 @@
 	  <ul>
 	  	{% for id in books %}
 	  		{% set book = books[id] %}
-	  		<li>{{ book['title'] }}
+			<li><a href="{{ url_for('getBook', book_id=book['id']) }}">{{ book['title'] }}</a>
 	  			{% if book['address'] %}
 	  			
 	  				{% set address = book['address'] %}

@@ -108,9 +108,9 @@ def locateBook():
       else:
         test = db.set_request(request)
         flash('Location requested for book {}'.format(request.form['book_id']))
-        if(request.referrer.find('tag')):
-          redirect('/authors')
-        return redirect('/')
+      if(request.referrer and 'tag' in request.referrer):
+        return redirect('/authors')
+      return redirect('/')
 
 #get request from arduino for current arduino_id
 @app.route('/request/')
@@ -139,7 +139,7 @@ def searchBookReference():
     url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
     data = r.json()
-    #print(url)
+    print(url)
     return render_template('booksearch.html',data=data, req=request.form)
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):
