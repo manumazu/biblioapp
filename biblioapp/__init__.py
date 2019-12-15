@@ -113,14 +113,17 @@ def locateBook():
       return redirect('/')
 
 #get request from arduino for current arduino_id
-@app.route('/request/')
-def getRequest():
-  data = db.get_request(arduino_id)
-  response = app.response_class(
-        response=json.dumps(data),
-        mimetype='application/json'
-  )
-  return response
+@app.route('/request/<uuid>/')
+def getRequest(uuid):
+  user_app = db.get_app_for_uuid(uuid)
+  if(user_app):
+    data = db.get_request(user_app['id_arduino'])
+    response = app.response_class(
+          response=json.dumps(data),
+          mimetype='application/json'
+    )
+    return response
+  abort(404)
 
 @app.route('/booksearch/', methods=['GET', 'POST'])
 def searchBookReference():

@@ -19,6 +19,14 @@ def get_arduino_map() :
     if row:
       return row
 
+def get_app_for_uuid(uuid) :
+  cursor = get_db()
+  cursor.execute("SELECT id_arduino FROM biblio_app WHERE uuid=%s",uuid)
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+
 def get_tidy_books(arduino_id, line = None) :
   cursor = get_db()
   if line == None:
