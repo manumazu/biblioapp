@@ -1,12 +1,17 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape
 from flask_bootstrap import Bootstrap
+import flask_login
 
 app = Flask(__name__)
 app.config.from_object("config")
 
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+
+
 Bootstrap(app)
 
-from biblioapp import db, tools
+from biblioapp import db, tools, models
 
 global arduino_id
 arduino_map = db.get_arduino_map()
@@ -178,6 +183,40 @@ def bookReferencer():
       db.set_tag_node(bookId, authorTagids)
     return redirect('/')
   return render_template('bookreferencer.html')
-   
+
+
+'''
+Authentication
+'''
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return '''
+               <form action='login' method='POST'>
+                <input type='text' name='email' id='email' placeholder='email'/>
+                <input type='password' name='password' id='password' placeholder='password'/>
+                <input type='submit' name='submit'/>
+               </form>
+               '''
+
+    email = request.form['email']
+    if request.form['password'] == models.users[email]['password']:
+        user = models.User()
+        user.id = email
+        flask_login.login_user(user)
+        return redirect('/protected')
+
+    return 'Bad login'
+
+@app.route('/protected')
+@flask_login.login_required
+def protected():
+    return 'Logged in as: ' + flask_login.current_user.id
+
+@app.route('/logout')
+def logout():
+    flask_login.logout_user()
+    return 'Logged out'
+
 if __name__ == "__main__":
     app.run(debug=True)
