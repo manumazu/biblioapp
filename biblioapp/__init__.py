@@ -41,7 +41,10 @@ def home():
     )
     return response
   else:
-    return render_template('index.html',arduino_id=arduino_id, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
+    user_login = False
+    if(flask_login.current_user.is_authenticated):
+      user_login = flask_login.current_user.id
+    return render_template('index.html',user_login=user_login, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
   
 @app.route('/ajax_sort/', methods=['POST'])
 def ajaxSort():
@@ -191,13 +194,7 @@ Authentication
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return '''
-               <form action='login' method='POST'>
-                <input type='text' name='email' id='email' placeholder='email'/>
-                <input type='password' name='password' id='password' placeholder='password'/>
-                <input type='submit' name='submit'/>
-               </form>
-               '''
+        return render_template('login.html')
 
     email = request.form['email']
     if request.form['password'] == models.users[email]['password']:
@@ -211,7 +208,8 @@ def login():
 @app.route('/protected')
 @flask_login.login_required
 def protected():
-    return 'Logged in as: ' + flask_login.current_user.id
+  flash('Logged in as: ' + flask_login.current_user.id)
+  return redirect('/')
 
 @app.route('/logout')
 def logout():
