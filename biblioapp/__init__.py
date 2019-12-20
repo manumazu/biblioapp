@@ -197,11 +197,15 @@ def login():
         return render_template('login.html')
 
     email = request.form['email']
-    if request.form['password'] == models.users[email]['password']:
-        user = models.User()
-        user.id = email
-        flask_login.login_user(user)
-        return redirect('/protected')
+    #exist_user = db.get_user(email)
+    #print(exist_user)
+    #if exist_user is not None:
+    #if request.form['password'] == models.users[email]['password']:
+    user = models.User()
+    user.id = email
+    user.password = request.form['password'] 
+    flask_login.login_user(user)
+    return redirect('/protected')
 
     return 'Bad login'
 

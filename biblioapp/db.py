@@ -277,5 +277,14 @@ def set_tag_node(node, tagIds):
     conn.commit()
   cursor.close()
 
+def get_user(email):
+  cursor = get_db()
+  cursor.execute("SELECT id, email, password FROM biblio_user WHERE email=%s", email)
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
+  return None
+
 def close_conn() :
     conn.close()
