@@ -43,7 +43,7 @@ def home():
   else:
     user_login = False
     if(flask_login.current_user.is_authenticated):
-      user_login = flask_login.current_user.id
+      user_login = flask_login.current_user.name
     return render_template('index.html',user_login=user_login, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
   
 @app.route('/ajax_sort/', methods=['POST'])
@@ -197,28 +197,30 @@ def login():
         return render_template('login.html')
 
     email = request.form['email']
-    #exist_user = db.get_user(email)
-    #print(exist_user)
-    #if exist_user is not None:
-    #if request.form['password'] == models.users[email]['password']:
-    user = models.User()
-    user.id = email
-    user.password = request.form['password'] 
-    flask_login.login_user(user)
-    return redirect('/protected')
+    exists = db.get_user(email)
+    if exists is not None:
 
-    return 'Bad login'
+      if request.form['password'] == exists['password']:
+
+        user = models.User()
+        user.id = email
+        user.name = exists['name'] 
+        flask_login.login_user(user)
+        return redirect('/protected')
+
+      return 'Bad login'
 
 @app.route('/protected')
 @flask_login.login_required
 def protected():
-  flash('Logged in as: ' + flask_login.current_user.id)
+  flash('Logged in as: ' + flask_login.current_user.name)
   return redirect('/')
 
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
-    return 'Logged out'
+    flash('Logged out')
+    return redirect('/')
 
 if __name__ == "__main__":
     app.run(debug=True)

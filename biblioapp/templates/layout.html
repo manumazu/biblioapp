@@ -45,8 +45,11 @@
 		    <li><a href="#">Something else here</a></li>
 		    <li class="divider"></li>
 		    <li><a href="#">Separated link</a></li-->
-		    <li class="divider"></li>
 		    <li><a href="{{ url_for('listAuthors') }}">Authors</a></li>
+		    {% if user_login %}
+		    	<li class="divider"></li>
+		    	<li><a href="{{ url_for('logout') }}">Logout</a></li>
+		    {% endif %}
 		  </ul>
 		</li>
 	      </ul>

@@ -279,7 +279,7 @@ def set_tag_node(node, tagIds):
 
 def get_user(email):
   cursor = get_db()
-  cursor.execute("SELECT id, email, password FROM biblio_user WHERE email=%s", email)
+  cursor.execute("SELECT id, email, password, name FROM biblio_user WHERE email=%s", email)
   row = cursor.fetchone()
   cursor.close()
   if row:
