@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape
 from flask_bootstrap import Bootstrap
 import flask_login
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config.from_object("config")
@@ -21,6 +22,12 @@ arduino_id = arduino_map['id_arduino']
 @app.route("/app/")
 @app.route("/ajax_positions_inline/", methods=['GET'])
 def home():
+  user_login = False
+  if(flask_login.current_user.is_authenticated):
+    user_login = flask_login.current_user.name
+  if(user_login==False):
+    return redirect('/login')
+    
   if request.method == 'GET' and request.args.get('row'):
     row = request.args.get('row')
   else:
@@ -41,9 +48,6 @@ def home():
     )
     return response
   else:
-    user_login = False
-    if(flask_login.current_user.is_authenticated):
-      user_login = flask_login.current_user.name
     return render_template('index.html',user_login=user_login, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
   
 @app.route('/ajax_sort/', methods=['POST'])
@@ -199,8 +203,8 @@ def login():
     email = request.form['email']
     exists = db.get_user(email)
     if exists is not None:
-
-      if request.form['password'] == exists['password']:
+      #hash = generate_password_hash(exists['password'])
+      if check_password_hash(exists['password'],request.form['password']):
 
         user = models.User()
         user.id = email
