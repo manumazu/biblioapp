@@ -19,9 +19,18 @@ arduino_map = db.get_arduino_map()
 arduino_id = arduino_map['id_arduino']
 
 @app.route("/")
-@app.route("/app/")
+@app.route('/authors/')
+def listAuthors():
+  user_login = False
+  if(flask_login.current_user.is_authenticated):
+    user_login = flask_login.current_user.name
+  if(user_login==False):
+    return redirect('/login')
+  return render_template('authors.html', user_login=user_login, db=db)
+
 @app.route("/ajax_positions_inline/", methods=['GET'])
-def home():
+@app.route("/app/")
+def myBookShelf():
   user_login = False
   if(flask_login.current_user.is_authenticated):
     user_login = flask_login.current_user.name
@@ -49,7 +58,7 @@ def home():
     return response
   else:
     return render_template('index.html',user_login=user_login, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
-  
+
 @app.route('/ajax_sort/', methods=['POST'])
 def ajaxSort():
   if request.method == 'POST':
@@ -76,10 +85,6 @@ def ajaxDelPosition():
         mimetype='application/json'
   )
   return response
-
-@app.route('/authors/')
-def listAuthors():
-  return render_template('authors.html',db=db)
 
 @app.route('/tag/<tag_id>')
 def listNode(tag_id):
@@ -118,11 +123,24 @@ def locateBook():
         db.del_request(arduino_id,request.form['column'], request.form['row'])
         flash('Location removed for book {}'.format(request.form['book_id']))
       else:
-        test = db.set_request(request)
+        test = db.set_request(arduino_id, request.form.get('row'), request.form.get('column'), request.form.get('range'))
         flash('Location requested for book {}'.format(request.form['book_id']))
       if(request.referrer and 'tag' in request.referrer):
         return redirect('/authors')
       return redirect('/')
+
+@app.route('/locate_for_tag/<tag_id>')  
+def locateBooksForTag(tag_id):
+  nodes = db.get_node_for_tag(tag_id)
+  db.clean_request(arduino_id)
+  for node in nodes:
+    address = db.get_position_for_book(node['id_node'])
+    if address:
+      book = db.get_book(node['id_node'])
+      db.set_request(arduino_id, address['row'], address['position'], tools.led_range(book['pages']))
+      flash('Location requested for book {}'.format(book['title']))
+  return redirect('/authors')
+
 
 #get request from arduino for current arduino_id
 @app.route('/request/<uuid>/')
@@ -140,6 +158,7 @@ def getRequest(uuid):
 @app.route('/booksearch/', methods=['GET', 'POST'])
 def searchBookReference():
   import requests
+
   '''search on api'''
   if request.method == 'POST':
     query = "key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
@@ -154,8 +173,9 @@ def searchBookReference():
     url = "https://www.googleapis.com/books/v1/volumes?"+query
     r = requests.get(url)
     data = r.json()
-    print(url)
+    #print(url)
     return render_template('booksearch.html',data=data, req=request.form)
+
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):
     ref = request.args.get('ref')

@@ -25,9 +25,7 @@ def getLastnameFirstname(names):
       lnfn.append(namearr[0])
   return lnfn
 
-@app.context_processor
-def utility_processor():
-    def led_range(nb_pages):
+def led_range(nb_pages):
         if nb_pages.strip() == '':
           lrange = 2
         elif int(nb_pages) < 100:
@@ -35,4 +33,7 @@ def utility_processor():
         else:
           lrange = round(int(nb_pages)/100)
         return lrange
+
+@app.context_processor
+def utility_processor():
     return dict(led_range=led_range)

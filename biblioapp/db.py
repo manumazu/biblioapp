@@ -86,12 +86,11 @@ def get_request_for_position(arduino_id, position, row) :
     return row
   return False  
 
-def set_request(request) :
+def set_request(arduino_id, row, column, range) :
   now = tools.getNow()
   cursor = get_db()
   cursor.execute("INSERT INTO biblio_request (`id_arduino`, `row`, `column`, `range`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s", \
-  (request.form.get('arduino_id'), request.form.get('row'), request.form.get('column'), request.form.get('range'), \
-  now.strftime("%Y-%m-%d %H:%M:%S"), request.form.get('range')))
+  (arduino_id, row, column, range, now.strftime("%Y-%m-%d %H:%M:%S"), range))
   conn.commit()
   cursor.close()
   return True
@@ -99,6 +98,13 @@ def set_request(request) :
 def del_request(arduino_id, column, row) :
   cursor = get_db()
   cursor.execute("DELETE FROM biblio_request where id_arduino=%s and `column`=%s and `row`=%s",(arduino_id, column,row))
+  conn.commit()
+  cursor.close()
+  return True
+
+def clean_request(arduino_id) :
+  cursor = get_db()
+  cursor.execute("DELETE FROM biblio_request where id_arduino=%s",(arduino_id))
   conn.commit()
   cursor.close()
   return True
