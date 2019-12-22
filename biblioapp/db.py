@@ -11,13 +11,13 @@ def get_db() :
   cursor = conn.cursor(pymysql.cursors.DictCursor)	
   return cursor
 
-def get_arduino_map() :
-    cursor = get_db()
-    cursor.execute("SELECT * FROM biblio_app WHERE id=1")
-    row = cursor.fetchone()
-    cursor.close()
-    if row:
-      return row
+def get_arduino_map():
+  cursor = get_db()
+  cursor.execute("SELECT * FROM biblio_app WHERE id=1")
+  row = cursor.fetchone()
+  cursor.close()
+  if row:
+    return row
 
 def get_app_for_uuid(uuid) :
   cursor = get_db()

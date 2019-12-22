@@ -9,42 +9,50 @@ app.config.from_object("config")
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-
 Bootstrap(app)
 
 from biblioapp import db, tools, models
 
-global arduino_id
+global arduino_id, user_login
+
+def initApp():
+  user_login = False
+  if(flask_login.current_user.is_authenticated):
+    user_login = flask_login.current_user.name  
+    arduino_map = db.get_arduino_map()
+    arduino_id = arduino_map['id_arduino']
+  else:
+    user_login = False
+    arduino_map = None
+    arduino_id = None
+  return {'user_login':user_login,'arduino_map':arduino_map,'arduino_id':arduino_id}
+
 arduino_map = db.get_arduino_map()
-arduino_id = arduino_map['id_arduino']
+arduino_id = arduino_map['id_arduino']  
 
 @app.route("/")
 @app.route('/authors/')
 def listAuthors():
-  user_login = False
-  if(flask_login.current_user.is_authenticated):
-    user_login = flask_login.current_user.name
-  if(user_login==False):
+  globalVars = initApp()
+  if(globalVars['user_login']==False):
     return redirect('/login')
-  return render_template('authors.html', user_login=user_login, db=db)
+  return render_template('authors.html', user_login=globalVars['user_login'], db=db)
 
 @app.route("/ajax_positions_inline/", methods=['GET'])
 @app.route("/app/")
 def myBookShelf():
-  user_login = False
-  if(flask_login.current_user.is_authenticated):
-    user_login = flask_login.current_user.name
-  if(user_login==False):
+  globalVars = initApp()
+  if(globalVars['user_login']==False):
     return redirect('/login')
     
   if request.method == 'GET' and request.args.get('row'):
     row = request.args.get('row')
   else:
     row = None
-  tidybooks = db.get_tidy_books(arduino_id, row) #books with addresses
-  bookstorange = db.get_books_to_range(arduino_id) #books with position
+  tidybooks = db.get_tidy_books(globalVars['arduino_id'], row) #books with addresses
+  bookstorange = db.get_books_to_range(globalVars['arduino_id']) #books with position
   #search requested books in tidy books 
-  requested_books = db.get_request(arduino_id)
+  requested_books = db.get_request(globalVars['arduino_id'])
   if requested_books:
    for requested in requested_books:
      if requested['row'] in tidybooks:
@@ -57,9 +65,11 @@ def myBookShelf():
     )
     return response
   else:
-    return render_template('index.html',user_login=user_login, tidybooks=tidybooks, bookstorange=bookstorange, biblio_nb_rows=arduino_map['nb_lines'])
+    return render_template('index.html',user_login=globalVars['user_login'], tidybooks=tidybooks, \
+      bookstorange=bookstorange, biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
 
 @app.route('/ajax_sort/', methods=['POST'])
+@flask_login.login_required
 def ajaxSort():
   if request.method == 'POST':
     current_row = request.form['row'] 
@@ -72,6 +82,7 @@ def ajaxSort():
   return response
 
 @app.route('/ajax_del_position/', methods=['POST'])
+@flask_login.login_required
 def ajaxDelPosition():
   if request.method == 'POST':
     for elem in request.form:
@@ -88,6 +99,7 @@ def ajaxDelPosition():
 
 @app.route('/tag/<tag_id>')
 def listNode(tag_id):
+  globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id)
   tag = db.get_tag_by_id(tag_id)
   if nodes:
@@ -97,47 +109,54 @@ def listNode(tag_id):
           books[book['id']] = book
           address = db.get_position_for_book(book['id'])
           if address:
-            hasRequest = db.get_request_for_position(arduino_id, address['position'], address['row'])
+            hasRequest = db.get_request_for_position(globalVars['arduino_id'], address['position'], address['row'])
             books[book['id']]['address'] = address
             books[book['id']]['hasRequest'] = hasRequest         
-  return render_template('tag.html', books=books, arduino_id=arduino_id, author=tag['tag'])  
+  return render_template('tag.html', books=books, arduino_id=globalVars['arduino_id'], author=tag['tag'])  
 
 @app.route('/book/<book_id>')
 def getBook(book_id):
-    book = db.get_book(book_id)
-    if book:
-        address = db.get_position_for_book(book['id'])
-        tags = db.get_tag_for_node(book['id'])
-        hasRequest = False
-        if address:
-          hasRequest = db.get_request_for_position(arduino_id, address['position'], address['row'])
-        return render_template('book.html', book=book, address=address, tags=tags, arduino_id=arduino_id,  \
+  globalVars = initApp()
+  book = db.get_book(book_id)
+  if book:
+      address = db.get_position_for_book(book['id'])
+      tags = db.get_tag_for_node(book['id'])
+      hasRequest = False
+      if address:
+        hasRequest = db.get_request_for_position(globalVars['arduino_id'], address['position'], address['row'])
+      return render_template('book.html', book=book, address=address, tags=tags, arduino_id=globalVars['arduino_id'],  \
           biblio_nb_rows=arduino_map['nb_lines'], hasRequest = hasRequest)
-    abort(404)
+  abort(404)
 
 #post request from app
 @app.route('/locate/', methods=['GET', 'POST'])
+@flask_login.login_required
 def locateBook():
-    if request.method == 'POST':
-      if 'remove_request' in request.form:
-        db.del_request(arduino_id,request.form['column'], request.form['row'])
-        flash('Location removed for book {}'.format(request.form['book_id']))
-      else:
-        test = db.set_request(arduino_id, request.form.get('row'), request.form.get('column'), request.form.get('range'))
-        flash('Location requested for book {}'.format(request.form['book_id']))
-      if(request.referrer and 'tag' in request.referrer):
-        return redirect('/authors')
-      return redirect('/')
+  globalVars = initApp()
+  if request.method == 'POST':
+
+    if 'remove_request' in request.form:
+      db.del_request(globalVars['arduino_id'],request.form['column'], request.form['row'])
+      flash('Location removed for book {}'.format(request.form['book_id']))
+    else:
+      test = db.set_request(globalVars['arduino_id'], request.form.get('row'), request.form.get('column'), request.form.get('range'))
+      flash('Location requested for book {}'.format(request.form['book_id']))
+    
+    if(request.referrer and 'tag' in request.referrer):
+      return redirect('/authors')
+    return redirect('/')
 
 @app.route('/locate_for_tag/<tag_id>')  
+@flask_login.login_required
 def locateBooksForTag(tag_id):
+  globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id)
   db.clean_request(arduino_id)
   for node in nodes:
     address = db.get_position_for_book(node['id_node'])
     if address:
       book = db.get_book(node['id_node'])
-      db.set_request(arduino_id, address['row'], address['position'], tools.led_range(book['pages']))
+      db.set_request(globalVars['arduino_id'], address['row'], address['position'], tools.led_range(book['pages']))
       flash('Location requested for book {}'.format(book['title']))
   return redirect('/authors')
 
@@ -156,6 +175,7 @@ def getRequest(uuid):
   abort(404)
 
 @app.route('/booksearch/', methods=['GET', 'POST'])
+@flask_login.login_required
 def searchBookReference():
   import requests
 
@@ -187,6 +207,7 @@ def searchBookReference():
     return render_template('booksearch.html')
 
 @app.route('/bookreferencer/', methods=['POST'])
+@flask_login.login_required
 def bookReferencer():
   if request.method == 'POST':
     authors = request.form.getlist('authors[]')
