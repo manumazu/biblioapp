@@ -27,9 +27,6 @@ def initApp():
     arduino_id = None
   return {'user_login':user_login,'arduino_map':arduino_map,'arduino_id':arduino_id}
 
-arduino_map = db.get_arduino_map()
-arduino_id = arduino_map['id_arduino']  
-
 @app.route("/")
 @app.route('/authors/')
 def listAuthors():
@@ -125,7 +122,7 @@ def getBook(book_id):
       if address:
         hasRequest = db.get_request_for_position(globalVars['arduino_id'], address['position'], address['row'])
       return render_template('book.html', book=book, address=address, tags=tags, arduino_id=globalVars['arduino_id'],  \
-          biblio_nb_rows=arduino_map['nb_lines'], hasRequest = hasRequest)
+          biblio_nb_rows=globalVars['arduino_map']['nb_lines'], hasRequest = hasRequest)
   abort(404)
 
 #post request from app
@@ -151,7 +148,7 @@ def locateBook():
 def locateBooksForTag(tag_id):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id)
-  db.clean_request(arduino_id)
+  db.clean_request(globalVars['arduino_id'])
   for node in nodes:
     address = db.get_position_for_book(node['id_node'])
     if address:
