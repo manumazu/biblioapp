@@ -21,7 +21,7 @@ def get_arduino_map():
 
 def get_app_for_uuid(uuid) :
   cursor = get_db()
-  cursor.execute("SELECT id_arduino FROM biblio_app WHERE uuid=%s",uuid)
+  cursor.execute("SELECT id_arduino FROM biblio_app WHERE uuid=%s or mac=%s",(uuid,uuid))
   row = cursor.fetchone()
   cursor.close()
   if row:
