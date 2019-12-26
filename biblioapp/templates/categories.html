@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}Authors{% endblock %}
+{% block styles %}
+    {{super()}}
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+		    <ul>
+		  	{%for category in categories %}
+			<li><a href="/tag/{{ category['id'] }}">{{ category['tag'] }}</a>
+				<a href="{{ url_for('locateBooksForTag', tag_id=category['id']) }}"><span class="badge badge-pill badge-success">Locate</span></a>
+			</li>
+		  	{% endfor %}
+		</ul>
+
+	{{ super() }}
+	</div>
+{% endblock %}
+
+{% block scripts %}
+  {{super()}}
+  <script src="{{url_for('static', filename='app.js')}}"></script>
+{% endblock %}
+
+{% endblock %}
