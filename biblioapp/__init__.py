@@ -35,6 +35,14 @@ def listAuthors():
     return redirect('/login')
   return render_template('authors.html', user_login=globalVars['user_login'], db=db)
 
+@app.route('/categories/')
+def listCategories():
+  globalVars = initApp()
+  if(globalVars['user_login']==False):
+    return redirect('/login')
+  categories = db.get_categories()
+  return render_template('categories.html', user_login=globalVars['user_login'], categories=categories)  
+
 @app.route("/ajax_positions_inline/", methods=['GET'])
 @app.route("/app/")
 def myBookShelf():
@@ -98,6 +106,7 @@ def ajaxDelPosition():
 def listNode(tag_id):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id)
+  print(nodes)
   tag = db.get_tag_by_id(tag_id)
   if nodes:
       books = {}
