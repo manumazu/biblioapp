@@ -11,9 +11,12 @@ def get_db() :
   cursor = conn.cursor(pymysql.cursors.DictCursor)	
   return {'conn':conn,'cursor':cursor}
 
-def get_arduino_map():
+def get_arduino_map(user_email):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_app WHERE id=1")
+  mysql['cursor'].execute("SELECT ba.*, bu.id as user_id FROM biblio_app ba \
+    INNER JOIN biblio_user_app bua ON bua.id_app = ba.id \
+    INNER JOIN biblio_user bu ON bu.id=bua.id_user \
+    WHERE bu.email=%s", user_email)
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -64,9 +67,9 @@ def get_books_to_range(arduino_id) :
   if rows:
     return rows
 
-def get_book(book_id) :
+def get_book(book_id, user_id) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_book where id=%s",book_id)
+  mysql['cursor'].execute("SELECT * FROM biblio_book where id=%s and id_user=%s",(book_id, user_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -121,9 +124,9 @@ def clean_request(arduino_id) :
 
 
 ''' manage book '''
-def get_bookapi(bookapi):
+def get_bookapi(bookapi, user_id):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id FROM biblio_book WHERE `reference`=%s", bookapi['reference'])
+  mysql['cursor'].execute("SELECT id FROM biblio_book WHERE `reference`=%s and `id_user`=%s", (bookapi['reference'], user_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -131,13 +134,13 @@ def get_bookapi(bookapi):
     return row
   return False
 
-def set_book(bookapi) :
-  hasBook = get_bookapi(bookapi)
+def set_book(bookapi, user_id) :
+  hasBook = get_bookapi(bookapi, user_id)
   datepub = tools.getYear(bookapi['year'])
   if hasBook is False:
     mysql = get_db()
-    mysql['cursor'].execute("INSERT INTO biblio_book (`isbn`, `title`, `author`, `editor`, `year`, `pages`, `reference`, `description`) \
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s )", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], datepub, \
+    mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, `reference`, `description`) \
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s )", (user_id, bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], datepub, \
     bookapi['pages'], bookapi['reference'], bookapi['description']))
     mysql['conn'].commit()
     mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
@@ -155,9 +158,9 @@ def set_book(bookapi) :
   return hasBook
 
 ''' manage items position '''
-def get_position_for_book(book_id) :
+def get_position_for_book(app_id, book_id) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_position where id_app=1 and id_item=%s and item_type='book'",book_id)
+  mysql['cursor'].execute("SELECT * FROM biblio_position where id_app=%s and id_item=%s and item_type='book'",(app_id, book_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -165,9 +168,9 @@ def get_position_for_book(book_id) :
     return row
   return False
 
-def get_positions_for_row(row) :
+def get_positions_for_row(app_id, row) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id_item FROM biblio_position where id_app=%s and `row`=%s order by `position`",(1, row))
+  mysql['cursor'].execute("SELECT id_item FROM biblio_position where id_app=%s and `row`=%s order by `position`",(app_id, row))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -196,7 +199,7 @@ def sort_items(items, row) :
 
 '''
 manage position suppression for one item
-- check current postion
+- check current position
 - check and delete requested postion on arduino
 - decrement remaining positions
 - delete current position
@@ -205,7 +208,7 @@ def del_item_position(item, arduino_id) :
   position = get_position_for_book(item[1])
   if position:
     mysql = get_db()
-    mysql['cursor'].execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=1", (item[1], item[0]))
+    mysql['cursor'].execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=%s", (item[1], item[0], position['id_app']))
     mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
@@ -214,14 +217,15 @@ def del_item_position(item, arduino_id) :
   if has_request:
     del_request(arduino_id, position['position'], position['row'])
   #get list for remaining items and sort them again
-  items = get_positions_for_row(position['row'])
+  items = get_positions_for_row(position['id_app'], position['row'])
   sort_items(items, position['row'])
   return True
 
 ''' manage taxonomy '''
 def get_tag_for_node(id_node):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, tag FROM biblio_tags bt INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag WHERE btn.id_node=%s", id_node)
+  mysql['cursor'].execute("SELECT id, tag FROM biblio_tags bt \
+    INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag WHERE btn.id_node=%s", id_node)
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -229,9 +233,12 @@ def get_tag_for_node(id_node):
     return row
   return False
 
-def get_node_for_tag(id_tag):
+def get_node_for_tag(id_tag, id_user):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id_node FROM biblio_tag_node btn INNER JOIN biblio_tags bt ON bt.id = btn.id_tag WHERE btn.id_tag=%s and btn.node_type='book'", id_tag)
+  mysql['cursor'].execute("SELECT id_node FROM biblio_tag_node btn \
+    INNER JOIN biblio_tags bt ON bt.id = btn.id_tag \
+    INNER JOIN biblio_book bb ON btn.id_node = bb.id \
+    WHERE btn.id_tag=%s and btn.node_type='book' and bb.id_user=%s", (id_tag, id_user))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -239,9 +246,12 @@ def get_node_for_tag(id_tag):
     return row
   return False
 
-def get_categories():
+def get_categories(id_user):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT bt.id, bt.tag FROM `biblio_tags` bt INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag WHERE bt.id_taxonomy=1 GROUP BY bt.id")
+  mysql['cursor'].execute("SELECT bt.id, bt.tag, count(bb.id) as nbnode FROM `biblio_tags` bt \
+    INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
+    INNER JOIN biblio_book bb ON btn.id_node = bb.id \
+    WHERE bt.id_taxonomy=1 and bb.id_user=%s GROUP BY bt.id", id_user)
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -249,10 +259,13 @@ def get_categories():
     return row
   return False
 
-def get_author(letter):
+def get_author(letter, id_user):
   mysql = get_db()
   searchLetter = letter+"%"
-  mysql['cursor'].execute("SELECT id, tag FROM `biblio_tags` WHERE id_taxonomy=2 and tag like %s", searchLetter)
+  mysql['cursor'].execute("SELECT bt.id, bt.tag, count(bb.id) as nbnode FROM `biblio_tags` bt \
+    INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
+    INNER JOIN biblio_book bb ON btn.id_node = bb.id \
+    WHERE bt.id_taxonomy=2 and tag like %s and bb.id_user=%s GROUP BY bt.id", (searchLetter, id_user))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()

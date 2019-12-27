@@ -19,7 +19,7 @@ def initApp():
   user_login = False
   if(flask_login.current_user.is_authenticated):
     user_login = flask_login.current_user.name  
-    arduino_map = db.get_arduino_map()
+    arduino_map = db.get_arduino_map(flask_login.current_user.id)
     arduino_id = arduino_map['id_arduino']
   else:
     user_login = False
@@ -33,14 +33,14 @@ def listAuthors():
   globalVars = initApp()
   if(globalVars['user_login']==False):
     return redirect('/login')
-  return render_template('authors.html', user_login=globalVars['user_login'], db=db)
+  return render_template('authors.html', user_login=globalVars['user_login'], db=db, user_id=globalVars['arduino_map']['user_id'])
 
 @app.route('/categories/')
 def listCategories():
   globalVars = initApp()
   if(globalVars['user_login']==False):
     return redirect('/login')
-  categories = db.get_categories()
+  categories = db.get_categories(globalVars['arduino_map']['user_id'])
   return render_template('categories.html', user_login=globalVars['user_login'], categories=categories)  
 
 @app.route("/ajax_positions_inline/", methods=['GET'])
@@ -103,35 +103,37 @@ def ajaxDelPosition():
   return response
 
 @app.route('/tag/<tag_id>')
+@flask_login.login_required
 def listNode(tag_id):
   globalVars = initApp()
-  nodes = db.get_node_for_tag(tag_id)
-  print(nodes)
+  nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
   tag = db.get_tag_by_id(tag_id)
   if nodes:
       books = {}
       for node in nodes:
-          book = db.get_book(node['id_node'])
+          book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
           books[book['id']] = book
-          address = db.get_position_for_book(book['id'])
+          address = db.get_position_for_book(globalVars['arduino_map']['id'], book['id'])
           if address:
             hasRequest = db.get_request_for_position(globalVars['arduino_id'], address['position'], address['row'])
             books[book['id']]['address'] = address
             books[book['id']]['hasRequest'] = hasRequest         
-  return render_template('tag.html', books=books, arduino_id=globalVars['arduino_id'], author=tag['tag'])  
+  return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
+    arduino_id=globalVars['arduino_id'], author=tag['tag'])  
 
 @app.route('/book/<book_id>')
+@flask_login.login_required
 def getBook(book_id):
   globalVars = initApp()
-  book = db.get_book(book_id)
+  book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
   if book:
-      address = db.get_position_for_book(book['id'])
+      address = db.get_position_for_book(globalVars['arduino_map']['id'], book['id'])
       tags = db.get_tag_for_node(book['id'])
       hasRequest = False
       if address:
         hasRequest = db.get_request_for_position(globalVars['arduino_id'], address['position'], address['row'])
-      return render_template('book.html', book=book, address=address, tags=tags, arduino_id=globalVars['arduino_id'],  \
-          biblio_nb_rows=globalVars['arduino_map']['nb_lines'], hasRequest = hasRequest)
+      return render_template('book.html', user_login=globalVars['user_login'], book=book, address=address, tags=tags, \
+        arduino_id=globalVars['arduino_id'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'], hasRequest = hasRequest)
   abort(404)
 
 #post request from app
@@ -156,12 +158,12 @@ def locateBook():
 @flask_login.login_required
 def locateBooksForTag(tag_id):
   globalVars = initApp()
-  nodes = db.get_node_for_tag(tag_id)
+  nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
   db.clean_request(globalVars['arduino_id'])
   for node in nodes:
-    address = db.get_position_for_book(node['id_node'])
+    address = db.get_position_for_book(globalVars['arduino_map']['id'], node['id_node'])
     if address:
-      book = db.get_book(node['id_node'])
+      book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
       db.set_request(globalVars['arduino_id'], address['row'], address['position'], tools.led_range(book['pages']))
       flash('Location requested for book {}'.format(book['title']))
   return redirect('/authors')
@@ -184,7 +186,7 @@ def getRequest(uuid):
 @flask_login.login_required
 def searchBookReference():
   import requests
-
+  globalVars = initApp()
   '''search on api'''
   if request.method == 'POST':
     query = "key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
@@ -200,7 +202,7 @@ def searchBookReference():
     r = requests.get(url)
     data = r.json()
     #print(url)
-    return render_template('booksearch.html',data=data, req=request.form)
+    return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form)
 
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):
@@ -208,13 +210,14 @@ def searchBookReference():
     r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
     data = r.json()
     #print(data['volumeInfo'])
-    return render_template('booksearch.html',book=data['volumeInfo'], ref=ref)
+    return render_template('booksearch.html', user_login=globalVars['user_login'], book=data['volumeInfo'], ref=ref)
   else:
-    return render_template('booksearch.html')
+    return render_template('booksearch.html', user_login=globalVars['user_login'])
 
 @app.route('/bookreferencer/', methods=['POST'])
 @flask_login.login_required
 def bookReferencer():
+  globalVars = initApp()
   if request.method == 'POST':
     authors = request.form.getlist('authors[]')
     bookapi={}
@@ -226,7 +229,7 @@ def bookReferencer():
     bookapi['editor'] = request.form['editor']
     bookapi['pages'] = request.form['pages']
     bookapi['year'] = request.form['year']
-    bookId = db.set_book(bookapi)
+    bookId = db.set_book(bookapi, globalVars['arduino_map']['user_id'])
     '''manage tags + taxonomy'''
     authorTags = tools.getLastnameFirstname(authors)
     authorTagids = db.set_tags(authorTags,'Authors')
@@ -236,7 +239,7 @@ def bookReferencer():
     if len(authorTagids)>0:
       db.set_tag_node(bookId, authorTagids)
     return redirect('/')
-  return render_template('bookreferencer.html')
+  return render_template('bookreferencer.html', user_login=globalVars['user_login'])
 
 
 '''
