@@ -14,7 +14,7 @@
 	<div class="container">
 		    <ul>
 		  	{%for category in categories %}
-			<li><a href="/tag/{{ category['id'] }}">{{ category['tag'] }}</a>
+			<li><a href="/tag/{{ category['id'] }}">{{ category['tag'] }}</a> ({{ category['nbnode'] }})
 				<a href="{{ url_for('locateBooksForTag', tag_id=category['id']) }}"><span class="badge badge-pill badge-success">Locate</span></a>
 			</li>
 		  	{% endfor %}

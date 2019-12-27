@@ -41,12 +41,10 @@
 		 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Menu <span class="caret"></span></a>
 		  <ul class="dropdown-menu" role="menu">
 		    <li><a class="dropdown-item" href="{{ url_for('searchBookReference') }}">Add new reference</a></li>
-		    <!--li><a href="#">Another action</a></li>
-		    <li><a href="#">Something else here</a></li>
 		    <li class="divider"></li>
-		    <li><a href="#">Separated link</a></li-->
 		    <li><a href="{{ url_for('myBookShelf') }}">My Book Shelf</a></li>
 		    <li><a href="{{ url_for('listAuthors') }}">Authors</a></li>
+		    <li><a href="{{ url_for('listCategories') }}">Categories</a></li>
 		    <li class="divider"></li>
 		    {% if user_login %}
 		    	<li><a href="{{ url_for('logout') }}">Logout</a></li>
@@ -72,12 +70,12 @@
 
 	{% with messages = get_flashed_messages() %}
 	{% if messages %}
-	    <div class="alert alert-dismissible alert-success">
 	    {% for m in messages %}
+	    <div class="alert alert-dismissible alert-success">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		<a href="#" class="alert-link">{{ m }}</a>.
+		</div>
 	    {% endfor %}
-	    </div>
 	{% endif %}
 	{% endwith %}
 
