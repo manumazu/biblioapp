@@ -22,9 +22,12 @@ byte bytesRecvd = 0;
 boolean readInProgress = false;
 boolean newDataFromPC = false;
 
-boolean ledStatus = false;
+byte ledStatus = 1;  // for light or not leds
+int buttonState = 0;        // current state of the button
+int lastButtonState = 0;    // previous state of the button
+int buttonPush = 0;         // counter
+
 int pinReset = 8;
-int switchstate = 0;
 int newLedColumn = 0;
 
 char messageFromPC[buffSize] = {0};
@@ -56,20 +59,37 @@ void setup() {
   for (byte n = 0; n < numLEDs; n++) {
      digitalWrite(ledPin[n], LOW);
   }*/
-  
-    // tell the PC we are ready
+  // tell the PC we are ready
   Serial.println("<Arduino is ready>");
 }
 
 //=============
 
 void loop() {
-  //set stop button
-  switchstate = digitalRead(pinReset);
-  if (switchstate == HIGH) {
-    //force ledstatus off
-    ledStatus = false;
+  
+  //manage satus for leds :
+  //1 = wait for request
+  //0 = switch off all leds
+  //3 = switch on all leds
+  buttonState = digitalRead(pinReset);
+  if (buttonState != lastButtonState) {
+    if (buttonState == HIGH) {
+      buttonPush++;
+      if(buttonPush>2)
+        buttonPush=1;
+        
+      newLedColumn = 0;//reset current led
+      if (buttonPush == 1) { //force ledstatus off
+        ledStatus = 0;
+      }
+      if (buttonPush == 2) { //force all ledstatus on
+        ledStatus = 3;
+      }
+      
+    }
   }
+  lastButtonState = buttonState;
+  
   curMillis = millis();
   getDataFromPC();
   replyToPC();
@@ -81,16 +101,22 @@ void loop() {
 
 void lightLEDs() {
 
-  if (ledStatus==true) { 
+  if (ledStatus==1) { 
      if(newLedColumn==0) //when nothing is requested
       ledStatus=false;
-     else 
+     else {
       digitalWrite(ledPin[newLedColumn-1], HIGH ); 
+     }
   }
-  else {
+  if (ledStatus==0){
     for (byte n = 0; n < numLEDs; n++) {
        digitalWrite( ledPin[n], LOW );
-    }  
+    } 
+  }
+  if (ledStatus==3){
+    for (byte n = 0; n < numLEDs; n++) {
+       digitalWrite( ledPin[n], HIGH );
+    }
   }
 }
 
@@ -101,6 +127,8 @@ void getDataFromPC() {
     // receive data from PC and save it into inputBuffer
     
   if(Serial.available() > 0) {
+
+    ledStatus = 1; // force led status when request
 
     char x = Serial.read();
     Serial.write(Serial.read());
