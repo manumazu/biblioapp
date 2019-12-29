@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
-{% block title %}Biblioapp{% endblock %}
+{% block title %}modules{% endblock %}
 {% block styles %}
     {{super()}}
-    <link rel="stylesheet" href="{{url_for('static', filename='range.css')}}">
 {% endblock %}
 
 {% block body %}
@@ -12,50 +11,29 @@
 {% endblock %}
 
 {% block content %}
+	<div class="container">
+		
+	  {% if modules %}
+	    <ul>
+	  	{%for module in modules %}
+		<li>{{ module['arduino_name'] }}
+			<form method="POST" action="{{ url_for('selectArduino') }}">
+				<input type="hidden" name="module_id" value="{{ module['id'] }}">
+				<input type="hidden" name="module_name" value="{{ module['arduino_name'] }}">
+				<button type="submit" class="btn btn-primary">Select this module</button>
+			</form>
+		</li>
+	  	{% endfor %}
+	    </ul>
+	  {% endif %}
 
-<div class="container text-center">
-  <h1 class="mt-5 text-white font-weight-light">Liste of books in your personnal bookcase :</h1>
-  <p class="lead text-white-50">Drag elements to record their position in shelfs.</p>
- 
-	<div class="biblio">
-	{% set lines=range(biblio_nb_rows) %} 
-
-	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line+1)}}',{% endfor %}];</script>
-
-	{% for line in lines %}
-	<ul id="droppable_{{(line+1)}}" class="droppable success">
-	  {% for position,book in tidybooks[(line+1)].items() %}
-	     <li id="book_{{book['id']}}" class="ui-state-default">
-               {% if book['requested'] %}[R]{% endif %}
-               <span class="del">x</span>
-               <a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
-            </li>
-	  {% endfor %}
-	</ul>
-	{% endfor %}
-
+	{{ super() }}
 	</div>
-
-	<h2>Books not ranged</h2>    
-	<ul id="draggable">
-    	{% if bookstorange %}
-	   {% for book in bookstorange %}
-	     <li id="book_{{book['id']}}" class="ui-state-default">
-		<span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
-	     </li>
-	   {% endfor %}
-    	{% endif %}
-	</ul>
-</div>
-
 {% endblock %}
 
 {% block scripts %}
-{{super()}}
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
-  <script src="{{url_for('static', filename='range.js')}}"></script>
-  <script src="{{url_for('static', filename='app.js')}}"></script>  
+  {{super()}}
+  <script src="{{url_for('static', filename='app.js')}}"></script>
 {% endblock %}
 
 {% endblock %}
-

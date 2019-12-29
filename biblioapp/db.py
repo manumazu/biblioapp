@@ -11,17 +11,29 @@ def get_db() :
   cursor = conn.cursor(pymysql.cursors.DictCursor)	
   return {'conn':conn,'cursor':cursor}
 
-def get_arduino_map(user_email):
+def get_arduino_map(user_email, app_id):
   mysql = get_db()
   mysql['cursor'].execute("SELECT ba.*, bu.id as user_id FROM biblio_app ba \
     INNER JOIN biblio_user_app bua ON bua.id_app = ba.id \
     INNER JOIN biblio_user bu ON bu.id=bua.id_user \
-    WHERE bu.email=%s", user_email)
+    WHERE bu.email=%s and ba.id=%s", (user_email, app_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
   if row:
     return row
+
+def get_arduino_for_user(user_email):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT ba.*, bu.id as user_id FROM biblio_app ba \
+    INNER JOIN biblio_user_app bua ON bua.id_app = ba.id \
+    INNER JOIN biblio_user bu ON bu.id=bua.id_user \
+    WHERE bu.email=%s", user_email)
+  row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row    
 
 def get_app_for_uuid(uuid) :
   mysql = get_db()
@@ -40,7 +52,7 @@ def get_tidy_books(app_id, line = None) :
   else:
     where = "app.id=%s and bp.row=%s"
     args = (app_id,line)
-  mysql['cursor'].execute("SELECT bb.id, bb.title, bb.author, bp.position, bp.row FROM biblio_book bb \
+  mysql['cursor'].execute("SELECT bb.`id`, bb.`title`, bb.`author`, bp.`position`, bp.`row` FROM biblio_book bb \
 	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
 	inner join biblio_app app on bp.id_app=app.id\
 	where "+ where +" order by row, position",args)
@@ -178,7 +190,7 @@ def get_positions_for_row(app_id, row) :
   return False
 
 
-def sort_items(items, row) :
+def sort_items(app_id, items, row) :
   mysql = get_db()
   i=0
   sortable={}
@@ -189,7 +201,7 @@ def sort_items(items, row) :
       item_id=item
     i+=1
     mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, `position`, `row`) VALUES (%s, %s, %s, %s, %s) \
-    ON DUPLICATE KEY UPDATE position=%s, row=%s", (1, item_id, 'book', i, row , i, row))
+    ON DUPLICATE KEY UPDATE position=%s, row=%s", (app_id, item_id, 'book', i, row , i, row))
     mysql['conn'].commit()
     sortable[i]={'book':item_id,'position':i}
   mysql['cursor'].close()
@@ -217,7 +229,8 @@ def del_item_position(app_id, item) :
     del_request(app_id, position['position'], position['row'])
   #get list for remaining items and sort them again
   items = get_positions_for_row(position['id_app'], position['row'])
-  sort_items(items, position['row'])
+  if items:
+    sort_items(app_id, items, position['row'])
   return True
 
 ''' manage taxonomy '''
