@@ -33,9 +33,10 @@ def selectArduino():
   modules = db.get_arduino_for_user(flask_login.current_user.id)
   if request.method == 'POST' and request.form.get('module_id'):
     session['app_id'] = request.form.get('module_id')
+    session['app_name'] = request.form.get('module_name')
     flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
     return redirect('/app')
-  return render_template('index.html', user_login=flask_login.current_user.name, modules=modules)
+  return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
 
 @app.route('/authors/')
 def listAuthors():
@@ -143,18 +144,20 @@ def getBook(book_id):
   globalVars = initApp()
   book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
   if book:
+    book['address']=None
+    book['hasRequest']=None
+    tags = db.get_tag_for_node(book['id'])
     app_modules = db.get_arduino_for_user(flask_login.current_user.id)
     for module in app_modules:
       address = db.get_position_for_book(module['id'], book['id'])
-      tags = db.get_tag_for_node(book['id'])
-      hasRequest = False
       if address:
+        hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
+        book['address'] = address
         book['arduino_name'] = module['arduino_name']
         book['app_id'] = module['id']
-        hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
-    return render_template('book.html', user_login=globalVars['user_login'], book=book, address=address, tags=tags, \
-        biblio_name=globalVars['arduino_map']['arduino_name'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'], \
-        hasRequest = hasRequest)
+        book['hasRequest'] = hasRequest  
+    return render_template('book.html', user_login=globalVars['user_login'], book=book, tags=tags, \
+        biblio_name=globalVars['arduino_map']['arduino_name'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
   abort(404)
 
 #post request from app
