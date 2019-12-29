@@ -175,7 +175,7 @@ def locateBooksForTag(tag_id):
 def getRequest(uuid):
   user_app = db.get_app_for_uuid(uuid)
   if(user_app):
-    data = db.get_request(user_app['id_app'])
+    data = db.get_request(user_app['id'])
     response = app.response_class(
           response=json.dumps(data),
           mimetype='application/json'
