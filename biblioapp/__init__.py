@@ -297,7 +297,7 @@ def protected():
 def logout():
     flask_login.logout_user()
     flash('Logged out')
-    return redirect('/')
+    return redirect('/login')
 
 if __name__ == "__main__":
     app.run(debug=True)
