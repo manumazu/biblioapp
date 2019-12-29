@@ -25,21 +25,21 @@ def get_arduino_map(user_email):
 
 def get_app_for_uuid(uuid) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id_arduino FROM biblio_app WHERE uuid=%s or mac=%s",(uuid,uuid))
+  mysql['cursor'].execute("SELECT id_app FROM biblio_app WHERE uuid=%s or mac=%s",(uuid,uuid))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
   if row:
     return row
 
-def get_tidy_books(arduino_id, line = None) :
+def get_tidy_books(app_id, line = None) :
   mysql = get_db()
   if line == None:
-    where = "app.id_arduino=%s"
-    args = arduino_id
+    where = "app.id=%s"
+    args = app_id
   else:
-    where = "app.id_arduino=%s and bp.row=%s"
-    args = (arduino_id,line)
+    where = "app.id=%s and bp.row=%s"
+    args = (app_id,line)
   mysql['cursor'].execute("SELECT bb.id, bb.title, bb.author, bp.position, bp.row FROM biblio_book bb \
 	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
 	inner join biblio_app app on bp.id_app=app.id\
@@ -55,12 +55,11 @@ def get_tidy_books(arduino_id, line = None) :
   if rows:
     return books
 
-def get_books_to_range(arduino_id) :
-  #@todo : books without address are not linked with arduino id ! 
+def get_books_to_range(user_id) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT * FROM biblio_book bb \
 	left join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
-	where bp.id_item is null order by bb.author, bb.title")
+	where bp.id_item is null order by bb.author, bb.title and bb.id_user=%s", user_id)
   rows = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -76,9 +75,9 @@ def get_book(book_id, user_id) :
   if row:
     return row
 
-def get_request(arduino_id) :
+def get_request(app_id) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_request where id_arduino=%s",arduino_id)
+  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s",app_id)
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -86,9 +85,9 @@ def get_request(arduino_id) :
     return row
   return False
 
-def get_request_for_position(arduino_id, position, row) :
+def get_request_for_position(app_id, position, row) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_request where id_arduino=%s and `column`=%s and `row`=%s",(arduino_id, position, row))
+  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s and `column`=%s and `row`=%s",(app_id, position, row))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -96,27 +95,27 @@ def get_request_for_position(arduino_id, position, row) :
     return row
   return False  
 
-def set_request(arduino_id, row, column, range) :
+def set_request(app_id, row, column, range) :
   now = tools.getNow()
   mysql = get_db()
-  mysql['cursor'].execute("INSERT INTO biblio_request (`id_arduino`, `row`, `column`, `range`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s", \
-  (arduino_id, row, column, range, now.strftime("%Y-%m-%d %H:%M:%S"), range))
+  mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `row`, `column`, `range`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s", \
+  (app_id, row, column, range, now.strftime("%Y-%m-%d %H:%M:%S"), range))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
   return True
 
-def del_request(arduino_id, column, row) :
+def del_request(app_id, column, row) :
   mysql = get_db()
-  mysql['cursor'].execute("DELETE FROM biblio_request where id_arduino=%s and `column`=%s and `row`=%s",(arduino_id, column,row))
+  mysql['cursor'].execute("DELETE FROM biblio_request where id_app=%s and `column`=%s and `row`=%s",(app_id, column,row))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
   return True
 
-def clean_request(arduino_id) :
+def clean_request(app_id) :
   mysql = get_db()
-  mysql['cursor'].execute("DELETE FROM biblio_request where id_arduino=%s",(arduino_id))
+  mysql['cursor'].execute("DELETE FROM biblio_request where id_app=%s",(app_id))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -204,18 +203,18 @@ manage position suppression for one item
 - decrement remaining positions
 - delete current position
 '''
-def del_item_position(item, arduino_id) :
-  position = get_position_for_book(item[1])
+def del_item_position(app_id, item) :
+  position = get_position_for_book(app_id, item[1])
   if position:
     mysql = get_db()
     mysql['cursor'].execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=%s", (item[1], item[0], position['id_app']))
     mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
-  has_request = get_request_for_position(arduino_id, position['position'], position['row'])
+  has_request = get_request_for_position(app_id, position['position'], position['row'])
   #remove request
   if has_request:
-    del_request(arduino_id, position['position'], position['row'])
+    del_request(app_id, position['position'], position['row'])
   #get list for remaining items and sort them again
   items = get_positions_for_row(position['id_app'], position['row'])
   sort_items(items, position['row'])
