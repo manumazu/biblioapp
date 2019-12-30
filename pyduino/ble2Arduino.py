@@ -7,7 +7,7 @@
 import pexpect, time, requests
 
 #get requested position of items int app
-url='https://bibliobus.bearstech.com/request/'
+url='https://bibliobus.bearstech.com/request/4C:24:98:E6:99:DB'
 r = requests.get(url)
 datas = r.json()
 
