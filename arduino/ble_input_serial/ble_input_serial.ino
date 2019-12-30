@@ -1,16 +1,8 @@
-/*#include <Servo.h>
-Servo myServo;
-byte servoPin = 8;
-byte servoMin = 10;
-byte servoMax = 170;
-byte servoPos = 0;
-byte newServoPos = servoMin;*/
-
-#include <SoftwareSerial.h>
-SoftwareSerial mySerial(0, 1); // RX, TX
+#include <AltSoftSerial.h>
+AltSoftSerial softSerial; // (pin 8 = RX, pin 9 = TX)
 
 const byte numLEDs = 3;
-byte ledPin[numLEDs] = {5,6,7};
+byte ledPin[numLEDs] = {4,5,6};
 unsigned long LEDinterval[numLEDs] = {400, 400, 400};
 unsigned long prevLEDmillis[numLEDs] = {0, 0, 0};
 
@@ -27,12 +19,12 @@ int buttonState = 0;        // current state of the button
 int lastButtonState = 0;    // previous state of the button
 int buttonPush = 0;         // counter
 
-int pinReset = 8;
+int pinReset = 7;
 int newLedColumn = 0;
 
 char messageFromPC[buffSize] = {0};
 int newFlashInterval = 0;
-float servoFraction = 0.0; // fraction of servo range to move
+//float servoFraction = 0.0; // fraction of servo range to move
 
 
 unsigned long curMillis;
@@ -44,6 +36,7 @@ unsigned long replyToPCinterval = 1000;
 
 void setup() {
   Serial.begin(9600);
+  softSerial.begin(9600);
 
   // declare LEDs as output
   for (byte n = 0; n < numLEDs; n++) {
@@ -126,12 +119,12 @@ void getDataFromPC() {
 
     // receive data from PC and save it into inputBuffer
     
-  if(Serial.available() > 0) {
+  if(softSerial.available() > 0) {
 
     ledStatus = 1; // force led status when request
 
-    char x = Serial.read();
-    Serial.write(Serial.read());
+    char x = softSerial.read();
+    //Serial.write(softSerial.read());
 
       // the order of these IF clauses is significant
       
@@ -172,8 +165,8 @@ void parseData() {
   strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
   newFlashInterval = atoi(strtokIndx);     // convert this part to an integer
   
-  strtokIndx = strtok(NULL, ","); 
-  servoFraction = atof(strtokIndx);     // convert this part to a float
+  //strtokIndx = strtok(NULL, ","); 
+  //servoFraction = atof(strtokIndx);     // convert this part to a float
 
 }
 
@@ -188,8 +181,6 @@ void replyToPC() {
     Serial.print(messageFromPC);
     Serial.print(" NewFlash ");
     Serial.print(newFlashInterval);
-    Serial.print(" SrvFrac ");
-    Serial.print(servoFraction);
     Serial.print(" Time ");
     Serial.print(curMillis >> 9); // divide by 512 is approx = half-seconds
     Serial.println(">");
