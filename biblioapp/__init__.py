@@ -209,6 +209,19 @@ def getRequest(uuid):
     return response
   abort(404)
 
+#get request from arduino for current arduino_name
+@app.route('/module/<uuid>/')
+def getModule(uuid):
+  user_app = db.get_app_for_uuid(uuid)
+  if(user_app):
+    data = user_app
+    response = app.response_class(
+          response=json.dumps(data),
+          mimetype='application/json'
+    )
+    return response
+  abort(404)  
+
 @app.route('/booksearch/', methods=['GET', 'POST'])
 @flask_login.login_required
 def searchBookReference():
