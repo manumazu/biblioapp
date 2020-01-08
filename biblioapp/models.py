@@ -1,4 +1,4 @@
-from biblioapp import app, db, flask_login, login_manager
+from biblioapp import app, db, flask_login, login_manager, session
 
 
 users = {'foo@bar.tld': {'password': 'secret'}}
@@ -32,6 +32,8 @@ def request_loader(request):
             if exist is None:
                 return
             if request.args.get('email')==exist['email']:
+                session['app_id'] = exist['id_app']
+                session['app_name'] = exist['arduino_name']
                 user = User()
                 user.id = exist['email']
                 user.name = exist['name']

@@ -44,6 +44,18 @@ def get_app_for_uuid(uuid) :
   if row:
     return row
 
+def get_user_for_uuid(uuid):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT bu.id, bu.email, bu.password, bu.name, ba.id as id_app, ba.arduino_name FROM biblio_user bu \
+    INNER JOIN biblio_user_app bua ON bu.id = bua.id_user \
+    INNER JOIN biblio_app ba ON bua.id_app = ba.id WHERE (ba.uuid=%s OR ba.mac=%s)", (uuid,uuid))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return None    
+
 def get_tidy_books(app_id, line = None) :
   mysql = get_db()
   if line == None:
@@ -366,15 +378,4 @@ def get_user(email):
   if row:
     return row
   return None
-
-def get_user_for_uuid(uuid):
-  mysql = get_db()
-  mysql['cursor'].execute("SELECT bu.id, bu.email, bu.password, bu.name FROM biblio_user bu \
-    INNER JOIN biblio_user_app bua ON bu.id = bua.id_user \
-    INNER JOIN biblio_app ba ON bua.id_app = ba.id WHERE (ba.uuid=%s OR ba.mac=%s)", (uuid,uuid))
-  row = mysql['cursor'].fetchone()
-  mysql['cursor'].close()
-  mysql['conn'].close()
-  if row:
-    return row
-  return None 
+ 
