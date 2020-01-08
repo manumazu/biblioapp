@@ -16,7 +16,7 @@
 		<ul style="column-count: 2;">
 		{% for i in range(alphabet|length) %}
 		  <li style="text-transform: uppercase;">{{alphabet[i]}}</li>
-		  {% set authors = db.get_author(alphabet[i], user_id) %}
+		  {% set authors = db.get_authors_alphabetic(alphabet[i], user_id) %}
 		  {% if authors %}
 		    <ul>
 		  	{%for author in authors %}

@@ -271,13 +271,27 @@ def get_categories(id_user):
     return row
   return False
 
-def get_author(letter, id_user):
+def get_authors_alphabetic(letter, id_user):
   mysql = get_db()
   searchLetter = letter+"%"
   mysql['cursor'].execute("SELECT bt.id, bt.tag, count(bb.id) as nbnode FROM `biblio_tags` bt \
     INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
     INNER JOIN biblio_book bb ON btn.id_node = bb.id \
     WHERE bt.id_taxonomy=2 and tag like %s and bb.id_user=%s GROUP BY bt.id", (searchLetter, id_user))
+  row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False
+
+def get_authors_for_app(id_app):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT bt.id, bt.tag, count(bb.id) as nbnode FROM `biblio_tags` bt \
+    INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
+    INNER JOIN biblio_book bb ON btn.id_node = bb.id \
+    INNER JOIN biblio_position bp ON bb.id = bp.id_item and bp.item_type='book' \
+    WHERE bt.id_taxonomy=2 and bp.id_app=%s GROUP BY bt.id ORDER BY bt.tag", id_app)
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -352,3 +366,15 @@ def get_user(email):
   if row:
     return row
   return None
+
+def get_user_for_uuid(uuid):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT bu.id, bu.email, bu.password, bu.name FROM biblio_user bu \
+    INNER JOIN biblio_user_app bua ON bu.id = bua.id_user \
+    INNER JOIN biblio_app ba ON bua.id_app = ba.id WHERE (ba.uuid=%s OR ba.mac=%s)", (uuid,uuid))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return None 

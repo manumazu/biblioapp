@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session
+from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for
 from flask_bootstrap import Bootstrap
 import flask_login
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -185,6 +185,7 @@ def locateBooksForTag(tag_id):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
   app_modules = db.get_arduino_for_user(flask_login.current_user.id)
+  ret = []
   for module in app_modules:
     db.clean_request(module['id'])
     for node in nodes:
@@ -192,13 +193,22 @@ def locateBooksForTag(tag_id):
       if address:
         book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
         db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
-        flash('Location requested for book {}'.format(book['title']))
+        ret.append(book['title'])
+  #send json when token mode
+  if('email' in request.args):
+    response = app.response_class(
+      response=json.dumps(ret),
+      mimetype='application/json'
+    )
+    return response
+  for book_title in ret:
+    flash('Location requested for book {}'.format(book_title))
   return redirect('/authors')
 
 
 #get request from arduino for current arduino_name
 @app.route('/request/<uuid>/')
-def getRequest(uuid):
+def getRequestForModule(uuid):
   user_app = db.get_app_for_uuid(uuid)
   if(user_app):
     data = db.get_request(user_app['id'])
@@ -209,7 +219,7 @@ def getRequest(uuid):
     return response
   abort(404)
 
-#get request from arduino for current arduino_name
+#get module infos from arduino for current arduino_name
 @app.route('/module/<uuid>/')
 def getModule(uuid):
   user_app = db.get_app_for_uuid(uuid)
@@ -221,6 +231,23 @@ def getModule(uuid):
     )
     return response
   abort(404)  
+
+#get authors liste from arduino for current arduino_name
+@app.route('/authors/<uuid>/')
+def listAuthorsForModule(uuid):
+  user_app = db.get_app_for_uuid(uuid)
+  user = db.get_user_for_uuid(uuid)
+  if(user_app):
+    data = db.get_authors_for_app(user_app['id'])
+    '''set url for authenticate requesting location from app'''
+    for i in range(len(data)):
+      data[i]['url'] = url_for('locateBooksForTag',tag_id=data[i]['id'])+"?email="+user['email']
+    response = app.response_class(
+          response=json.dumps(data),
+          mimetype='application/json'
+    )
+    return response
+  abort(404)    
 
 @app.route('/booksearch/', methods=['GET', 'POST'])
 @flask_login.login_required
