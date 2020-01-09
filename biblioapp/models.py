@@ -1,4 +1,4 @@
-from biblioapp import app, db, flask_login, login_manager, session
+from biblioapp import app, db, flask_login, login_manager, session, hashlib
 
 
 users = {'foo@bar.tld': {'password': 'secret'}}
@@ -22,7 +22,7 @@ def user_loader(email):
 @login_manager.request_loader
 def request_loader(request):
     '''login via token for uuid'''
-    if 'email' in request.args:
+    if 'token' in request.args:
         if 'uuid' in request.view_args or 'uuid' in request.args :
             if 'uuid' in request.view_args:
                 uuid = request.view_args.get('uuid')
@@ -31,7 +31,8 @@ def request_loader(request):
             exist = db.get_user_for_uuid(uuid)
             if exist is None:
                 return
-            if request.args.get('email')==exist['email']:
+            hashmail = hashlib.md5(exist['email'].encode('utf-8')).hexdigest()
+            if request.args.get('token')==hashmail:
                 session['app_id'] = exist['id_app']
                 session['app_name'] = exist['arduino_name']
                 user = User()

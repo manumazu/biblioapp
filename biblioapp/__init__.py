@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for
 from flask_bootstrap import Bootstrap
-import flask_login
+import flask_login, hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -195,7 +195,7 @@ def locateBooksForTag(tag_id):
         db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
         ret.append(book['title'])
   #send json when token mode
-  if('email' in request.args):
+  if('token' in request.args):
     response = app.response_class(
       response=json.dumps(ret),
       mimetype='application/json'
@@ -241,7 +241,8 @@ def listAuthorsForModule(uuid):
     data = db.get_authors_for_app(user_app['id'])
     '''set url for authenticate requesting location from app'''
     for i in range(len(data)):
-      data[i]['url'] = url_for('locateBooksForTag',tag_id=data[i]['id'])+"?email="+user['email']
+      hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
+      data[i]['url'] = url_for('locateBooksForTag',tag_id=data[i]['id'])+"?token="+hashmail
     response = app.response_class(
           response=json.dumps(data),
           mimetype='application/json'
