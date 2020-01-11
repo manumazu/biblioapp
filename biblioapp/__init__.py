@@ -187,7 +187,7 @@ def locateBooksForTag(tag_id):
   app_modules = db.get_arduino_for_user(flask_login.current_user.id)
   ret = []
   action = 'add'
-  if('action' in request.args):
+  if('action' in request.args):#for add or remove
     action = request.args.get('action')
   mode = ''
   if('mode' in request.args):
@@ -228,6 +228,20 @@ def getRequestForModule(uuid):
     )
     return response
   abort(404)
+
+#remove all request from arduino for current module
+'''todo : must be protected'''
+@app.route('/reset/<uuid>/')
+def setResetForModule(uuid):
+  user_app = db.get_app_for_uuid(uuid)
+  if(user_app):
+    data = db.clean_request(user_app['id'])#clean all module's request
+    response = app.response_class(
+          response=json.dumps(data),
+          mimetype='application/json'
+    )
+    return response
+  abort(404)  
 
 #get module infos from arduino for current arduino_name
 @app.route('/module/<uuid>/')
