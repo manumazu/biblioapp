@@ -186,14 +186,22 @@ def locateBooksForTag(tag_id):
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
   app_modules = db.get_arduino_for_user(flask_login.current_user.id)
   ret = []
+  action = 'add'
+  mode = 'toggle'
+  if('action' in request.args):
+    action = request.args.get('action')
   for module in app_modules:
-    db.clean_request(module['id'])
+    if(mode!='toggle'):
+      db.clean_request(module['id'])
     for node in nodes:
       address = db.get_position_for_book(module['id'], node['id_node'])
       if address:
         book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
-        db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
-        ret.append(book['title'])
+        if(action=='add'):
+          db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
+        if(action=='remove'):
+          db.del_request(module['id'], address['position'], address['row'])
+        ret.append({'item':book['title'],'action':action})
   #send json when token mode
   if('token' in request.args):
     response = app.response_class(
@@ -202,7 +210,7 @@ def locateBooksForTag(tag_id):
     )
     return response
   for book_title in ret:
-    flash('Location requested for book {}'.format(book_title))
+    flash('Location requested for book {}'.format(book_title['item']))
   return redirect('/authors')
 
 
