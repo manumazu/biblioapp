@@ -187,19 +187,21 @@ def locateBooksForTag(tag_id):
   app_modules = db.get_arduino_for_user(flask_login.current_user.id)
   ret = []
   action = 'add'
-  mode = 'toggle'
   if('action' in request.args):
     action = request.args.get('action')
+  mode = ''
+  if('mode' in request.args):
+    mode = request.args.get('mode')
   for module in app_modules:
     if(mode!='toggle'):
-      db.clean_request(module['id'])
+      db.clean_request(module['id'])#clean all module's request
     for node in nodes:
       address = db.get_position_for_book(module['id'], node['id_node'])
       if address:
         book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
-        if(action=='add'):
+        if(action=='add'):#add request for tag's nodes
           db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
-        if(action=='remove'):
+        if(action=='remove'):#delete request for tag's nodes
           db.del_request(module['id'], address['position'], address['row'])
         ret.append({'item':book['title'],'action':action})
   #send json when token mode
