@@ -17,8 +17,7 @@
 
 	  {%if books %}
 	  <ul>
-	  	{% for id in books %}
-	  		{% set book = books[id] %}
+	  	{% for book in books %}
 			<li><a href="{{ url_for('getBook', book_id=book['id']) }}">{{ book['author'] }}, <i>{{ book['title'] }}</i>, {{ book['year'] }}, {{ book['pages'] }}p</a>
 	  			{% if book['address'] %}
 	  			

@@ -123,11 +123,11 @@ def listNodesForTag(tag_id):
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
   tag = db.get_tag_by_id(tag_id)
   if nodes:
-      books = {}
+      books = []
       #for node in nodes:
       for i in range(len(nodes)):
           book = db.get_book(nodes[i]['id_node'], globalVars['arduino_map']['user_id'])
-          books[i] = book
+          books.append(book)
           app_modules = db.get_arduino_for_user(flask_login.current_user.id)
           for module in app_modules:
             address = db.get_position_for_book(module['id'], book['id'])
