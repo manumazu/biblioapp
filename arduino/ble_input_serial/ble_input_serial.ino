@@ -1,5 +1,8 @@
-#include <AltSoftSerial.h>
-AltSoftSerial softSerial; // (pin 8 = RX, pin 9 = TX)
+//#include <AltSoftSerial.h>
+#include <SoftwareSerial.h>
+#include <ArduinoJson.h>
+//AltSoftSerial softSerial; // (pin 8 = RX, pin 9 = TX)
+SoftwareSerial softSerial(8, 9); 
 
 const byte numLEDs = 3;
 byte ledPin[numLEDs] = {4,5,6};
@@ -12,7 +15,7 @@ const char startMarker = '<';
 const char endMarker = '>';
 byte bytesRecvd = 0;
 boolean readInProgress = false;
-boolean newDataFromPC = false;
+boolean newDataFromSerial = false;
 
 byte ledStatus = 1;  // for light or not leds
 int buttonState = 0;        // current state of the button
@@ -21,9 +24,10 @@ int buttonPush = 0;         // counter
 
 int pinReset = 7;
 int newLedColumn = 0;
+int newLedRow = 0;
 
-char messageFromPC[buffSize] = {0};
-int newFlashInterval = 0;
+char messageFromSerial[buffSize] = {0};
+int newLedInterval = 0;
 //float servoFraction = 0.0; // fraction of servo range to move
 
 
@@ -66,12 +70,27 @@ void loop() {
   //3 = switch on all leds
   buttonState = digitalRead(pinReset);
   if (buttonState != lastButtonState) {
+
     if (buttonState == HIGH) {
       buttonPush++;
       if(buttonPush>2)
         buttonPush=1;
+
+        /*StaticJsonDocument<200> doc;
+        doc["row"] = newLedRow;
+        doc["column"] = newLedColumn;
+        doc["range"] = newLedInterval;
+        //serializeJsonPretty(doc, softSerial);
+        //serializeJsonPretty(doc, Serial);*/
+        String doc = "{\"row\":"+String(newLedRow)+",\"column\":"+String(newLedColumn)+"}";
+        //doc[1]=newLedColumn;
+        softSerial.print(doc);
+        //Serial.println(doc);
         
-      newLedColumn = 0;//reset current led
+      //send messages in buffer to serial BLE
+      //softSerial.write(Serial.read());//messageFromSerial);
+
+      //newLedColumn = 0;//reset current led  
       if (buttonPush == 1) { //force ledstatus off
         ledStatus = 0;
       }
@@ -84,7 +103,7 @@ void loop() {
   lastButtonState = buttonState;
   
   curMillis = millis();
-  getDataFromPC();
+  getDataFromSerial();
   replyToPC();
   lightLEDs();  
   //flashLEDs();
@@ -98,8 +117,10 @@ void lightLEDs() {
      if(newLedColumn==0) //when nothing is requested
       ledStatus=false;
      else {
-      digitalWrite(ledPin[newLedColumn-1], HIGH ); 
-     }
+       if(newLedRow==1){//light only for row=1
+        digitalWrite(ledPin[newLedColumn-1], HIGH ); 
+       }
+    }
   }
   if (ledStatus==0){
     for (byte n = 0; n < numLEDs; n++) {
@@ -115,7 +136,7 @@ void lightLEDs() {
 
 //=============
 
-void getDataFromPC() {
+void getDataFromSerial() {
 
     // receive data from PC and save it into inputBuffer
     
@@ -125,12 +146,13 @@ void getDataFromPC() {
 
     char x = softSerial.read();
     //Serial.write(softSerial.read());
+    //softSerial.write(softSerial.read());
 
       // the order of these IF clauses is significant
       
     if (x == endMarker) {
       readInProgress = false;
-      newDataFromPC = true;
+      newDataFromSerial = true;
       inputBuffer[bytesRecvd] = 0;
       parseData();
     }
@@ -158,12 +180,15 @@ void parseData() {
     
   char * strtokIndx; // this is used by strtok() as an index
   
-  strtokIndx = strtok(inputBuffer,",");      // get the first part - the string
-  strcpy(messageFromPC, strtokIndx); // copy it to messageFromPC
-  newLedColumn = atoi(strtokIndx);
+  strtokIndx = strtok(inputBuffer,",");      // get the first part - the string  
+  newLedRow = atoi(strtokIndx);
+
+  strtokIndx = strtok(NULL, ","); // this continues where the previous call left off 
+  strcpy(messageFromSerial, strtokIndx); // copy it to messageFromSerial    
+  newLedColumn = atoi(strtokIndx);     // convert this part to an integer
   
   strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
-  newFlashInterval = atoi(strtokIndx);     // convert this part to an integer
+  newLedInterval = atoi(strtokIndx);     // convert this part to an integer
   
   //strtokIndx = strtok(NULL, ","); 
   //servoFraction = atof(strtokIndx);     // convert this part to a float
@@ -174,13 +199,13 @@ void parseData() {
 
 void replyToPC() {
 
-  if (newDataFromPC) {
+  if (newDataFromSerial) {
     ledStatus = true;
-    newDataFromPC = false;
+    newDataFromSerial = false;
     Serial.print("<Msg ");
-    Serial.print(messageFromPC);
-    Serial.print(" NewFlash ");
-    Serial.print(newFlashInterval);
+    Serial.print(messageFromSerial);
+    //Serial.print(" ledInterval ");
+    //Serial.print(newLedInterval);
     Serial.print(" Time ");
     Serial.print(curMillis >> 9); // divide by 512 is approx = half-seconds
     Serial.println(">");
@@ -193,8 +218,8 @@ void replyToPC() {
 
 void updateLED1() {
 
-  if (newFlashInterval > 100) {
-    LEDinterval[0] = newFlashInterval;
+  if (newLedInterval > 100) {
+    LEDinterval[0] = newLedInterval;
   }
 }
 
