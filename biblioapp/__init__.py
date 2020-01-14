@@ -124,20 +124,21 @@ def listNodesForTag(tag_id):
   tag = db.get_tag_by_id(tag_id)
   if nodes:
       books = {}
-      for node in nodes:
-          book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
-          books[book['id']] = book
+      #for node in nodes:
+      for i in range(len(nodes)):
+          book = db.get_book(nodes[i]['id_node'], globalVars['arduino_map']['user_id'])
+          books[i] = book
           app_modules = db.get_arduino_for_user(flask_login.current_user.id)
           for module in app_modules:
             address = db.get_position_for_book(module['id'], book['id'])
             if address:
               hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
-              books[book['id']]['address'] = address
-              books[book['id']]['arduino_name'] = module['arduino_name']
-              books[book['id']]['app_id'] = module['id']
-              books[book['id']]['app_uuid'] = module['uuid']
-              books[book['id']]['app_mac'] = module['mac']
-              books[book['id']]['hasRequest'] = hasRequest              
+              books[i]['address'] = address
+              books[i]['arduino_name'] = module['arduino_name']
+              books[i]['app_id'] = module['id']
+              books[i]['app_uuid'] = module['uuid']
+              books[i]['app_mac'] = module['mac']
+              books[i]['hasRequest'] = hasRequest              
   #send json when token mode
   if('token' in request.args):
     response = app.response_class(
