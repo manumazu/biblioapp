@@ -275,7 +275,8 @@ def listAuthorsForModule(uuid):
     '''set url for authenticate requesting location from app'''
     for i in range(len(data)):
       hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
-      data[i]['url'] = url_for('locateBooksForTag',tag_id=data[i]['id'])+"?token="+hashmail
+      data[i]['url'] = url_for('locateBooksForTag',tag_id=data[i]['id'])
+      data[i]['token'] = hashmail
     response = app.response_class(
           response=json.dumps(data),
           mimetype='application/json'
