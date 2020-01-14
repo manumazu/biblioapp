@@ -118,7 +118,7 @@ def ajaxDelPosition():
 
 @app.route('/tag/<tag_id>')
 @flask_login.login_required
-def listNode(tag_id):
+def listNodesForTag(tag_id):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
   tag = db.get_tag_by_id(tag_id)
@@ -135,7 +135,16 @@ def listNode(tag_id):
               books[book['id']]['address'] = address
               books[book['id']]['arduino_name'] = module['arduino_name']
               books[book['id']]['app_id'] = module['id']
-              books[book['id']]['hasRequest'] = hasRequest         
+              books[book['id']]['app_uuid'] = module['uuid']
+              books[book['id']]['app_mac'] = module['mac']
+              books[book['id']]['hasRequest'] = hasRequest              
+  #send json when token mode
+  if('token' in request.args):
+    response = app.response_class(
+      response=json.dumps(books),
+      mimetype='application/json'
+    )
+    return response     
   return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
     biblio_name=globalVars['arduino_map']['arduino_name'], author=tag['tag'])  
 
