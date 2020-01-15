@@ -134,6 +134,7 @@ def listNodesForTag(tag_id):
             if address:
               hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
               books[i]['address'] = address
+              books[i]['address']['leds_range'] = tools.led_range(book['pages'])
               books[i]['arduino_name'] = module['arduino_name']
               books[i]['app_id'] = module['id']
               books[i]['app_uuid'] = module['uuid']
@@ -176,18 +177,44 @@ def getBook(book_id):
 @flask_login.login_required
 def locateBook():
   globalVars = initApp()
-  if request.method == 'POST':
-
+  remove = False
+  '''get form request params'''
+  if (request.method == 'POST'):
+    app_id = request.form.get('app_id')
+    column = request.form.get('column')
+    row = request.form.get('row')
+    book_id = request.form.get('book_id')
+    leds_range = request.form.get('range')  
     if 'remove_request' in request.form:
-      db.del_request(request.form.get('app_id'),request.form['column'], request.form['row'])
-      flash('Location removed for book {}'.format(request.form['book_id']))
-    else:
-      test = db.set_request(request.form.get('app_id'), request.form.get('row'), request.form.get('column'), request.form.get('range'))
-      flash('Location requested for book {}'.format(request.form['book_id']))
+      remove = True
+  '''get params from arduino'''      
+  if (request.method == 'GET') and ('token' in request.args):
+    app_id = request.args.get('app_id')
+    column = request.args.get('column')
+    row = request.args.get('row')
+    book_id = request.args.get('book_id')
+    leds_range = request.args.get('leds_range')
+    if 'remove_request' in request.args:
+      remove = True
+
+  if remove:
+    db.del_request(app_id, column, row)
+    retMsg = 'Location removed for book {}'.format(book_id)
+  else:
+    db.set_request(app_id, row, column, leds_range)
+    retMsg = 'Location requested for book {}'.format(book_id)
+
+  if('token' in request.args):
+    response = app.response_class(
+      response=json.dumps(retMsg),
+      mimetype='application/json'
+    )
+    return response
     
-    if(request.referrer and 'tag' in request.referrer):
-      return redirect('/authors')
-    return redirect('/app')
+  flash(retMsg)
+  if(request.referrer and 'tag' in request.referrer):
+    return redirect('/authors')
+  return redirect('/app')
 
 @app.route('/locate_for_tag/<tag_id>')  
 @flask_login.login_required
