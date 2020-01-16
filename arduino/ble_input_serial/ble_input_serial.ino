@@ -1,6 +1,5 @@
 //#include <AltSoftSerial.h>
 #include <SoftwareSerial.h>
-#include <ArduinoJson.h>
 //AltSoftSerial softSerial; // (pin 8 = RX, pin 9 = TX)
 SoftwareSerial softSerial(8, 9); 
 
@@ -70,27 +69,23 @@ void loop() {
   //3 = switch on all leds
   buttonState = digitalRead(pinReset);
   if (buttonState != lastButtonState) {
-
     if (buttonState == HIGH) {
       buttonPush++;
       if(buttonPush>2)
         buttonPush=1;
 
-        /*StaticJsonDocument<200> doc;
-        doc["row"] = newLedRow;
-        doc["column"] = newLedColumn;
-        doc["range"] = newLedInterval;
-        //serializeJsonPretty(doc, softSerial);
-        //serializeJsonPretty(doc, Serial);*/
-        String doc = "{\"row\":"+String(newLedRow)+",\"column\":"+String(newLedColumn)+"}";
-        //doc[1]=newLedColumn;
-        softSerial.print(doc);
-        //Serial.println(doc);
-        
       //send messages in buffer to serial BLE
-      //softSerial.write(Serial.read());//messageFromSerial);
-
-      //newLedColumn = 0;//reset current led  
+      for (byte n = 0; n < numLEDs; n++) {
+           if(digitalRead(ledPin[n])) 
+           {
+              String doc = "{\"row\":"+String(newLedRow)+",\"col\":"+String(n+1)+"}";
+              Serial.println(doc);
+              softSerial.println(doc);
+              delay(10);
+           }
+      }
+        
+      newLedColumn = 0;//reset current led  
       if (buttonPush == 1) { //force ledstatus off
         ledStatus = 0;
       }
@@ -189,7 +184,7 @@ void parseData() {
   
   strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
   newLedInterval = atoi(strtokIndx);     // convert this part to an integer
-  
+    
   //strtokIndx = strtok(NULL, ","); 
   //servoFraction = atof(strtokIndx);     // convert this part to a float
 
