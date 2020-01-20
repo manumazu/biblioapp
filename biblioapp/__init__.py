@@ -122,6 +122,8 @@ def listNodesForTag(tag_id):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
   tag = db.get_tag_by_id(tag_id)
+  data = {}
+  data['list_title'] = tag['tag']
   if nodes:
       books = []
       #for node in nodes:
@@ -139,11 +141,12 @@ def listNodesForTag(tag_id):
               books[i]['app_id'] = module['id']
               books[i]['app_uuid'] = module['uuid']
               books[i]['app_mac'] = module['mac']
-              books[i]['hasRequest'] = hasRequest              
+              books[i]['hasRequest'] = hasRequest
+      data['items'] = books
   #send json when token mode
   if('token' in request.args):
     response = app.response_class(
-      response=json.dumps(books),
+      response=json.dumps(data),
       mimetype='application/json'
     )
     return response     
@@ -298,13 +301,17 @@ def getModule(uuid):
 def listAuthorsForModule(uuid):
   user_app = db.get_app_for_uuid(uuid)
   user = db.get_user_for_uuid(uuid)
+  data = {}
   if(user_app):
-    data = db.get_authors_for_app(user_app['id'])
+    data['list_title'] = user_app['arduino_name']
+    items = db.get_authors_for_app(user_app['id'])
     '''set url for authenticate requesting location from app'''
-    for i in range(len(data)):
+    for i in range(len(items)):
       hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
-      data[i]['url'] = url_for('locateBooksForTag',tag_id=data[i]['id'])
-      data[i]['token'] = hashmail
+      items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
+      items[i]['token'] = hashmail
+
+    data['items'] = items
     response = app.response_class(
           response=json.dumps(data),
           mimetype='application/json'
