@@ -35,9 +35,9 @@ def selectArduino():
       session['app_id'] = request.form.get('module_id')
       session['app_name'] = request.form.get('module_name')
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-      return redirect(url_for('myBookShelf',_scheme='https',_external=True))
+      return redirect(url_for('myBookShelf', _scheme='https', _external=True))#,_scheme='https'
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
-  return redirect(url_for('login',_scheme='https',_external=True))
+  return redirect(url_for('login', _scheme='https', _external=True))#
 
 @app.route('/authors/')
 def listAuthors():
@@ -304,14 +304,22 @@ def listAuthorsForModule(uuid):
   data = {}
   if(user_app):
     data['list_title'] = user_app['arduino_name']
-    items = db.get_authors_for_app(user_app['id'])
-    '''set url for authenticate requesting location from app'''
-    for i in range(len(items)):
-      hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
-      items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
-      items[i]['token'] = hashmail
+    data['elements']=[]
+    alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+    for j in range(len(alphabet)):
+      '''data['elements'][j]={}
+      data['elements'][j]['initial']=alphabet[j]'''
+      #print(data)
+      items = db.get_authors_for_app(user_app['id'], alphabet[j])
+      if items:
+        '''set url for authenticate requesting location from app'''
+        for i in range(len(items)):
+          hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
+          items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
+          items[i]['token'] = hashmail
+        #data['elements'][j]['items'] = items
+      data['elements'].append({'initial':alphabet[j],'items':items})
 
-    data['items'] = items
     response = app.response_class(
           response=json.dumps(data),
           mimetype='application/json'

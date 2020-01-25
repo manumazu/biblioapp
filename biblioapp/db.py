@@ -297,13 +297,14 @@ def get_authors_alphabetic(letter, id_user):
     return row
   return False
 
-def get_authors_for_app(id_app):
+def get_authors_for_app(id_app, letter):
   mysql = get_db()
+  searchLetter = letter+"%"
   mysql['cursor'].execute("SELECT bt.id, bt.tag, count(bb.id) as nbnode FROM `biblio_tags` bt \
     INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
     INNER JOIN biblio_book bb ON btn.id_node = bb.id \
     INNER JOIN biblio_position bp ON bb.id = bp.id_item and bp.item_type='book' \
-    WHERE bt.id_taxonomy=2 and bp.id_app=%s GROUP BY bt.id ORDER BY bt.tag", id_app)
+    WHERE bt.id_taxonomy=2 and bp.id_app=%s and bt.tag like %s GROUP BY bt.id ORDER BY bt.tag", (id_app, searchLetter))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
