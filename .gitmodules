@@ -1,0 +1,6 @@
+[submodule "biblioapp/static/vendor/caret"]
+	path = biblioapp/static/vendor/caret
+	url = https://github.com/accursoft/caret.git
+[submodule "biblioapp/static/vendor/jQuery-tagEditor"]
+	path = biblioapp/static/vendor/jQuery-tagEditor
+	url = https://github.com/accursoft/jQuery-tagEditor.git
