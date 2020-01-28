@@ -246,10 +246,10 @@ def del_item_position(app_id, item) :
   return True
 
 ''' manage taxonomy '''
-def get_tag_for_node(id_node):
+def get_tag_for_node(id_node, id_taxonomy):
   mysql = get_db()
   mysql['cursor'].execute("SELECT id, tag FROM biblio_tags bt \
-    INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag WHERE btn.id_node=%s", id_node)
+    INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag WHERE btn.id_node=%s and bt.id_taxonomy=%s", (id_node,id_taxonomy))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()

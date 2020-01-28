@@ -79,18 +79,32 @@
 	    </div>
          </div>
 
+	<div class="form-group"><label for="tags" class="col-lg-1 control-label">Categories</label> 
+	   <div class="col-lg-5"><textarea id="tags"></textarea></div>
+    </div> 
+
 	{% if 'categories' in book %}
-	  {% for category in book['categories'] %}
+
+	    <script type="text/javascript">
+	    	var bookCategories = {{book['categories']|safe}};
+		</script>
+
+	  {# for category in book['categories'] %}
 	   <input type="hidden" name="tags[]" value="{{ category }}">
-	  {% endfor %}
+	  {% endfor #}
+
 	{% endif %}
 
-        {% if 'id' in book %}
+    {% if 'id' in book %}
         <input type="hidden" name="id" value="{{ book['id'] }}">
 	{% endif %}
 	<input type="hidden" name="description" value="{{book['description']}}">
 	<input type="hidden" name="reference" value="{{ reference }}">
 	<input type="submit" value="Edit and save this !" class="btn btn-info">
+
+     <span onclick="alert($('#tags').tagEditor('getTags')[0].tags);" class="ed_on pure-button button-sm">getTags</span>
+
+
 
 </fieldset>
 </form>
