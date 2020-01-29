@@ -270,18 +270,30 @@ def get_node_for_tag(id_tag, id_user):
     return row
   return False
 
-def get_categories(id_user):
+def get_categories_for_user(id_user):
   mysql = get_db()
   mysql['cursor'].execute("SELECT bt.id, bt.tag, count(bb.id) as nbnode FROM `biblio_tags` bt \
     INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
     INNER JOIN biblio_book bb ON btn.id_node = bb.id \
-    WHERE bt.id_taxonomy=1 and bb.id_user=%s GROUP BY bt.id", id_user)
+    WHERE bt.id_taxonomy=1 and bb.id_user=%s GROUP BY bt.id ORDER BY bt.tag", id_user)
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
   if row:
     return row
   return False
+
+def get_categories_for_term(term):
+  mysql = get_db()
+  searchTerm = term+"%"
+  mysql['cursor'].execute("SELECT bt.tag FROM `biblio_tags` bt \
+    WHERE bt.id_taxonomy=1 and bt.tag like %s", searchTerm)
+  row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False  
 
 def get_authors_alphabetic(letter, id_user):
   mysql = get_db()
@@ -359,6 +371,15 @@ def set_tags(tags, taxonomy_label):
     else:
       tag_ids.append(hasTag)
   return tag_ids
+
+def clean_tag_for_node(id_node, id_taxonomy):
+  mysql = get_db()
+  mysql['cursor'].execute("DELETE tn.* FROM biblio_tag_node tn LEFT JOIN biblio_tags t ON tn.id_tag = t.id \
+      WHERE tn.id_node=%s and t.id_taxonomy=%s and tn.node_type='book'", (id_node, id_taxonomy))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+
 
 def set_tag_node(node, tagIds):
   mysql = get_db()

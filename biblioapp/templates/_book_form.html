@@ -86,19 +86,8 @@
 	{% if 'categories' in book %}
 
 	    <script type="text/javascript">
-	    	var tagCategories = {{tags|safe}};
-	    </script>
-	{% endif %}
-
-	{% if 'categories' in book %}
-
-	    <script type="text/javascript">
 	    	var bookCategories = {{book['categories']|safe}};
 		</script>
-
-	  {# for category in book['categories'] %}
-	   <input type="hidden" name="tags[]" value="{{ category }}">
-	  {% endfor #}
 
 	{% endif %}
 
@@ -108,9 +97,6 @@
 	<input type="hidden" name="description" value="{{book['description']}}">
 	<input type="hidden" name="reference" value="{{ reference }}">
 	<input type="submit" value="Edit and save this !" class="btn btn-info">
-
-     <span onclick="alert($('#tags').tagEditor('getTags')[0].tags);" class="ed_on pure-button button-sm">getTags</span>
-
 
 
 </fieldset>
