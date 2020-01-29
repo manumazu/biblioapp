@@ -162,11 +162,16 @@ def getBook(book_id):
     book['address']=None
     book['hasRequest']=None
     book['categories'] = []
-    tags = db.get_tag_for_node(book['id'], 1)#tags for categories
+    tags = db.get_tag_for_node(book['id'], 1)#book tags for taxonomy categories
     if tags:
       for i in range(len(tags)):
         book['categories'].append(tags[i]['tag'])
-    book['categories'] = json.dumps(book['categories'])
+    #book['categories'] = json.dumps(book['categories'])
+    user_taxo = []
+    other_categ = db.get_categories(globalVars['arduino_map']['user_id'])
+    if other_categ:
+        for i in range(len(other_categ)):
+            user_taxo.append(other_categ[i]['tag'])
     app_modules = db.get_arduino_for_user(flask_login.current_user.id)
     for module in app_modules:
       address = db.get_position_for_book(module['id'], book['id'])
@@ -176,7 +181,7 @@ def getBook(book_id):
         book['arduino_name'] = module['arduino_name']
         book['app_id'] = module['id']
         book['hasRequest'] = hasRequest  
-    return render_template('book.html', user_login=globalVars['user_login'], book=book, tags=tags, \
+    return render_template('book.html', user_login=globalVars['user_login'], book=book, tags=user_taxo, \
         biblio_name=globalVars['arduino_map']['arduino_name'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
   abort(404)
 
@@ -381,9 +386,11 @@ def bookReferencer():
     bookapi['year'] = request.form['year']
     bookId = db.set_book(bookapi, globalVars['arduino_map']['user_id'])
     '''manage tags + taxonomy'''
+    categ = request.form['tags']
     authorTags = tools.getLastnameFirstname(authors)
     authorTagids = db.set_tags(authorTags,'Authors')
-    catTagIds = db.set_tags(request.form.getlist('tags[]'),'Categories')
+    '''catTagIds = db.set_tags(request.form.getlist('tags[]'),'Categories')'''
+    catTagIds = db.set_tags(categ.split(','),'Categories')
     if len(catTagIds)>0:
       db.set_tag_node(bookId, catTagIds)
     if len(authorTagids)>0:

@@ -80,8 +80,15 @@
          </div>
 
 	<div class="form-group"><label for="tags" class="col-lg-1 control-label">Categories</label> 
-	   <div class="col-lg-5"><textarea id="tags"></textarea></div>
+	   <div class="col-lg-5"><textarea id="tags" name="tags"></textarea></div>
     </div> 
+
+	{% if 'categories' in book %}
+
+	    <script type="text/javascript">
+	    	var tagCategories = {{tags|safe}};
+	    </script>
+	{% endif %}
 
 	{% if 'categories' in book %}
 
