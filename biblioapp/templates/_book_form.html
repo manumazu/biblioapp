@@ -87,6 +87,7 @@
 
 	    <script type="text/javascript">
 	    	var bookCategories = {{book['categories']|safe}};
+	    	var urlAjaxCategories = '{{url_for('ajaxCategories', _scheme='https', _external=True)}}';
 		</script>
 
 	{% endif %}

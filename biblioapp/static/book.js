@@ -59,7 +59,7 @@ $(document).ready(function() {
   });
 
   $('#tags').tagEditor({
-      autocomplete: { delay: 0, position: { collision: 'flip' }, source: '/ajax_categories' },
+      autocomplete: { delay: 0, position: { collision: 'flip' }, source: urlAjaxCategories },
       forceLowercase: false,
       placeholder: 'book categories',
       initialTags: bookCategories
