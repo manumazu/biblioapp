@@ -37,7 +37,7 @@ def get_arduino_for_user(user_email):
 
 def get_app_for_uuid(uuid) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, arduino_name FROM biblio_app WHERE id_ble=%s or mac=%s",(uuid,uuid))
+  mysql['cursor'].execute("SELECT id, arduino_name FROM biblio_app WHERE id_ble=%s",(uuid))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -48,7 +48,7 @@ def get_user_for_uuid(uuid):
   mysql = get_db()
   mysql['cursor'].execute("SELECT bu.id, bu.email, bu.password, bu.name, ba.id as id_app, ba.arduino_name FROM biblio_user bu \
     INNER JOIN biblio_user_app bua ON bu.id = bua.id_user \
-    INNER JOIN biblio_app ba ON bua.id_app = ba.id WHERE (ba.id_ble=%s OR ba.mac=%s)", (uuid,uuid))
+    INNER JOIN biblio_app ba ON bua.id_app = ba.id WHERE (ba.id_ble=%s)", (uuid))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
