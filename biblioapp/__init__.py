@@ -262,7 +262,7 @@ def locateBooksForTag(tag_id):
           db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
         if(action=='remove'):#delete request for tag's nodes
           db.del_request(module['id'], address['position'], address['row'])
-        ret.append({'item':book['title'],'action':action})
+        ret.append({'item':book['title'],'action':action,'address':address})
   #send json when token mode
   if('token' in request.args):
     response = app.response_class(
