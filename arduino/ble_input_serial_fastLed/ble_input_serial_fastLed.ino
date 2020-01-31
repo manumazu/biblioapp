@@ -106,9 +106,9 @@ void lightLEDs() {
      }
      else {
        if(newLedRow==1){//light only for row=1
-        leds[newLedColumn-1] = CRGB::Blue; 
+        leds[newLedColumn-1] = CRGB::Green; 
         FastLED.show(); 
-        delay(90);
+        delay(80);
        }
     }
   }
