@@ -35,9 +35,9 @@ def selectArduino():
       session['app_id'] = request.form.get('module_id')
       session['app_name'] = request.form.get('module_name')
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-      return redirect(url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
+      return redirect(url_for('myBookShelf', _external=True))# _scheme='https',
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
-  return redirect(url_for('login', _scheme='https', _external=True))#_scheme='https',
+  return redirect(url_for('login', _external=True))#_scheme='https',
 
 @app.route('/authors/')
 def listAuthors():
@@ -243,26 +243,35 @@ def locateBook():
 def locateBooksForTag(tag_id):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
-  app_modules = db.get_arduino_for_user(flask_login.current_user.id)
+  
+  if('uuid' in request.args):
+    module = db.get_app_for_uuid(request.args.get('uuid'))
+  else:
+    module = db.get_app_for_uuid(globalVars['arduino_map']['id_ble'])
+  #app_modules = db.get_arduino_for_user(flask_login.current_user.id)
+
   ret = []
   action = 'add'
   if('action' in request.args):#for add or remove
     action = request.args.get('action')
+
   mode = ''
   if('mode' in request.args):
     mode = request.args.get('mode')
-  for module in app_modules:
-    if(mode!='toggle'):
-      db.clean_request(module['id'])#clean all module's request
-    for node in nodes:
-      address = db.get_position_for_book(module['id'], node['id_node'])
-      if address:
-        book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
-        if(action=='add'):#add request for tag's nodes
-          db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
-        if(action=='remove'):#delete request for tag's nodes
-          db.del_request(module['id'], address['position'], address['row'])
-        ret.append({'item':book['title'],'action':action,'address':address})
+
+  #for module in app_modules:
+  if(mode!='toggle'):
+    db.clean_request(module['id'])#clean all module's request
+
+  for node in nodes:
+    address = db.get_position_for_book(module['id'], node['id_node'])
+    if address:
+      book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
+      if(action=='add'):#add request for tag's nodes
+        db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
+      if(action=='remove'):#delete request for tag's nodes
+        db.del_request(module['id'], address['position'], address['row'])
+      ret.append({'item':book['title'],'action':action,'address':address})
   #send json when token mode
   if('token' in request.args):
     response = app.response_class(
