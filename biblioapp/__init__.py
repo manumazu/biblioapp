@@ -199,7 +199,9 @@ def ajaxCategories():
 @flask_login.login_required
 def locateBook():
   globalVars = initApp()
-  remove = False
+  action = 'add'
+  ret = []
+
   '''get form request params'''
   if (request.method == 'POST'):
     app_id = request.form.get('app_id')
@@ -208,7 +210,8 @@ def locateBook():
     book_id = request.form.get('book_id')
     leds_range = request.form.get('range')  
     if 'remove_request' in request.form:
-      remove = True
+      action = 'remove'
+
   '''get params from arduino'''      
   if (request.method == 'GET') and ('token' in request.args):
     app_id = request.args.get('app_id')
@@ -216,10 +219,15 @@ def locateBook():
     row = request.args.get('row')
     book_id = request.args.get('book_id')
     leds_range = request.args.get('leds_range')
+    address = {}
+    address['interval'] = leds_range
+    address['position'] = column
+    address['row'] = row
     if 'remove_request' in request.args:
-      remove = True
+      action = 'remove'
+    ret.append({'item':book_id,'action':action,'address':address})
 
-  if remove:
+  if action == 'remove':
     db.del_request(app_id, column, row)
     retMsg = 'Location removed for book {}'.format(book_id)
   else:
@@ -228,7 +236,7 @@ def locateBook():
 
   if('token' in request.args):
     response = app.response_class(
-      response=json.dumps(retMsg),
+      response=json.dumps(ret),
       mimetype='application/json'
     )
     return response
@@ -243,7 +251,7 @@ def locateBook():
 def locateBooksForTag(tag_id):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
-  
+
   if('uuid' in request.args):
     module = db.get_app_for_uuid(request.args.get('uuid'))
   else:
@@ -267,8 +275,10 @@ def locateBooksForTag(tag_id):
     address = db.get_position_for_book(module['id'], node['id_node'])
     if address:
       book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
+      ledsInterval = tools.led_range(book['pages'])
+      address['interval'] = ledsInterval
       if(action=='add'):#add request for tag's nodes
-        db.set_request(module['id'], address['row'], address['position'], tools.led_range(book['pages']))
+        db.set_request(module['id'], address['row'], address['position'], ledsInterval)
       if(action=='remove'):#delete request for tag's nodes
         db.del_request(module['id'], address['position'], address['row'])
       ret.append({'item':book['title'],'action':action,'address':address})
