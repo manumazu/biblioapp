@@ -105,13 +105,18 @@ void lightLEDs() {
      }
      else {
        if(newLedRow==1){//light only for row=1
-        if(newLedInterval==0) //switch off
-          leds[newLedColumn-1] = CRGB::Black;
-        else {
-          leds[newLedColumn-1] = CRGB::Green;
+        if(newLedInterval <= 0) {//switch off
+          for (int i=newLedColumn; i<=(newLedColumn-newLedInterval-1); i++) { //light off given line
+            leds[i] = CRGB::Black;
+          }
+        }
+        else {//switch on
+          for (int i=newLedColumn; i<=(newLedColumn+newLedInterval-1); i++) { //light on given line
+            leds[i] = CRGB::Green;
+          }
         }
         FastLED.show(); 
-        delay(100);
+        delay(110);
        }
     }
   }

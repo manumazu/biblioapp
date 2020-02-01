@@ -27,11 +27,11 @@ def getLastnameFirstname(names):
 
 def led_range(nb_pages):
         if nb_pages.strip() == '':
-          lrange = 2
-        elif int(nb_pages) < 100:
+          lrange = 1
+        elif int(nb_pages) < 200:
           lrange = 1
         else:
-          lrange = round(int(nb_pages)/100)
+          lrange = round(int(nb_pages)/200)
         return lrange
 
 @app.context_processor
