@@ -25,11 +25,9 @@ int buttonPush = 0;         // counter
 int pinReset = 12;
 int newLedColumn = 0;
 int newLedRow = 0;
+int newLedInterval = 0;
 
 char messageFromSerial[buffSize] = {0};
-int newLedInterval = 0;
-//float servoFraction = 0.0; // fraction of servo range to move
-
 
 unsigned long curMillis;
 
@@ -43,6 +41,7 @@ void setup() {
   softSerial.begin(9600);
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+  FastLED.clear();
 
   // declare the reset pin as an input
   pinMode(pinReset, INPUT);
@@ -100,15 +99,19 @@ void loop() {
 
 void lightLEDs() {
 
-  if (ledStatus==1) { 
+  if (ledStatus==1 && readInProgress==false) { 
      if(newLedColumn==0) {//when nothing is requested
       ledStatus=false;
      }
      else {
        if(newLedRow==1){//light only for row=1
-        leds[newLedColumn-1] = CRGB::Green; 
+        if(newLedInterval==0) //switch off
+          leds[newLedColumn-1] = CRGB::Black;
+        else {
+          leds[newLedColumn-1] = CRGB::Green;
+        }
         FastLED.show(); 
-        delay(80);
+        delay(100);
        }
     }
   }
@@ -179,9 +182,6 @@ void parseData() {
   
   strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
   newLedInterval = atoi(strtokIndx);     // convert this part to an integer
-    
-  //strtokIndx = strtok(NULL, ","); 
-  //servoFraction = atof(strtokIndx);     // convert this part to a float
 
 }
 
@@ -192,10 +192,10 @@ void replyToPC() {
   if (newDataFromSerial) {    
     ledStatus = true;
     newDataFromSerial = false;
-    Serial.print("<Msg ");
-    Serial.print(messageFromSerial);
-    //Serial.print(" ledInterval ");
-    //Serial.print(newLedInterval);
+    Serial.print("<Position ");
+    Serial.print(newLedColumn);
+    Serial.print(" ledInterval ");
+    Serial.print(newLedInterval);
     Serial.print(" Time ");
     Serial.print(curMillis >> 9); // divide by 512 is approx = half-seconds
     Serial.println(">");
