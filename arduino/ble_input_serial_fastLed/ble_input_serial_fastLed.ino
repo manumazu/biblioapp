@@ -100,18 +100,18 @@ void loop() {
 void lightLEDs() {
 
   if (ledStatus==1 && readInProgress==false) { 
-     if(newLedColumn==0) {//when nothing is requested
+     if(newLedRow==0) {//when nothing is requested
       ledStatus=false;
      }
      else {
        if(newLedRow==1){//light only for row=1
         if(newLedInterval <= 0) {//switch off
-          for (int i=newLedColumn; i<=(newLedColumn-newLedInterval-1); i++) { //light off given line
+          for (int i=newLedColumn; i<(newLedColumn-newLedInterval); i++) { //light off given line
             leds[i] = CRGB::Black;
           }
         }
-        else {//switch on
-          for (int i=newLedColumn; i<=(newLedColumn+newLedInterval-1); i++) { //light on given line
+        else {
+          for (int i=newLedColumn; i<(newLedColumn+newLedInterval); i++) { //light on given line
             leds[i] = CRGB::Green;
           }
         }

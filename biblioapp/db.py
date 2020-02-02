@@ -117,13 +117,14 @@ def get_request_for_position(app_id, position, row) :
   mysql['conn'].close()
   if row:
     return row
-  return False  
+  return False 
 
-def set_request(app_id, row, column, range) :
+def set_request(app_id, row, column, interval, led_column) :
   now = tools.getNow()
   mysql = get_db()
-  mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `row`, `column`, `range`) VALUES (%s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s", \
-  (app_id, row, column, range, now.strftime("%Y-%m-%d %H:%M:%S"), range))
+  mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `row`, `column`, `range`, `led_column`) \
+    VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s, `led_column`=%s",  \
+  (app_id, row, column, interval, led_column, now.strftime("%Y-%m-%d %H:%M:%S"), interval, led_column))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -202,7 +203,7 @@ def get_positions_for_row(app_id, row) :
   return False
 
 
-def sort_items(app_id, items, row) :
+def sort_items(app_id, user_id, items, row) :
   mysql = get_db()
   i=0
   sortable={}
@@ -211,9 +212,14 @@ def sort_items(app_id, items, row) :
       item_id=item['id_item']
     else:
       item_id=item
+    book = get_book(item_id, user_id)
+    interval = tools.led_range(book['pages'])
     i+=1
-    mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, `position`, `row`) VALUES (%s, %s, %s, %s, %s) \
-    ON DUPLICATE KEY UPDATE position=%s, row=%s", (app_id, item_id, 'book', i, row , i, row))
+    led_column = get_led_column(app_id, item_id, row, i)
+    mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, \
+      `position`, `row`, `range`, `led_column`) VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY \
+      UPDATE position=%s, row=%s, `range`=%s, `led_column`=%s", \
+      (app_id, item_id, 'book', i, row, interval, led_column, i, row, interval, led_column))
     mysql['conn'].commit()
     sortable[i]={'book':item_id,'position':i}
   mysql['cursor'].close()
@@ -222,11 +228,25 @@ def sort_items(app_id, items, row) :
 
 '''
 manage position suppression for one item
+- compute sum of intervals for setting physical position
 - check current position
 - check and delete requested postion on arduino
 - decrement remaining positions
 - delete current position
 '''
+
+def get_led_column(app_id, item_id, row, column) :
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT sum(`range`) as `column` FROM `biblio_position` \
+    WHERE `position`<%s  and id_app=%s and `row`=%s and id_item <> %s",(column, app_id, row, item_id))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row['column'] is not None:
+    return row['column']
+  return int(0)
+
+
 def del_item_position(app_id, item) :
   position = get_position_for_book(app_id, item[1])
   if position:

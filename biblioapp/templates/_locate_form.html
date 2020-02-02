@@ -1,6 +1,7 @@
 <form action="/locate/" method="post">
 <input type="hidden" name="book_id" value="{{ book['id'] }}">
 <input type="hidden" name="column" value="{{ book['address']['position'] }}">
+<input type="hidden" name="led_column" value="{{ book['address']['led_column'] }}">
 <input type="hidden" name="row" value="{{ book['address']['row'] }}">
 <input type="hidden" name="range" value="{{ led_range(book['pages']) }}">
 <input type="hidden" name="app_id" value="{{ book['app_id'] }}">

@@ -35,9 +35,9 @@ def selectArduino():
       session['app_id'] = request.form.get('module_id')
       session['app_name'] = request.form.get('module_name')
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-      return redirect(url_for('myBookShelf', _external=True))# _scheme='https',
+      return redirect(url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
-  return redirect(url_for('login', _external=True))#_scheme='https',
+  return redirect(url_for('login', _scheme='https', _external=True))#_scheme='https',
 
 @app.route('/authors/')
 def listAuthors():
@@ -90,10 +90,11 @@ def myBookShelf():
 @app.route('/ajax_sort/', methods=['POST'])
 @flask_login.login_required
 def ajaxSort():
+  globalVars = initApp()
   if request.method == 'POST' and session.get('app_id'):
     current_row = request.form['row'] 
     book_ids = request.form.getlist('book[]')
-    sortable = db.sort_items(session.get('app_id'), book_ids, current_row)
+    sortable = db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], book_ids, current_row)
     response = app.response_class(
         response=json.dumps(sortable),
         mimetype='application/json'
@@ -136,7 +137,6 @@ def listNodesForTag(tag_id):
             if address:
               hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
               books[i]['address'] = address
-              books[i]['address']['leds_range'] = tools.led_range(book['pages'])
               books[i]['arduino_name'] = module['arduino_name']
               books[i]['app_id'] = module['id']
               books[i]['app_uuid'] = module['uuid']
@@ -208,7 +208,8 @@ def locateBook():
     column = request.form.get('column')
     row = request.form.get('row')
     book_id = request.form.get('book_id')
-    leds_range = request.form.get('range')  
+    leds_range = request.form.get('range') 
+    led_column = request.form.get('led_column')  
     if 'remove_request' in request.form:
       action = 'remove'
 
@@ -218,23 +219,25 @@ def locateBook():
     column = request.args.get('column')
     row = request.args.get('row')
     book_id = request.args.get('book_id')
-    leds_range = request.args.get('leds_range')
+    leds_range = request.args.get('range')
+    led_column = request.args.get('led_column')
     address = {}
-    address['interval'] = leds_range
+    address['range'] = leds_range
+    address['led_column'] = led_column
     address['position'] = column
     address['row'] = row
     if 'remove_request' in request.args:
       action = 'remove'
-    ret.append({'item':book_id,'action':action,'address':address})
 
   if action == 'remove':
     db.del_request(app_id, column, row)
     retMsg = 'Location removed for book {}'.format(book_id)
-  else:
-    db.set_request(app_id, row, column, leds_range)
+  else: 
+    db.set_request(app_id, row, column, leds_range, led_column)
     retMsg = 'Location requested for book {}'.format(book_id)
 
   if('token' in request.args):
+    ret.append({'item':book_id,'action':action,'address':address})    
     response = app.response_class(
       response=json.dumps(ret),
       mimetype='application/json'
@@ -275,10 +278,8 @@ def locateBooksForTag(tag_id):
     address = db.get_position_for_book(module['id'], node['id_node'])
     if address:
       book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
-      ledsInterval = tools.led_range(book['pages'])
-      address['interval'] = ledsInterval
       if(action=='add'):#add request for tag's nodes
-        db.set_request(module['id'], address['row'], address['position'], ledsInterval)
+        led_column = db.set_request(module['id'], address['row'], address['position'], address['range'], address['led_column'])
       if(action=='remove'):#delete request for tag's nodes
         db.del_request(module['id'], address['position'], address['row'])
       ret.append({'item':book['title'],'action':action,'address':address})
