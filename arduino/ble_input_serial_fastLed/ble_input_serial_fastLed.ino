@@ -66,8 +66,8 @@ void loop() {
         buttonPush=1;
 
       //send messages in buffer to serial BLE
-      /*for (byte n = 0; n < numLEDs; n++) {
-           if(digitalRead(ledPin[n])) 
+      /*for (byte n = 0; n < NUM_LEDS; n++) {
+           if(leds[n]) 
            {
               String doc = "{\"row\":"+String(newLedRow)+",\"col\":"+String(n+1)+"}";
               Serial.println(doc);
@@ -76,7 +76,7 @@ void loop() {
            }
       }*/
         
-      newLedColumn = 0;//reset current led  
+      newLedRow = 0;//reset current led  
       if (buttonPush == 1) { //force ledstatus off
         ledStatus = 0;
       }
@@ -103,7 +103,7 @@ void lightLEDs() {
      if(newLedRow==0) {//when nothing is requested
       ledStatus=false;
      }
-     else {
+     else { 
        if(newLedRow==1){//light only for row=1
         if(newLedInterval <= 0) {//switch off
           for (int i=newLedColumn; i<(newLedColumn-newLedInterval); i++) { //light off given line
@@ -111,8 +111,9 @@ void lightLEDs() {
           }
         }
         else {
+          FastLED.setBrightness(50);
           for (int i=newLedColumn; i<(newLedColumn+newLedInterval); i++) { //light on given line
-            leds[i] = CRGB::Green;
+            leds[i] = CRGB::DarkBlue;
           }
         }
         FastLED.show(); 
@@ -121,14 +122,18 @@ void lightLEDs() {
     }
   }
   if (ledStatus==0){
-      FastLED.clear(); // clear OFF all strip
+     //FastLED.clear(); // clear OFF all strip
+     for(int i=0; i<NUM_LEDS; i++) {
+      leds[i] = CRGB::Black;
+      FastLED.show();
+     }
   }
   if (ledStatus==3){
-    /*for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
-      strip.setPixelColor(i, strip.Color(255, 69, 0));//  Set pixel's color (in RAM) to BROWN
-      strip.show();                          //  Update strip to match
-      //delay(wait);                           //  Pause for a moment
-    }*/
+    FastLED.setBrightness(30);
+    for(int i=0; i<NUM_LEDS; i++) {
+      leds[i] = CRGB::Brown;
+      FastLED.show();
+    }
   }
 }
 
