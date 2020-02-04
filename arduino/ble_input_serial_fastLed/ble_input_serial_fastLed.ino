@@ -41,7 +41,9 @@ void setup() {
   softSerial.begin(9600);
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-  FastLED.clear();
+  FastLED.setBrightness(50);
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);
+  FastLED.clear(true);
 
   // declare the reset pin as an input
   pinMode(pinReset, INPUT);
@@ -56,15 +58,23 @@ void loop() {
 
   //manage satus for leds :
   //1 = wait for request
-  //0 = switch off all leds
+  //2 = switch off all leds
   //3 = switch on all leds
   buttonState = digitalRead(pinReset);
   if (buttonState != lastButtonState) {
     if (buttonState == HIGH) {
       buttonPush++;
+      
       if(buttonPush>2)
         buttonPush=1;
-
+          
+      if (buttonPush == 1) { //force all ledstatus on
+        ledStatus = 3;
+      }
+      if (buttonPush == 2) { //force all ledstatus off
+        ledStatus = 2;
+      }
+      
       //send messages in buffer to serial BLE
       /*for (byte n = 0; n < NUM_LEDS; n++) {
            if(leds[n]) 
@@ -75,14 +85,7 @@ void loop() {
               delay(10);
            }
       }*/
-        
-      newLedRow = 0;//reset current led  
-      if (buttonPush == 1) { //force ledstatus off
-        ledStatus = 0;
-      }
-      if (buttonPush == 2) { //force all ledstatus on
-        ledStatus = 3;
-      }
+      
       
     }
     //Serial.println(ledStatus);
@@ -104,14 +107,16 @@ void lightLEDs() {
       ledStatus=false;
      }
      else { 
-       if(newLedRow==1){//light only for row=1
+       //@todo : remove test for row=1
+       if(newLedRow==1)
+       {
         if(newLedInterval <= 0) {//switch off
           for (int i=newLedColumn; i<(newLedColumn-newLedInterval); i++) { //light off given line
             leds[i] = CRGB::Black;
           }
         }
         else {
-          FastLED.setBrightness(50);
+          //FastLED.setBrightness(50);
           for (int i=newLedColumn; i<(newLedColumn+newLedInterval); i++) { //light on given line
             leds[i] = CRGB::DarkBlue;
           }
@@ -122,18 +127,16 @@ void lightLEDs() {
     }
   }
   if (ledStatus==0){
-     //FastLED.clear(); // clear OFF all strip
-     for(int i=0; i<NUM_LEDS; i++) {
-      leds[i] = CRGB::Black;
-      FastLED.show();
-     }
+     FastLED.clear(); // soft reset clear OFF all strip
   }
-  if (ledStatus==3){
-    FastLED.setBrightness(30);
-    for(int i=0; i<NUM_LEDS; i++) {
-      leds[i] = CRGB::Brown;
+  if (ledStatus == 2) { // hard reset
       FastLED.show();
-    }
+      ledStatus = 0; 
+  }
+  if (ledStatus==3){ // display colors for all
+    fill_solid(leds, NUM_LEDS, CRGB::Brown);
+    FastLED.show();
+    FastLED.clear();
   }
 }
 
@@ -143,15 +146,14 @@ void getDataFromSerial() {
 
     // receive data from PC and save it into inputBuffer
     
-  if(softSerial.available() > 0) {//softSerial.available()
+  if(softSerial.available() > 0) {
 
     ledStatus = 1; // force led status when request
 
-    char x = softSerial.read();//softSerial.read()
+    char x = softSerial.read();
     //Serial.write(softSerial.read());
-    //softSerial.write(softSerial.read());
 
-      // the order of these IF clauses is significant
+    // the order of these IF clauses is significant
       
     if (x == endMarker) {
       readInProgress = false;
@@ -200,7 +202,6 @@ void parseData() {
 void replyToPC() {
 
   if (newDataFromSerial) {    
-    ledStatus = true;
     newDataFromSerial = false;
     Serial.print("<Position ");
     Serial.print(newLedColumn);
