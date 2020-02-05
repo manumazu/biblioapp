@@ -30,6 +30,8 @@ def led_range(nb_pages):
           lrange = 1
         elif int(nb_pages) < 200:
           lrange = 1
+        elif int(nb_pages) > 1000:
+          lrange = round(int(nb_pages)/400)
         else:
           lrange = round(int(nb_pages)/200)
         return lrange
