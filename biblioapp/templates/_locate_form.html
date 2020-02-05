@@ -1,13 +1,30 @@
+<p>
 <form action="/locate/" method="post">
+<fieldset>
+  <legend>Locate on bookshelf :</legend>	
+  <div class="form-group">
+  	<label for="range" class="col-lg-2 control-label">Adjust book interval :</label>
+  	<div class="col-lg-1">
+    <select class="custom-select" name="range">
+      <option>Adjust book interval</option>
+      {% for i in range(1,10) %}
+      <option value="{{i}}" {%if i==book['address']['range']%} selected="selected" {%endif%}>{{i}}</option>
+      {% endfor %}
+    </select>
+	</div>
+  </div>	
 <input type="hidden" name="book_id" value="{{ book['id'] }}">
 <input type="hidden" name="column" value="{{ book['address']['position'] }}">
 <input type="hidden" name="led_column" value="{{ book['address']['led_column'] }}">
 <input type="hidden" name="row" value="{{ book['address']['row'] }}">
-<input type="hidden" name="range" value="{{ led_range(book['pages']) }}">
 <input type="hidden" name="app_id" value="{{ book['app_id'] }}">
+</fieldset>
+
 {%if book['hasRequest'] %}
 	<input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
 {% else %}
 	<input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
 {% endif %}
+
 </form>
+</p>

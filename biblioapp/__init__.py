@@ -35,9 +35,9 @@ def selectArduino():
       session['app_id'] = request.form.get('module_id')
       session['app_name'] = request.form.get('module_name')
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-      return redirect(url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
+      return redirect(url_for('myBookShelf', _external=True))# _scheme='https',
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
-  return redirect(url_for('login', _scheme='https', _external=True))#_scheme='https',
+  return redirect(url_for('login', _external=True))#_scheme='https',
 
 @app.route('/authors/')
 def listAuthors():
@@ -208,8 +208,10 @@ def locateBook():
     column = request.form.get('column')
     row = request.form.get('row')
     book_id = request.form.get('book_id')
-    leds_range = request.form.get('range') 
-    led_column = request.form.get('led_column')  
+    leds_range = request.form.get('range')
+    address = db.get_position_for_book(app_id, book_id)
+    led_column = db.set_position(app_id, book_id, column, row, leds_range)
+    #led_column = request.form.get('led_column')
     if 'remove_request' in request.form:
       action = 'remove'
 

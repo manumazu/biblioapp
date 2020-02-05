@@ -181,6 +181,15 @@ def set_book(bookapi, user_id) :
     mysql['conn'].close()
   return hasBook
 
+'''
+manage position suppression for one item
+- compute sum of intervals for setting physical position
+- check current position
+- check and delete requested postion on arduino
+- decrement remaining positions
+- delete current position
+'''  
+
 ''' manage items position '''
 def get_position_for_book(app_id, book_id) :
   mysql = get_db()
@@ -215,26 +224,25 @@ def sort_items(app_id, user_id, items, row) :
     book = get_book(item_id, user_id)
     interval = tools.led_range(book['pages'])
     i+=1
-    led_column = get_led_column(app_id, item_id, row, i)
-    mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, \
-      `position`, `row`, `range`, `led_column`) VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY \
-      UPDATE position=%s, row=%s, `range`=%s, `led_column`=%s", \
-      (app_id, item_id, 'book', i, row, interval, led_column, i, row, interval, led_column))
-    mysql['conn'].commit()
+    set_position(app_id, item_id, i, row, interval)
     sortable[i]={'book':item_id,'position':i}
   mysql['cursor'].close()
   mysql['conn'].close()
   return sortable
 
-'''
-manage position suppression for one item
-- compute sum of intervals for setting physical position
-- check current position
-- check and delete requested postion on arduino
-- decrement remaining positions
-- delete current position
-'''
+def set_position(app_id, item_id, position, row, interval) :
+  led_column = get_led_column(app_id, item_id, row, position)
+  mysql = get_db()
+  mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, \
+      `position`, `row`, `range`, `led_column`) VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY \
+      UPDATE position=%s, row=%s, `range`=%s, `led_column`=%s", \
+      (app_id, item_id, 'book', position, row, interval, led_column, position, row, interval, led_column))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return led_column
 
+'''compute sum of intervals for setting physical position'''
 def get_led_column(app_id, item_id, row, column) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT sum(`range`) as `column` FROM `biblio_position` \

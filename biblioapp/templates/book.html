@@ -31,12 +31,12 @@
 			var book_url="{{ url_for('getBook',book_id=book['id']) }}";
 		</script>
 		<fieldset>
-		 <a href="javascript:void(0);" class="btn btn-warning" id="rangebook-{{ book['id'] }}">Range this !</a>
+		<legend><a href="javascript:void(0);" id="rangebook-{{ book['id'] }}">Add book in bookshlef :</a></legend>	
 		 {% set lines=range(biblio_nb_rows) %} 
 		 <div class="form-group" id="shelf-num">
 		    <label for="select" class="col-lg-2 control-label">Select a shelf:</label>
 		    <div class="col-lg-3">
-			<select class="form-control" id="select-shelf">
+			<select class="custom-select" id="select-shelf">
 			  <option selected="selected">Shelf number</option>
 	     		{% for line in lines %}
 			  <option value="{{line+1}}">Shelf {{line+1}}</option>
