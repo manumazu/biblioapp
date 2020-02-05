@@ -185,7 +185,7 @@ def set_book(bookapi, user_id) :
 manage position suppression for one item
 - compute sum of intervals for setting physical position
 - check current position
-- check and delete requested postion on arduino
+- check and delete requested position on arduino
 - decrement remaining positions
 - delete current position
 '''  
@@ -221,8 +221,11 @@ def sort_items(app_id, user_id, items, row) :
       item_id=item['id_item']
     else:
       item_id=item
-    book = get_book(item_id, user_id)
-    interval = tools.led_range(book['pages'])
+    position = get_position_for_book(app_id, item_id)
+    interval = position['range'] 
+    if interval == 0:
+      book = get_book(item_id, user_id)
+      interval = tools.led_range(book['pages'])
     i+=1
     set_position(app_id, item_id, i, row, interval)
     sortable[i]={'book':item_id,'position':i}
