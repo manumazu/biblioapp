@@ -35,9 +35,9 @@ def selectArduino():
       session['app_id'] = request.form.get('module_id')
       session['app_name'] = request.form.get('module_name')
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-      return redirect(url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
+      return redirect('/app')#url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
-  return redirect(url_for('login', _scheme='https', _external=True))#_scheme='https',
+  return redirect('/login')#url_for('login', _scheme='https', _external=True))#_scheme='https',
 
 @app.route('/authors/')
 def listAuthors():

@@ -222,8 +222,9 @@ def sort_items(app_id, user_id, items, row) :
     else:
       item_id=item
     position = get_position_for_book(app_id, item_id)
-    interval = position['range'] 
-    if interval == 0:
+    if position:
+      interval = position['range'] 
+    else:
       book = get_book(item_id, user_id)
       interval = tools.led_range(book['pages'])
     i+=1
@@ -249,14 +250,30 @@ def set_position(app_id, item_id, position, row, interval) :
 def get_led_column(app_id, item_id, row, column) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT sum(`range`) as `column` FROM `biblio_position` \
-    WHERE `position`<%s  and id_app=%s and `row`=%s and id_item <> %s",(column, app_id, row, item_id))
-  row = mysql['cursor'].fetchone()
+    WHERE `position`<%s  and id_app=%s and `row`=%s and id_item <> %s and item_type='book'",(column, app_id, row, item_id))
+  res = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
-  if row['column'] is not None:
-    return row['column']
+  #check for static columns to shift book's real position 
+  statics = get_static_positions(app_id, row)
+  if res['column'] is not None:
+    if statics:
+      for static in statics:
+        if res['column'] >= static['led_column']:
+          res['column'] += static['range']
+      return res['column']
   return int(0)
 
+def get_static_positions(app_id, row):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT `led_column`, `range` FROM `biblio_position` \
+    WHERE item_type='static' AND id_app=%s AND `row`=%s ORDER BY `position`", (app_id, row))
+  row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False
 
 def del_item_position(app_id, item) :
   position = get_position_for_book(app_id, item[1])
