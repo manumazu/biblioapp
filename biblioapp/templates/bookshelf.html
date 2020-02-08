@@ -26,11 +26,15 @@
 	<ul id="droppable_{{(line+1)}}" class="droppable success">
 	{% if tidybooks != None %}
 	  {% for position,book in tidybooks[(line+1)].items() %}
+	  	{%if book['item_type']=='book' %}
 	     <li id="book_{{book['id']}}" class="ui-state-default">
                {% if book['requested'] %}[R]{% endif %}
                <span class="del">x</span>
                <a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
-            </li>
+         </li>
+        {%else%}
+        	<li class="non-draggable">static</li>
+        {%endif%}
 	  {% endfor %}
 	{% endif %}
 	</ul>
@@ -38,7 +42,7 @@
 
 	</div>
 
-	<h2>Books not ranged</h2>    
+	<h2>Drag book in bookshelf</h2>    
 	<ul id="draggable">
     	{% if bookstorange %}
 	   {% for book in bookstorange %}
@@ -48,6 +52,9 @@
 	   {% endfor %}
     	{% endif %}
 	</ul>
+
+	<h2>Add static element</h2>
+
 </div>
 
 {% endblock %}

@@ -64,31 +64,56 @@ def get_tidy_books(app_id, line = None) :
   else:
     where = "app.id=%s and bp.row=%s"
     args = (app_id,line)
-  mysql['cursor'].execute("SELECT bb.`id`, bb.`title`, bb.`author`, bp.`position`, bp.`row` FROM biblio_book bb \
-	inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
-	inner join biblio_app app on bp.id_app=app.id\
-	where "+ where +" order by row, position",args)
+  mysql['cursor'].execute("SELECT bb.`id`, bb.`title`, bb.`author`, bp.`position`, bp.`row`, bp.`item_type`, bp.`led_column`\
+  FROM biblio_book bb inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
+	inner join biblio_app app on bp.id_app=app.id where "+ where +" order by row, led_column",args)
   rows = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
   from collections import defaultdict
   books = defaultdict(dict)
   for row in rows:
-    books[row['row']][row['position']]={'id':row['id'], 'title':row['title'], 'author':row['author'], 'url':'/book/'+str(row['id'])}
-  #print(books)
+    books[row['row']][row['led_column']]={'item_type':row['item_type'],'id':row['id'], \
+    'title':row['title'], 'author':row['author'], 'position':row['position'], 'url':'/book/'+str(row['id'])}
+  #add static elements
+  #statics = get_static_elements(app_id)
+  #for static in statics:
+  #  books[static['row']].append([static['led_column']]={'item_type':static['item_type'],'id':None, 'position':row['position']})
   if rows:
+    #sorted_dict = sorted(books, key=lambda x: int(books[x][0]))
     return books
 
-def get_books_to_range(user_id) :
+def get_books_for_row(app_id, numrow) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_book bb \
-	left join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
-	where bp.id_item is null order by bb.author, bb.title and bb.id_user=%s", user_id)
+  mysql['cursor'].execute("SELECT bb.`id`, bb.`title`, bb.`author`, bp.`position`, bp.`row`, bp.`item_type`, bp.`led_column`\
+  FROM biblio_book bb inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
+  inner join biblio_app app on bp.id_app=app.id where app.id=%s and bp.row=%s order by row, led_column",(app_id,numrow))  
   rows = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
   if rows:
     return rows
+
+def get_books_to_range(user_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT * FROM biblio_book bb \
+	left join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
+	where bp.id_item is null order by bb.author, bb.title and bb.id_user=%s", int(user_id))
+  rows = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if rows:
+    return rows
+
+def get_static_elements(app_id, numrow) :
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT * FROM biblio_position bp WHERE bp.item_type='static' \
+  and bp.id_app=%s and bp.row=%s order by bp.led_column", (int(app_id),numrow))
+  rows = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if rows:
+    return rows    
 
 def get_book(book_id, user_id) :
   mysql = get_db()
@@ -261,7 +286,7 @@ def get_led_column(app_id, item_id, row, column) :
       for static in statics:
         if res['column'] >= static['led_column']:
           res['column'] += static['range']
-      return res['column']
+    return res['column']
   return int(0)
 
 def get_static_positions(app_id, row):
@@ -275,7 +300,7 @@ def get_static_positions(app_id, row):
     return row
   return False
 
-def del_item_position(app_id, item) :
+def del_item_position(app_id, item, user_id) :
   position = get_position_for_book(app_id, item[1])
   if position:
     mysql = get_db()
@@ -290,7 +315,7 @@ def del_item_position(app_id, item) :
   #get list for remaining items and sort them again
   items = get_positions_for_row(position['id_app'], position['row'])
   if items:
-    sort_items(app_id, items, position['row'])
+    sort_items(app_id, user_id, items, position['row'])
   return True
 
 ''' manage taxonomy '''

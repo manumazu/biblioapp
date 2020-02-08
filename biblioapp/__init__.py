@@ -35,7 +35,7 @@ def selectArduino():
       session['app_id'] = request.form.get('module_id')
       session['app_name'] = request.form.get('module_name')
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-      return redirect('/app')#url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
+      return redirect('/app/')#url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
   return redirect('/login')#url_for('login', _scheme='https', _external=True))#_scheme='https',
 
@@ -68,7 +68,7 @@ def myBookShelf():
   else:
     row = None
   tidybooks = db.get_tidy_books(globalVars['arduino_map']['id'], row) #books with addresses
-  bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books with position
+  bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
   #search requested books in tidy books 
   requested_books = db.get_request(globalVars['arduino_map']['id'])
   if requested_books:
@@ -87,6 +87,33 @@ def myBookShelf():
       bookstorange=bookstorange, biblio_nb_rows=globalVars['arduino_map']['nb_lines'], \
       biblio_name=globalVars['arduino_map']['arduino_name'])
 
+@app.route("/app2/")
+@flask_login.login_required
+def myBookShelf2():
+  globalVars = initApp()
+  app_id = globalVars['arduino_map']['id']
+  elements = {}
+  for i in range(globalVars['arduino_map']['nb_lines']):
+    i+=1
+    books = db.get_books_for_row(app_id, i)
+    statics = db.get_static_elements(app_id, i)
+    element = {}
+    for row in books:     
+      element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
+    'title':row['title'], 'author':row['author'], 'position':row['position'], 'url':'/book/'+str(row['id'])}
+      requested = db.get_request_for_position(app_id, row['position'], i)
+      if requested:
+        element[row['led_column']]['requested']=True
+    if statics:
+      for static in statics:
+        element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
+    elements[i] = sorted(element.items())
+  bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
+  return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
+      bookstorange=bookstorange, biblio_nb_rows=globalVars['arduino_map']['nb_lines'], \
+      biblio_name=globalVars['arduino_map']['arduino_name'])
+
+
 @app.route('/ajax_sort/', methods=['POST'])
 @flask_login.login_required
 def ajaxSort():
@@ -104,10 +131,11 @@ def ajaxSort():
 @app.route('/ajax_del_position/', methods=['POST'])
 @flask_login.login_required
 def ajaxDelPosition():
+  globalVars = initApp()
   if request.method == 'POST' and session.get('app_id'):
     for elem in request.form:
        book = elem.split('_')
-       if db.del_item_position(session.get('app_id'), book):
+       if db.del_item_position(session.get('app_id'), book, globalVars['arduino_map']['user_id']):
          ret={'success':True}
        else:
          ret={'success':False}
