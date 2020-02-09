@@ -31,8 +31,8 @@ $(document).ready(function() {
   	      complete: function(res){
   		      var json=$.parseJSON(res.responseText);
   		      $.each(json, function(key,book){
-              $(drop_selector).append('<li id="book_'+book['id']+'" class="ui-state-default"> \
-                <a href="'+book['url']+'">'+book['author']+' - '+book['title']+'</li>');
+              $(drop_selector).append('<li id="book_'+book[1]['id']+'" class="ui-state-default"> \
+                <a href="'+book[1]['url']+'">'+book[1]['author']+' - '+book[1]['title']+'</li>');
             });
             //ajax_postOrder(current_selector); //add new item
   	      }

@@ -56,40 +56,9 @@ def listCategories():
   return render_template('categories.html', user_login=globalVars['user_login'], categories=categories, \
     biblio_name=globalVars['arduino_map']['arduino_name'])
 
-@app.route("/ajax_positions_inline/", methods=['GET'])
 @app.route("/app/")
-def myBookShelf():
-  globalVars = initApp()
-  if(globalVars['user_login']==False):
-    return redirect('/login')
-    
-  if request.method == 'GET' and request.args.get('row'):
-    row = request.args.get('row')
-  else:
-    row = None
-  tidybooks = db.get_tidy_books(globalVars['arduino_map']['id'], row) #books with addresses
-  bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
-  #search requested books in tidy books 
-  requested_books = db.get_request(globalVars['arduino_map']['id'])
-  if requested_books:
-   for requested in requested_books:
-     if requested['row'] in tidybooks:
-       if requested['column'] in tidybooks[requested['row']]:
-         tidybooks[requested['row']][requested['column']]['requested']=True
-  if request.method == 'GET' and request.args.get('row'):
-    response = app.response_class(
-      response=json.dumps(tidybooks[int(row)]),
-      mimetype='application/json'
-    )
-    return response
-  else:
-    return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=tidybooks, \
-      bookstorange=bookstorange, biblio_nb_rows=globalVars['arduino_map']['nb_lines'], \
-      biblio_name=globalVars['arduino_map']['arduino_name'])
-
-@app.route("/app2/")
 @flask_login.login_required
-def myBookShelf2():
+def myBookShelf():
   globalVars = initApp()
   app_id = globalVars['arduino_map']['id']
   elements = {}
@@ -112,6 +81,28 @@ def myBookShelf2():
   return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
       bookstorange=bookstorange, biblio_nb_rows=globalVars['arduino_map']['nb_lines'], \
       biblio_name=globalVars['arduino_map']['arduino_name'])
+
+@app.route("/ajax_positions_inline/", methods=['GET'])
+@flask_login.login_required
+def jsonBookshelf(): 
+  globalVars = initApp()
+  app_id = globalVars['arduino_map']['id']  
+  if request.method == 'GET' and request.args.get('row'):
+    numrow = request.args.get('row')
+    books = db.get_books_for_row(app_id, numrow)
+    element = {}
+    for row in books:
+      element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
+    'title':row['title'], 'author':row['author'], 'position':row['position'], 'url':'/book/'+str(row['id'])}
+      requested = db.get_request_for_position(app_id, row['position'], numrow)
+      if requested:
+        element[row['led_column']]['requested']=True
+    element = sorted(element.items())
+    response = app.response_class(
+      response=json.dumps(element),
+      mimetype='application/json'
+    )
+    return response
 
 
 @app.route('/ajax_sort/', methods=['POST'])
