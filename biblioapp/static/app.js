@@ -10,7 +10,7 @@
 		    success: function(res){
 		      //json=JSON.parse(res.responseText);
 		      console.log(res);
-		      window.location='/app/';
+		      //window.location='/app/';
 		    }
 	    });
    }

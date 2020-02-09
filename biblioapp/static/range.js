@@ -12,22 +12,23 @@ $(document).ready(function() {
 		      scope: "d1",
 		      activeClass: "ui-state-default",
 		      hoverClass: "ui-state-hover",
-		      accept: '#draggable li',
+		      accept: '#draggable li, #draggable2 li',
 		      drop: function( event, ui ) {
-			i++;
-			ui.draggable.remove();
-			ui.draggable.detach().css({top: 0,left: 0}).appendTo($(this));
-	 
-			//specific event after dropped item
-			ajax_postOrder(element); //order new item
-			ui.draggable.find('span').one('click', function() { //delete new item
-			   ajax_supprItem($( this ));
-			});
+				i++;
+				ui.draggable.remove();
+				ui.draggable.detach().css({top: 0,left: 0}).appendTo($(this));
+		 
+				//specific event after dropped item
+				console.log(element);
+				ajax_postOrder(element); //order new item
+				ui.draggable.find('span').one('click', function() { //delete new item
+				   ajax_supprItem($( this ));
+				});
 		     }
 		     }).sortable({
 		      items: "li",
 		      sort: function() {
-			$( this ).removeClass("ui-state-default");
+				$( this ).removeClass("ui-state-default");
 		      }
 		   });
 
@@ -45,7 +46,7 @@ $(document).ready(function() {
 	}
 
 
-  $('#draggable li').draggable({
+  $('#draggable li, #draggable2 li').draggable({
     appendTo: "body",
     //helper: "clone",
     revert: true,

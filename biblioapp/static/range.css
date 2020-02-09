@@ -7,7 +7,7 @@
   /*border-radius: .7em;*/
 }
 
-ul.droppable, ul#draggable { width: auto; height: 200px; padding: 1em; margin: 7px; color:#ddd; list-style: none; }
+ul.droppable, ul#draggable, ul#draggable2 { width: auto; height: 200px; padding: 1em; margin: 7px; color:#ddd; list-style: none; }
 ul.droppable li { cursor: pointer; }
 
 .droppable { 
@@ -18,13 +18,13 @@ ul.droppable li { cursor: pointer; }
 
 @media screen and (max-width: 640px) {
         #draggable, #droppable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
-        #draggable li, .droppable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 10px; height: 35px; }
+        #draggable li, #draggable2 li, .droppable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 10px; height: 35px; }
         #draggable li span { position: absolute; margin-left: -1.3em; }
 }
 
 @media screen and (min-width: 640px) {
 
-  ul#draggable li, ul.droppable li {
+  ul#draggable li,   ul#draggable2 li, ul.droppable li {
     background: #eedc9a; 
     border:1px solid #ddd;
     padding:5px;
@@ -41,7 +41,7 @@ ul.droppable li { cursor: pointer; }
   }
 }
 
-ul.droppable .non-draggable {
+ul#draggable2 .non-draggable, ul.droppable .non-draggable {
   width: 10px;
   background-color: #ccc;
 }
@@ -56,4 +56,9 @@ ul.droppable .non-draggable {
 
 #draggable li .del {
   display:none;
+}
+
+.notranged {
+  float:left;
+  width: 80%;
 }

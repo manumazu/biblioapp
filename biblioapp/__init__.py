@@ -61,25 +61,28 @@ def listCategories():
 def myBookShelf():
   globalVars = initApp()
   app_id = globalVars['arduino_map']['id']
+  if request.method == 'GET' and request.args.get('rownum'):
+    shelfs = [int(request.args.get('rownum'))]
+  else:
+    shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
   elements = {}
-  for i in range(globalVars['arduino_map']['nb_lines']):
-    i+=1
-    books = db.get_books_for_row(app_id, i)
-    statics = db.get_static_elements(app_id, i)
+  for shelf in shelfs:
+    books = db.get_books_for_row(app_id, shelf)
+    statics = db.get_static_elements(app_id, shelf)
     element = {}
     for row in books:     
       element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
     'title':row['title'], 'author':row['author'], 'position':row['position'], 'url':'/book/'+str(row['id'])}
-      requested = db.get_request_for_position(app_id, row['position'], i)
+      requested = db.get_request_for_position(app_id, row['position'], shelf)
       if requested:
         element[row['led_column']]['requested']=True
     if statics:
       for static in statics:
         element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
-    elements[i] = sorted(element.items())
+    elements[shelf] = sorted(element.items())
   bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
   return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
-      bookstorange=bookstorange, biblio_nb_rows=globalVars['arduino_map']['nb_lines'], \
+      bookstorange=bookstorange, lines=shelfs, \
       biblio_name=globalVars['arduino_map']['arduino_name'])
 
 @app.route("/ajax_positions_inline/", methods=['GET'])

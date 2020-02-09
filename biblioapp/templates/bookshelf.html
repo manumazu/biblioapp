@@ -18,14 +18,13 @@
   <p class="lead text-white-50">Drag elements to record their position in shelfs.</p>
  
 	<div class="biblio">
-	{% set lines=range(biblio_nb_rows) %} 
 
-	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line+1)}}',{% endfor %}];</script>
+	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line)}}',{% endfor %}];</script>
 
 	{% for line in lines %}
-	<ul id="droppable_{{(line+1)}}" class="droppable success">
+	<ul id="droppable_{{(line)}}" class="droppable success">
 	{% if tidybooks != None %}
-	  {% for position,book in tidybooks[(line+1)] %}
+	  {% for position,book in tidybooks[line] %}
 	  	{%if book['item_type']=='book' %}
 	     <li id="book_{{book['id']}}" class="ui-state-default">
                {% if book['requested'] %}[R]{% endif %}
@@ -42,7 +41,8 @@
 
 	</div>
 
-	<h2>Drag book in bookshelf</h2>    
+<div class="notranged">
+	<h3>Add book in shelf</h3>    
 	<ul id="draggable">
     	{% if bookstorange %}
 	   {% for book in bookstorange %}
@@ -52,8 +52,14 @@
 	   {% endfor %}
     	{% endif %}
 	</ul>
+</div>
 
-	<h2>Add static element</h2>
+<div class="static">
+	<h3>Add static element</h3>
+	<ul id="draggable2">
+		<li class="non-draggable">&nbsp;</li>
+	</ul>
+</div>
 
 </div>
 
