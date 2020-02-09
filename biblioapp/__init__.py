@@ -31,11 +31,14 @@ def initApp():
 def selectArduino():
   if(flask_login.current_user.is_authenticated):
     modules = db.get_arduino_for_user(flask_login.current_user.id)
-    if request.method == 'POST' and request.form.get('module_id'):
-      session['app_id'] = request.form.get('module_id')
-      session['app_name'] = request.form.get('module_name')
-      flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-      return redirect('/app/')#url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
+    if request.method == 'POST':
+      if 'action' in request.form and request.form.get('action')=='select':
+        session['app_id'] = request.form.get('module_id')
+        session['app_name'] = request.form.get('module_name')
+        flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
+        return redirect('/app/')#url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
+      if 'action' in request.form and request.form.get('action')=='edit':
+        print(request.form)
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
   return redirect('/login')#url_for('login', _scheme='https', _external=True))#_scheme='https',
 
@@ -68,18 +71,19 @@ def myBookShelf():
   elements = {}
   for shelf in shelfs:
     books = db.get_books_for_row(app_id, shelf)
-    statics = db.get_static_elements(app_id, shelf)
-    element = {}
-    for row in books:     
-      element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
+    if books:
+      statics = db.get_static_elements(app_id, shelf)
+      element = {}
+      for row in books:     
+        element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
     'title':row['title'], 'author':row['author'], 'position':row['position'], 'url':'/book/'+str(row['id'])}
-      requested = db.get_request_for_position(app_id, row['position'], shelf)
-      if requested:
-        element[row['led_column']]['requested']=True
-    if statics:
-      for static in statics:
-        element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
-    elements[shelf] = sorted(element.items())
+        requested = db.get_request_for_position(app_id, row['position'], shelf)
+        if requested:
+          element[row['led_column']]['requested']=True
+      if statics:
+        for static in statics:
+          element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
+      elements[shelf] = sorted(element.items())
   bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
   return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
       bookstorange=bookstorange, lines=shelfs, \
