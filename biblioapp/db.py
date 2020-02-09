@@ -246,14 +246,15 @@ def sort_items(app_id, user_id, items, row) :
       item_id=item['id_item']
     else:
       item_id=item
-    position = get_position_for_book(app_id, item_id)
-    if position:
-      interval = position['range'] 
-    else:
-      book = get_book(item_id, user_id)
-      interval = tools.led_range(book['pages'])
-    i+=1
-    set_position(app_id, item_id, i, row, interval)
+    if item_id.isnumeric():
+      position = get_position_for_book(app_id, item_id)
+      if position:
+        interval = position['range'] 
+      else:
+        book = get_book(item_id, user_id)
+        interval = tools.led_range(book['pages'])
+      i+=1
+      set_position(app_id, item_id, i, row, interval)
     sortable[i]={'book':item_id,'position':i}
   mysql['cursor'].close()
   mysql['conn'].close()

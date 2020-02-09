@@ -12,7 +12,7 @@ $(document).ready(function() {
 		      scope: "d1",
 		      activeClass: "ui-state-default",
 		      hoverClass: "ui-state-hover",
-		      accept: '#draggable li, #draggable2 li',
+		      accept: '#draggable li',
 		      drop: function( event, ui ) {
 				i++;
 				ui.draggable.remove();
@@ -45,22 +45,21 @@ $(document).ready(function() {
 	   });
 	}
 
-
-  $('#draggable li, #draggable2 li').draggable({
-    appendTo: "body",
-    //helper: "clone",
-    revert: true,
-    scope: "d1",
-    cursor: 'move',
-    start: function(e, ui) {
-       ui.helper.addClass(selectedClass);
-    },
-    stop: function(e, ui) {
-      // reset group positions
-      $('.' + selectedClass).css({
-        top: 0,
-        left: 0
-      });
-    }
-   });
+  	$('#draggable li').draggable({
+	    appendTo: "body",
+	    //helper: "clone",
+	    revert: true,
+	    scope: "d1",
+	    cursor: 'move',
+	    start: function(e, ui) {
+	       ui.helper.addClass(selectedClass);
+	    },
+	    stop: function(e, ui) {
+	      // reset group positions
+	      $('.' + selectedClass).css({
+	        top: 0,
+	        left: 0
+	      });
+	    }
+   	});
 });

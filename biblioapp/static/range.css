@@ -7,7 +7,7 @@
   /*border-radius: .7em;*/
 }
 
-ul.droppable, ul#draggable, ul#draggable2 { width: auto; height: 200px; padding: 1em; margin: 7px; color:#ddd; list-style: none; }
+ul.droppable, ul#draggable, ul#draggable2 { width: auto; height: 270px; padding: 1em; margin: 7px; color:#ddd; list-style: none; }
 ul.droppable li { cursor: pointer; }
 
 .droppable { 
@@ -56,9 +56,4 @@ ul#draggable2 .non-draggable, ul.droppable .non-draggable {
 
 #draggable li .del {
   display:none;
-}
-
-.notranged {
-  float:left;
-  width: 80%;
 }
