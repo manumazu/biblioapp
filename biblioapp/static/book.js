@@ -55,7 +55,9 @@ $(document).ready(function() {
 
   $('#save-pos').on('click', function() {
     var current_selector = '#'+$(drop_selector).attr('id'); 
-    ajax_postOrder(current_selector);
+    var elements = $(current_selector).sortable('serialize');
+    var row = current_selector.split('_')[1];
+    ajax_postOrder(elements,row);
   });
 
   $('#tags').tagEditor({
@@ -64,5 +66,41 @@ $(document).ready(function() {
       placeholder: 'book categories',
       initialTags: bookCategories
     });
+
+  $("#range-adjust").on('change', function() {
+
+    var book_id = $('input[name="book_id"]').val();
+    var range = $("#range-adjust option:selected").val();
+    var column = $('input[name="column"]').val();
+    var row = $('input[name="row"]').val();
+    //set new position for given new range
+    var r = confirm("This change will affect all positions in shelf number " + row);
+    if (r == true) {
+        $.ajax({
+            data: 'book_id='+book_id+'&range='+range+'&column='+column+'&row='+row,
+            type: 'POST',
+            url: '/ajax_set_position/',
+        });
+        //get list of books for current row
+        $.ajax({
+              data: 'row='+row,
+              type: 'GET',
+              url: '/ajax_positions_inline/', //get items by position for given shelf 
+              dataType: 'json',
+              complete: function(res)
+              {
+                var json=$.parseJSON(res.responseText);
+                var elements = [];
+                $.each(json, function(key,elem){
+                  elements.push('book[]='+elem[1]['id']);
+                });
+                params = elements.join('&');
+                //sort list again
+                ajax_postOrder(params,row);
+              }
+        });
+    }
+
+  });
 
 });

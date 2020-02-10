@@ -5,7 +5,7 @@
   <div class="form-group">
   	<label for="range" class="col-lg-2 control-label">Adjust book interval :</label>
   	<div class="col-lg-1">
-    <select class="custom-select" name="range">
+    <select class="custom-select" name="range" id="range-adjust">
       <option>Adjust book interval</option>
       {% for i in range(1,10) %}
       <option value="{{i}}" {%if i==book['address']['range']%} selected="selected" {%endif%}>{{i}}</option>

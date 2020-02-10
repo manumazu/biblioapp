@@ -105,16 +105,6 @@ def get_books_to_range(user_id) :
   if rows:
     return rows
 
-def get_static_elements(app_id, numrow) :
-  mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_position bp WHERE bp.item_type='static' \
-  and bp.id_app=%s and bp.row=%s order by bp.led_column", (int(app_id),numrow))
-  rows = mysql['cursor'].fetchall()
-  mysql['cursor'].close()
-  mysql['conn'].close()
-  if rows:
-    return rows    
-
 def get_book(book_id, user_id) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT * FROM biblio_book where id=%s and id_user=%s",(book_id, user_id))
@@ -292,7 +282,7 @@ def get_led_column(app_id, item_id, row, column) :
 
 def get_static_positions(app_id, row):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT `led_column`, `range` FROM `biblio_position` \
+  mysql['cursor'].execute("SELECT `led_column`, `range`, position, item_type FROM `biblio_position` \
     WHERE item_type='static' AND id_app=%s AND `row`=%s ORDER BY `position`", (app_id, row))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()

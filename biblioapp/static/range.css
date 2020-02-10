@@ -20,6 +20,15 @@ ul.droppable li { cursor: pointer; }
         #draggable, #droppable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
         #draggable li, #draggable2 li, .droppable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 10px; height: 35px; }
         #draggable li span { position: absolute; margin-left: -1.3em; }
+
+        ul.droppable .non-draggable {
+          height: 5px;
+          background: repeating-linear-gradient(-45deg,
+            transparent,
+            transparent 10px,
+            #ccc 10px,
+            #ccc 20px);
+        }
 }
 
 @media screen and (min-width: 640px) {
@@ -39,11 +48,15 @@ ul.droppable li { cursor: pointer; }
     /*border-radius: .5em;
     /*z-index: 5;*/
   }
-}
 
-ul#draggable2 .non-draggable, ul.droppable .non-draggable {
-  width: 10px;
-  background-color: #ccc;
+  ul.droppable .non-draggable {
+    width: 5px;
+    background: repeating-linear-gradient(-45deg,
+      transparent,
+      transparent 10px,
+      #ccc 10px,
+      #ccc 20px);
+  }
 }
 
 .droppable li .del {

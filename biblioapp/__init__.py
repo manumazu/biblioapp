@@ -72,7 +72,7 @@ def myBookShelf():
   for shelf in shelfs:
     books = db.get_books_for_row(app_id, shelf)
     if books:
-      statics = db.get_static_elements(app_id, shelf)
+      statics = db.get_static_positions(app_id, shelf)
       element = {}
       for row in books:     
         element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
@@ -88,6 +88,7 @@ def myBookShelf():
   return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
       bookstorange=bookstorange, lines=shelfs, \
       biblio_name=globalVars['arduino_map']['arduino_name'])
+
 
 @app.route("/ajax_positions_inline/", methods=['GET'])
 @flask_login.login_required
@@ -125,6 +126,23 @@ def ajaxSort():
         mimetype='application/json'
     )
   return response
+
+@app.route('/ajax_set_position/', methods=['POST'])
+@flask_login.login_required
+def ajaxSetPosition():
+  globalVars = initApp()
+  if request.method == 'POST' and session.get('app_id'):
+    book_id = request.form.get('book_id')
+    leds_range = request.form.get('range')
+    column = request.form.get('column');
+    row = request.form.get('row')
+    led_column = db.set_position(session.get('app_id'), book_id, column, row, leds_range)
+    ret={'led_column':int(led_column)}
+    response = app.response_class(
+          response=json.dumps(ret),
+          mimetype='application/json'
+    )
+    return response
 
 @app.route('/ajax_del_position/', methods=['POST'])
 @flask_login.login_required

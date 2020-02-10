@@ -20,7 +20,10 @@ $(document).ready(function() {
 		 
 				//specific event after dropped item
 				console.log(element);
-				ajax_postOrder(element); //order new item
+			    var elements = $(element).sortable('serialize');
+			    var row = element.split('_')[1];
+				ajax_postOrder(elements,row); //order new item
+
 				ui.draggable.find('span').one('click', function() { //delete new item
 				   ajax_supprItem($( this ));
 				});
@@ -34,7 +37,9 @@ $(document).ready(function() {
 
 		   $(element).delay( 1000 ).sortable({
 				update: function(e, ui) {
-				   ajax_postOrder(element);
+					var elements = $(element).sortable('serialize');
+			    	var row = element.split('_')[1];
+					ajax_postOrder(elements,row);
 		   		}
 		   });
 
