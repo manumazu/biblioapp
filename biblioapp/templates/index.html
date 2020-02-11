@@ -17,21 +17,7 @@
 	  {% if modules %}
 	    <ul>
 	  	{%for module in modules %}
-		<li><h3>{{ module['arduino_name'] }}</h3>
-			<ul>
-				<li>Id BLE : {{ module['id_ble'] }}</li>
-				<li>Nb rows : {{ module['nb_lines'] }}</li>
-				<li>Nb cols / row : {{ module['nb_cols'] }}</li>
-			</ul>
-		<p>
-			Edit module proporties :
-			<form method="POST" action="{{ url_for('selectArduino') }}">
-				<input type="hidden" name="module_id" value="{{ module['id'] }}">
-				<input type="text" name="module_name" value="{{ module['arduino_name'] }}">
-				<input type="hidden" name="action" value="update">
-				<button type="submit" class="btn btn-info">Update</button>
-			</form>
-		</p>
+		<li><h3>{{ module['arduino_name'] }}</h3> <a href="{{ url_for('editArduino', app_id=module['id']) }}">Edit</a>
 			<form method="POST" action="{{ url_for('selectArduino') }}">
 				<input type="hidden" name="module_id" value="{{ module['id'] }}">
 				<input type="hidden" name="module_name" value="{{ module['arduino_name'] }}">

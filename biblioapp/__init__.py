@@ -37,10 +37,17 @@ def selectArduino():
         session['app_name'] = request.form.get('module_name')
         flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
         return redirect('/app/')#url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
-      if 'action' in request.form and request.form.get('action')=='edit':
-        print(request.form)
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
   return redirect('/login')#url_for('login', _scheme='https', _external=True))#_scheme='https',
+
+@app.route("/module/<app_id>", methods=['GET', 'POST'])
+def editArduino(app_id):
+  if(flask_login.current_user.is_authenticated):
+    module = db.get_arduino_map(flask_login.current_user.id, app_id)
+    if request.method == 'POST':
+      if 'action' in request.form and request.form.get('action')=='edit':
+        print(request.form)
+    return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db)
 
 @app.route('/authors/')
 def listAuthors():

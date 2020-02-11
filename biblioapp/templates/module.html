@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% block title %}modules{% endblock %}
+{% block styles %}
+	<link rel="stylesheet" href="{{url_for('static', filename='module.css')}}">
+    {{super()}}
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+		
+	<h2>Select a book shelf module :</h2>
+	  {% if module %}
+		<h3>{{ module['arduino_name'] }}</h3>
+			<ul>
+				<li>Id BLE : {{ module['id_ble'] }}</li>
+				<li>Nb rows : {{ module['nb_lines'] }}</li>
+				<li>Nb cols / row : {{ module['nb_cols'] }}</li>
+			</ul>
+		<p>
+			<h4>Edit module properties :</h4>
+			<form method="POST" action="{{ url_for('editArduino', app_id=module['id']) }}">
+				<input type="hidden" name="module_id" value="{{ module['id'] }}">
+				<input type="text" name="module_name" value="{{ module['arduino_name'] }}">
+
+				<ul id="shelf">
+				{% for line in range(module['nb_lines']) %}
+					<li>Edit separators for shelf {{ line+1 }} :
+						<ul id="static">
+						{% set statics = db.get_static_positions(module['id'], line+1) %}
+						{% if statics %}
+							{% for static in statics %}
+								<li>{{ static['led_column'] }}</li>
+							{% endfor %}
+								<li>40</li>
+						{% endif %}
+							<li class="text-primary">+add separator</li>						
+						</ul>
+						<div id="slider"></div>
+					</li>
+				{% endfor %}
+				</ul>
+
+				<input type="hidden" name="action" value="edit">
+				<button type="submit" class="btn btn-info">Update</button>
+			</form>
+		</p>
+		</li>
+	  {% endif %}
+
+	{{ super() }}
+	</div>
+{% endblock %}
+
+{% block scripts %}
+  {{super()}}
+  <script src="{{url_for('static', filename='module.js')}}"></script>
+  <script src="{{url_for('static', filename='app.js')}}"></script>
+{% endblock %}
+
+{% endblock %}
