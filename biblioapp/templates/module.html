@@ -12,6 +12,11 @@
 {% endblock %}
 
 {% block content %}
+
+	<script type="text/javascript">
+		var sliderList = new Array();
+	</script>
+
 	<div class="container">
 		
 	<h2>Select a book shelf module :</h2>
@@ -31,17 +36,19 @@
 				<ul id="shelf">
 				{% for line in range(module['nb_lines']) %}
 					<li>Edit separators for shelf {{ line+1 }} :
-						<ul id="static">
+						<ul id="static_{{ line+1 }}">
 						{% set statics = db.get_static_positions(module['id'], line+1) %}
 						{% if statics %}
 							{% for static in statics %}
 								<li>{{ static['led_column'] }}</li>
 							{% endfor %}
-								<li>40</li>
-						{% endif %}
-							<li class="text-primary">+add separator</li>						
+						{% endif %}						
 						</ul>
-						<div id="slider"></div>
+						<p id="add_{{ line+1 }}" class="text-primary">+add separator</p>
+						<div id="slider_{{ line+1 }}"></div>
+						<script type="text/javascript">
+							sliderList.push("static_{{ line+1 }}");
+						</script>
 					</li>
 				{% endfor %}
 				</ul>
@@ -59,7 +66,7 @@
 
 {% block scripts %}
   {{super()}}
-  <script src="{{url_for('static', filename='module.js')}}"></script>
+  <script src="{{url_for('static', filename='module.js')}}" async></script>
   <script src="{{url_for('static', filename='app.js')}}"></script>
 {% endblock %}
 
