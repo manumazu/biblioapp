@@ -40,12 +40,12 @@
 						{% set statics = db.get_static_positions(module['id'], line+1) %}
 						{% if statics %}
 							{% for static in statics %}
-								<li>{{ static['led_column'] }}</li>
+							<li id="{{line+1}}_{{loop.index}}">{{ static['led_column'] }}</li>
 							{% endfor %}
 						{% endif %}						
 						</ul>
 						<p id="add_{{ line+1 }}" class="text-primary">+add separator</p>
-						<div id="slider_{{ line+1 }}"></div>
+						<div id="slider_{{ line+1 }}" style="width:620px"></div>
 						<script type="text/javascript">
 							sliderList.push("static_{{ line+1 }}");
 						</script>
