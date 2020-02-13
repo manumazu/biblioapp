@@ -44,6 +44,8 @@ def selectArduino():
 def editArduino(app_id):
   if(flask_login.current_user.is_authenticated):
     module = db.get_arduino_map(flask_login.current_user.id, app_id)
+    session['app_id'] = module['id']
+    session['app_name'] = module['arduino_name']
     if request.method == 'POST':
       if 'action' in request.form and request.form.get('action')=='edit':
         print(request.form)

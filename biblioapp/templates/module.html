@@ -36,25 +36,25 @@
 				<ul id="shelf">
 				{% for line in range(module['nb_lines']) %}
 					<li>Edit separators for shelf {{ line+1 }} :
-						<ul id="static_{{ line+1 }}">
+						<ul id="static_{{ line+1 }}" class="static">
 						{% set statics = db.get_static_positions(module['id'], line+1) %}
 						{% if statics %}
 							{% for static in statics %}
-							<li id="{{line+1}}_{{loop.index}}">{{ static['led_column'] }}</li>
+							<li id="sep_{{line+1}}_{{loop.index}}">{{ static['led_column'] }}</li>
 							{% endfor %}
 						{% endif %}						
 						</ul>
-						<p id="add_{{ line+1 }}" class="text-primary">+add separator</p>
-						<div id="slider_{{ line+1 }}" style="width:620px"></div>
+						<div id="slider_{{ line+1 }}" style="width:700px"></div>
 						<script type="text/javascript">
 							sliderList.push("static_{{ line+1 }}");
 						</script>
 					</li>
+					<p id="add_{{ line+1 }}" class="text-primary">+add separator</p>
 				{% endfor %}
 				</ul>
 
 				<input type="hidden" name="action" value="edit">
-				<button type="submit" class="btn btn-info">Update</button>
+				<button type="button" class="btn btn-info" id="saveModule">Update</button>
 			</form>
 		</p>
 		</li>
