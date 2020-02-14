@@ -2,11 +2,15 @@ $(document).ready(function() {
 
 	$(sliderList).each(function(i, static) {
     	var handler = [];
+    	var margin = [];
 		i++;
 		$("#"+static+" li").each( function(index) {
 			var val = $(this).text();
-			var margin = ((val/61)*100)+"%";
-			$(this).css({ "width" : margin});
+			margin[i] = ((val/61)*700)+"px";
+			if(i>1) {
+				margin[i] = ((val/61)*700)-margin[i-1]+"px";
+			}
+			$(this).css({ "width" : margin[i]});
 			if($.isNumeric(val))
 				handler.push(val);
 		});
@@ -43,13 +47,18 @@ $(document).ready(function() {
 	}
 
 	function showSliderVal(index, values) {
+		var margin = [];
 		for(i=0;i<values.length;i++) 
 		{
 			var separator = $("li#sep_"+index+"_"+(i+1));
-			var margin = ((values[i]/61)*100)+"%";
+		 	margin[i] = ((values[i]/61)*700);
+			if(i>0) {
+				margin[i] = (((values[i]/61)*700)-(margin[i-1]))+30;
+				console.log(margin[i]);
+			}
 			if(separator.length) { //update existing value
 				separator.text(values[i]);
-				separator.css({ "width" : margin});
+				separator.css({ "width" : margin[i]+'px'});
 			}
 			else { //add new separator // style="padding-left:'+ margin +'"
 				//console.log(margin);
@@ -77,9 +86,11 @@ $(document).ready(function() {
 	 	var elements = JSON.stringify(lines);
 
 		$.ajax({
-		    data: 'action=edit&statics='+elements,
+			dataType: 'json',
+        	contentType: 'application/json',
+			data: elements,
 		    type: 'POST',
-		    url: '/module/1'
+		    url: $("#formEditArduino").attr('action')
 		});
 	});
 

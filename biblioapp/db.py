@@ -244,19 +244,20 @@ def sort_items(app_id, user_id, items, row) :
         book = get_book(item_id, user_id)
         interval = tools.led_range(book['pages'])
       i+=1
-      set_position(app_id, item_id, i, row, interval)
+      set_position(app_id, item_id, i, row, interval, 'book')
     sortable[i]={'book':item_id,'position':i}
   mysql['cursor'].close()
   mysql['conn'].close()
   return sortable
 
-def set_position(app_id, item_id, position, row, interval) :
-  led_column = get_led_column(app_id, item_id, row, position)
+def set_position(app_id, item_id, position, row, interval, item_type, led_column = None) :
+  if(led_column is None):
+    led_column = get_led_column(app_id, item_id, row, position)
   mysql = get_db()
   mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, \
       `position`, `row`, `range`, `led_column`) VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY \
       UPDATE position=%s, row=%s, `range`=%s, `led_column`=%s", \
-      (app_id, item_id, 'book', position, row, interval, led_column, position, row, interval, led_column))
+      (app_id, item_id, item_type, position, row, interval, led_column, position, row, interval, led_column))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()

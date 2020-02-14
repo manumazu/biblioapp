@@ -29,7 +29,7 @@
 			</ul>
 		<p>
 			<h4>Edit module properties :</h4>
-			<form method="POST" action="{{ url_for('editArduino', app_id=module['id']) }}">
+			<form method="POST" action="{{ url_for('editArduino', app_id=module['id']) }}" id="formEditArduino">
 				<input type="hidden" name="module_id" value="{{ module['id'] }}">
 				<input type="text" name="module_name" value="{{ module['arduino_name'] }}">
 

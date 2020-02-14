@@ -47,11 +47,13 @@ def editArduino(app_id):
     session['app_id'] = module['id']
     session['app_name'] = module['arduino_name']
     if request.method == 'POST':
-      if 'action' in request.form and request.form.get('action')=='edit':
-        #data = request.form.get('statics')
-        #print(json.load(data))
-        json = request.get_json()
-        print(json)
+      if request.is_json:
+        data = request.get_json()
+        for numrow in data:
+          positions = data[numrow]
+          for i in range(len(positions)):
+            pos = i+1
+            db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db)
 
 @app.route('/authors/')
@@ -148,7 +150,7 @@ def ajaxSetPosition():
     leds_range = request.form.get('range')
     column = request.form.get('column');
     row = request.form.get('row')
-    led_column = db.set_position(session.get('app_id'), book_id, column, row, leds_range)
+    led_column = db.set_position(session.get('app_id'), book_id, column, row, leds_range, 'book')
     ret={'led_column':int(led_column)}
     response = app.response_class(
           response=json.dumps(ret),
@@ -266,7 +268,7 @@ def locateBook():
     book_id = request.form.get('book_id')
     leds_range = request.form.get('range')
     address = db.get_position_for_book(app_id, book_id)
-    led_column = db.set_position(app_id, book_id, column, row, leds_range)
+    led_column = db.set_position(app_id, book_id, column, row, leds_range, 'book')
     #led_column = request.form.get('led_column')
     if 'remove_request' in request.form:
       action = 'remove'
