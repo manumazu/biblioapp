@@ -74,7 +74,13 @@ $(document).ready(function() {
 			}
 	 	});
 
-	 	console.log(JSON.stringify(lines));
+	 	var elements = JSON.stringify(lines);
+
+		$.ajax({
+		    data: 'action=edit&statics='+elements,
+		    type: 'POST',
+		    url: '/module/1'
+		});
 	});
 
 });

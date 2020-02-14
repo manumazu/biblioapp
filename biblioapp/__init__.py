@@ -48,7 +48,10 @@ def editArduino(app_id):
     session['app_name'] = module['arduino_name']
     if request.method == 'POST':
       if 'action' in request.form and request.form.get('action')=='edit':
-        print(request.form)
+        #data = request.form.get('statics')
+        #print(json.load(data))
+        json = request.get_json()
+        print(json)
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db)
 
 @app.route('/authors/')
