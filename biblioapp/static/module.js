@@ -6,15 +6,9 @@ $(document).ready(function() {
 		i++;
 		$("#"+static+" li").each( function(index) {
 			var val = $(this).text();
-			margin[i] = ((val/61)*700)+"px";
-			if(i>1) {
-				margin[i] = ((val/61)*700)-margin[i-1]+"px";
-			}
-			$(this).css({ "width" : margin[i]});
 			if($.isNumeric(val))
 				handler.push(val);
 		});
-
 		
 		$("#add_"+i).on('click', function(){
 			handler.push("0");
@@ -37,33 +31,40 @@ $(document).ready(function() {
 		  max: 61,
 		  values: values,
 		  change: function( event, ui ) {
-		  	//console.log(ui.values);
-			showSliderVal(index, ui.values);
+		  	console.log(ui.handle.offsetLeft);
+			showSliderVal(index, ui.values, ui.handle.offsetLeft);	
 		  },
+		  /*create: function( event, ui ) {
+		  	//showSliderVal(index, values);
+		  }
 	      /*slide: function( event, ui ) {
 	        console.log( ui.value );
 	      }*/
 		});
-	}
+	}	
 
-	function showSliderVal(index, values) {
-		var margin = [];
+	function showSliderVal(index, values, posLeft) 
+	{
 		for(i=0;i<values.length;i++) 
 		{
 			var separator = $("li#sep_"+index+"_"+(i+1));
-		 	margin[i] = ((values[i]/61)*700);
-			if(i>0) {
-				margin[i] = (((values[i]/61)*700)-(margin[i-1]))+30;
-				console.log(margin[i]);
-			}
 			if(separator.length) { //update existing value
 				separator.text(values[i]);
-				separator.css({ "width" : margin[i]+'px'});
 			}
 			else { //add new separator // style="padding-left:'+ margin +'"
 				//console.log(margin);
 				$("#static_" + index).append('<li id="sep_'+ index +'_'+ (i+1) +'">'+ values[i] +'</li>');
 			}
+			separator.css({ "width" : posLeft+"px", "text-align" : "right"});			
+			//computeListWidth(separator,values)
+			//if(i>0) {
+			/*	for (var j = 1; j <= values.length ; j++) {
+					console.log(j);
+					margin[i] = ((values[i]/61)*700)-margin[i-j]+30;
+					//separator.css({ "width" : margin[i]+"px"});
+					console.log(i-j);
+				}
+			//}*/
 		}
 	}
 
@@ -84,6 +85,7 @@ $(document).ready(function() {
 	 	});
 
 	 	var elements = JSON.stringify(lines);
+	 	//console.log(elements);
 
 		$.ajax({
 			dataType: 'json',
