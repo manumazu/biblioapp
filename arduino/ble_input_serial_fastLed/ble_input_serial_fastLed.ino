@@ -129,7 +129,7 @@ void lightLEDs() {
             }
           }
           FastLED.show();
-          delay(220);
+          delay(120);
        }
     }
   }
