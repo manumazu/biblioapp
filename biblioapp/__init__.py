@@ -321,7 +321,6 @@ def locateBooksForTag(tag_id):
     module = db.get_app_for_uuid(globalVars['arduino_map']['id_ble'])
   #app_modules = db.get_arduino_for_user(flask_login.current_user.id)
 
-  ret = []
   action = 'add'
   if('action' in request.args):#for add or remove
     action = request.args.get('action')
@@ -334,15 +333,25 @@ def locateBooksForTag(tag_id):
   if(mode!='toggle'):
     db.clean_request(module['id'])#clean all module's request
 
+  element = {}
   for node in nodes:
     address = db.get_position_for_book(module['id'], node['id_node'])
     if address:
       book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
       if(action=='add'):#add request for tag's nodes
-        led_column = db.set_request(module['id'], address['row'], address['position'], address['range'], address['led_column'])
+        db.set_request(module['id'], address['row'], address['position'], address['range'], address['led_column'])
       if(action=='remove'):#delete request for tag's nodes
         db.del_request(module['id'], address['position'], address['row'])
-      ret.append({'item':book['title'],'action':action,'address':address})
+      element[address['led_column']] = {'item':book['title'],'action':action,'address':address}
+  if(action=='remove'):
+    element = sorted(element.items(), reverse = True)
+  else:
+    element = sorted(element.items())
+
+  ret = []
+  for elem in element:
+    if elem[1] is not None:
+      ret.append(elem[1])
   #send json when token mode
   if('token' in request.args):
     response = app.response_class(
