@@ -151,8 +151,8 @@ void lightLEDs() {
               delay(100);
            }
       }*/
-    FastLED.setBrightness(50);      
-    fill_solid(leds, NUM_LEDS, CRGB::Brown);
+    FastLED.setBrightness(70);      
+    fill_solid(leds, NUM_LEDS, CRGB(78,32,9));//::Brown);
     FastLED.show();
     //FastLED.clear();
     ledStatus = 0; 
