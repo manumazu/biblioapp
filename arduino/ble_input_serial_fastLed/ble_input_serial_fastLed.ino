@@ -6,7 +6,7 @@ AltSoftSerial softSerial; // (pin 8 = RX, pin 9 = TX)
 
 // Declare our NeoPixel strip object:
 #define DATA_PIN    5
-#define NUM_LEDS 30
+#define NUM_LEDS 62
 CRGB leds[NUM_LEDS];
 
 const byte buffSize = 40;
@@ -26,6 +26,10 @@ int pinReset = 12;
 int newLedColumn = 0;
 int newLedRow = 0;
 int newLedInterval = 0;
+
+int red = -1;
+int green = -1;
+int blue = -1;
 
 char messageFromSerial[buffSize] = {0};
 
@@ -103,26 +107,29 @@ void loop() {
 void lightLEDs() {
 
   if (ledStatus==1 && readInProgress==false) { 
-     if(newLedRow==0) {//when nothing is requested
+     if(newLedRow==0) {//for reset action
       ledStatus=false;
      }
-     else { 
+     else {
        //@todo : remove test for row=1
        if(newLedRow==1)
        {
-        if(newLedInterval <= 0) {//switch off
-          for (int i=newLedColumn; i<(newLedColumn-newLedInterval); i++) { //light off given line
-            leds[i] = CRGB::Black;
+          if(newLedInterval <= 0) {//switch off
+            for (int i=newLedColumn; i<(newLedColumn-newLedInterval); i++) { //light off given line
+              leds[i] = CRGB::Black;
+            }
           }
-        }
-        else {
-          //FastLED.setBrightness(50);
-          for (int i=newLedColumn; i<(newLedColumn+newLedInterval); i++) { //light on given line
-            leds[i] = CRGB::DarkBlue;
+          else {
+            FastLED.setBrightness(80);
+            for (int i=newLedColumn; i<(newLedColumn+newLedInterval); i++) { //light on given line
+              if(red >=0)
+                leds[i] = CRGB(red,green,blue);//::Blue;//DarkBlue;
+              else
+                leds[i] = CRGB::Blue;
+            }
           }
-        }
-        FastLED.show(); 
-        delay(110);
+          FastLED.show();
+          delay(220);
        }
     }
   }
@@ -134,9 +141,21 @@ void lightLEDs() {
       ledStatus = 0; 
   }
   if (ledStatus==3){ // display colors for all
+
+      /*for (byte n = 0; n < NUM_LEDS; n++) {
+           if(leds[n]) 
+           {
+              String doc = "{\"row\":"+String(newLedRow)+",\"led\":"+String(-n+1)+"}";//\"action\":"+String(ledStatus)+",
+              //Serial.println(doc);
+              softSerial.println(doc);
+              delay(100);
+           }
+      }*/
+    FastLED.setBrightness(50);      
     fill_solid(leds, NUM_LEDS, CRGB::Brown);
     FastLED.show();
-    FastLED.clear();
+    //FastLED.clear();
+    ledStatus = 0; 
   }
 }
 
@@ -194,6 +213,13 @@ void parseData() {
   
   strtokIndx = strtok(NULL, ","); // this continues where the previous call left off
   newLedInterval = atoi(strtokIndx);     // convert this part to an integer
+
+  strtokIndx = strtok(NULL, ","); // set red value
+  red = atoi(strtokIndx);
+  strtokIndx = strtok(NULL, ","); // set green value
+  green = atoi(strtokIndx);   
+  strtokIndx = strtok(NULL, ","); // set blue value
+  blue = atoi(strtokIndx);   
 
 }
 
