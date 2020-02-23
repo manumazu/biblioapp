@@ -65,13 +65,32 @@ def listAuthors():
     biblio_name=globalVars['arduino_map']['arduino_name'])
 
 @app.route('/categories/')
-def listCategories():
-  globalVars = initApp()
-  if(globalVars['user_login']==False):
-    return redirect('/login')
-  categories = db.get_categories_for_user(globalVars['arduino_map']['user_id'])
-  return render_template('categories.html', user_login=globalVars['user_login'], categories=categories, \
+@app.route('/categories/<uuid>/')
+def listCategories(uuid = None):
+  if uuid is not None:
+    user_app = db.get_app_for_uuid(uuid)
+    user = db.get_user_for_uuid(uuid)
+    user_id = user['id']
+  else:
+    globalVars = initApp()
+    user_id = globalVars['arduino_map']['user_id']
+    if(globalVars['user_login']==False):
+      return redirect('/login')
+  categories = db.get_categories_for_user(user_id)
+  if uuid is not None:
+    hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
+    for i in range(len(categories)):
+      categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
+      categories[i]['token'] = hashmail
+    response = app.response_class(
+      response=json.dumps(categories),
+      mimetype='application/json'
+    )
+    return response
+  else:
+    return render_template('categories.html', user_login=globalVars['user_login'], categories=categories, \
     biblio_name=globalVars['arduino_map']['arduino_name'])
+
 
 @app.route("/app/")
 @flask_login.login_required
