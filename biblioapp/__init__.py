@@ -78,12 +78,15 @@ def listCategories(uuid = None):
       return redirect('/login')
   categories = db.get_categories_for_user(user_id)
   if uuid is not None:
+    data = {}
+    data['list_title'] = user_app['arduino_name']
     hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
     for i in range(len(categories)):
       categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
       categories[i]['token'] = hashmail
+    data['elements']=categories
     response = app.response_class(
-      response=json.dumps(categories),
+      response=json.dumps(data),
       mimetype='application/json'
     )
     return response
