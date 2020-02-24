@@ -516,7 +516,7 @@ def bookReferencer():
       catTagIds = db.set_tags(categ.split(','),'Categories')
       if len(catTagIds)>0:
         db.set_tag_node(bookId, catTagIds)
-    return redirect('/')
+    return redirect('/app/')
   return render_template('bookreferencer.html', user_login=globalVars['user_login'])
 
 
