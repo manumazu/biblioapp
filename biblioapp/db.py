@@ -335,9 +335,23 @@ def get_node_for_tag(id_tag, id_user):
     return row
   return False
 
+def get_categories_for_app(id_app):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT bt.id, bt.tag, bt.color, count(bb.id) as nbnode FROM `biblio_tags` bt \
+    INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
+    INNER JOIN biblio_book bb ON btn.id_node = bb.id \
+    INNER JOIN biblio_position bp ON bb.id = bp.id_item and bp.item_type='book'\
+    WHERE bt.id_taxonomy=1 and bp.id_app=%s GROUP BY bt.id ORDER BY bt.tag", id_app)
+  row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False  
+
 def get_categories_for_user(id_user):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT bt.id, bt.tag, count(bb.id) as nbnode FROM `biblio_tags` bt \
+  mysql['cursor'].execute("SELECT bt.id, bt.tag, bt.color, count(bb.id) as nbnode FROM `biblio_tags` bt \
     INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
     INNER JOIN biblio_book bb ON btn.id_node = bb.id \
     WHERE bt.id_taxonomy=1 and bb.id_user=%s GROUP BY bt.id ORDER BY bt.tag", id_user)
@@ -391,7 +405,7 @@ def get_authors_for_app(id_app, letter):
 
 def get_tag(tag):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, tag FROM biblio_tags WHERE tag=%s", tag)
+  mysql['cursor'].execute("SELECT id, tag, color FROM biblio_tags WHERE tag=%s", tag)
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -401,7 +415,7 @@ def get_tag(tag):
 
 def get_tag_by_id(tag_id):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, tag FROM biblio_tags WHERE id=%s", tag_id)
+  mysql['cursor'].execute("SELECT id, tag, color FROM biblio_tags WHERE id=%s", tag_id)
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()

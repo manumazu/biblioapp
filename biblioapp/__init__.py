@@ -71,12 +71,13 @@ def listCategories(uuid = None):
     user_app = db.get_app_for_uuid(uuid)
     user = db.get_user_for_uuid(uuid)
     user_id = user['id']
+    categories = db.get_categories_for_app(user_app['id'])
   else:
     globalVars = initApp()
     user_id = globalVars['arduino_map']['user_id']
+    categories = db.get_categories_for_user(user_id)
     if(globalVars['user_login']==False):
       return redirect('/login')
-  categories = db.get_categories_for_user(user_id)
   if uuid is not None:
     data = {}
     data['list_title'] = user_app['arduino_name']
@@ -84,6 +85,11 @@ def listCategories(uuid = None):
     for i in range(len(categories)):
       categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
       categories[i]['token'] = hashmail
+      if categories[i]['color'] is not None:
+        colors = categories[i]['color'].split(",")
+        categories[i]['red'] = colors[0]
+        categories[i]['green'] = colors[1]
+        categories[i]['blue'] = colors[2]
     data['elements']=categories
     response = app.response_class(
       response=json.dumps(data),
@@ -336,6 +342,12 @@ def locateBook():
 def locateBooksForTag(tag_id):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
+  tag = db.get_tag_by_id(tag_id)
+  if tag['color'] is not None:
+    colors = tag['color'].split(",")
+    tag['red'] = colors[0]
+    tag['green'] = colors[1]
+    tag['blue'] = colors[2]
 
   if('uuid' in request.args):
     module = db.get_app_for_uuid(request.args.get('uuid'))
@@ -364,7 +376,7 @@ def locateBooksForTag(tag_id):
         db.set_request(module['id'], address['row'], address['position'], address['range'], address['led_column'])
       if(action=='remove'):#delete request for tag's nodes
         db.del_request(module['id'], address['position'], address['row'])
-      element[address['led_column']] = {'item':book['title'],'action':action,'address':address}
+      element[address['led_column']] = {'item':book['title'],'action':action,'address':address,'tag':tag}
   if(action=='remove'):
     element = sorted(element.items(), reverse = True)
   else:
