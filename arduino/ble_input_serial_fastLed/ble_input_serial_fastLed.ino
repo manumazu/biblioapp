@@ -46,7 +46,7 @@ void setup() {
 
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
   FastLED.setBrightness(50);
-  FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);
+  //FastLED.setMaxPowerInVoltsAndMilliamps(5, 500);
   FastLED.clear(true);
 
   // declare the reset pin as an input
@@ -120,7 +120,7 @@ void lightLEDs() {
             }
           }
           else {
-            FastLED.setBrightness(80);
+            FastLED.setBrightness(50);
             for (int i=newLedColumn; i<(newLedColumn+newLedInterval); i++) { //light on given line
               if(red >=0)
                 leds[i] = CRGB(red,green,blue);//::Blue;//DarkBlue;
@@ -233,6 +233,8 @@ void replyToPC() {
     Serial.print(newLedColumn);
     Serial.print(" ledInterval ");
     Serial.print(newLedInterval);
+    Serial.print(" bytesRecvd ");
+    Serial.print(bytesRecvd);
     Serial.print(" Time ");
     Serial.print(curMillis >> 9); // divide by 512 is approx = half-seconds
     Serial.println(">");
