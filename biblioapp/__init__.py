@@ -376,7 +376,7 @@ def locateBooksForTag(tag_id):
         db.set_request(module['id'], address['row'], address['position'], address['range'], address['led_column'])
       if(action=='remove'):#delete request for tag's nodes
         db.del_request(module['id'], address['position'], address['row'])
-      element[address['led_column']] = {'item':book['title'],'action':action,'address':address,'tag':tag}
+      element[address['led_column']*address['row']] = {'item':book['title'],'action':action,'address':address,'tag':tag}
   if(action=='remove'):
     element = sorted(element.items(), reverse = True)
   else:
