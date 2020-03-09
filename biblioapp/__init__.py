@@ -36,9 +36,9 @@ def selectArduino():
         session['app_id'] = request.form.get('module_id')
         session['app_name'] = request.form.get('module_name')
         flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-        return redirect('/app/')#url_for('myBookShelf', _scheme='https', _external=True))# _scheme='https',
+        return redirect(url_for('myBookShelf', _scheme='https', _external=True))
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
-  return redirect('/login')#url_for('login', _scheme='https', _external=True))#_scheme='https',
+  return redirect(url_for('login', _scheme='https', _external=True))
 
 @app.route("/module/<app_id>", methods=['GET', 'POST'])
 def editArduino(app_id):
@@ -60,7 +60,7 @@ def editArduino(app_id):
 def listAuthors():
   globalVars = initApp()
   if(globalVars['user_login']==False):
-    return redirect('/login')
+    return redirect(url_for('login', _scheme='https', _external=True))
   return render_template('authors.html', user_login=globalVars['user_login'], db=db, user_id=globalVars['arduino_map']['user_id'], \
     biblio_name=globalVars['arduino_map']['arduino_name'])
 
@@ -77,7 +77,7 @@ def listCategories(uuid = None):
     user_id = globalVars['arduino_map']['user_id']
     categories = db.get_categories_for_user(user_id)
     if(globalVars['user_login']==False):
-      return redirect('/login')
+      return redirect(url_for('login', _scheme='https', _external=True))
   if uuid is not None:
     data = {}
     data['list_title'] = user_app['arduino_name']
@@ -334,8 +334,8 @@ def locateBook():
     
   flash(retMsg)
   if(request.referrer and 'tag' in request.referrer):
-    return redirect('/authors')
-  return redirect('/app')
+    return redirect(url_for('listAuthors', _scheme='https', _external=True))
+  return redirect(url_for('myBookShelf', _scheme='https', _external=True))
 
 @app.route('/locate_for_tag/<tag_id>')  
 @flask_login.login_required
@@ -395,8 +395,7 @@ def locateBooksForTag(tag_id):
     return response
   for book_title in ret:
     flash('Location requested for book {}'.format(book_title['item']))
-  return redirect('/authors')
-
+  return redirect(url_for('listAuthors', _scheme='https', _external=True))
 
 #get request from arduino for current arduino_name
 @app.route('/request/<uuid>/')
@@ -528,7 +527,7 @@ def bookReferencer():
       catTagIds = db.set_tags(categ.split(','),'Categories')
       if len(catTagIds)>0:
         db.set_tag_node(bookId, catTagIds)
-    return redirect('/app/')
+    return redirect(url_for('myBookShelf', _scheme='https', _external=True))
   return render_template('bookreferencer.html', user_login=globalVars['user_login'])
 
 
@@ -550,7 +549,7 @@ def login():
         user.id = email
         user.name = exists['name'] 
         flask_login.login_user(user)
-        return redirect('/protected')
+        return redirect(url_for('selectArduino', _scheme='https', _external=True))
 
       return 'Bad login'
 
@@ -558,13 +557,13 @@ def login():
 @flask_login.login_required
 def protected():
   flash('Logged in as: ' + flask_login.current_user.name)
-  return redirect('/')
+  return redirect(url_for('selectArduino', _scheme='https', _external=True))
 
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
     flash('Logged out')
-    return redirect('/login')
+    return redirect(url_for('login', _scheme='https', _external=True))
 
 if __name__ == "__main__":
     app.run(debug=True)

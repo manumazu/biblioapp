@@ -83,14 +83,13 @@
 	   <div class="col-lg-5"><textarea id="tags" name="tags"></textarea></div>
     </div> 
 
-	{% if 'categories' in book %}
+	
 
 	    <script type="text/javascript">
-	    	var bookCategories = {{book['categories']|safe}};
+	    	var bookCategories = {% if 'categories' in book %}{{book['categories']|safe}}{% else %}''{% endif %};
 	    	var urlAjaxCategories = '{{url_for('ajaxCategories', _scheme='https', _external=True)}}';
 		</script>
 
-	{% endif %}
 
     {% if 'id' in book %}
         <input type="hidden" name="id" value="{{ book['id'] }}">

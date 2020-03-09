@@ -1,5 +1,10 @@
 {% extends "layout.html" %}
 {% block title %}Book's search{% endblock %}
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='book.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='vendor/jQuery-tagEditor/jquery.tag-editor.css')}}">
+{% endblock %}
 
 {% block body %}
 
@@ -115,6 +120,11 @@
 
 {% block scripts %}
 {{super()}}
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
+  <script src="{{url_for('static', filename='book.js')}}"></script>
+  <script src="{{url_for('static', filename='app.js')}}"></script>
+  <script src="{{url_for('static', filename='vendor/jQuery-tagEditor/jquery.caret.min.js')}}"></script>
+  <script src="{{url_for('static', filename='vendor/jQuery-tagEditor/jquery.tag-editor.js')}}"></script>
 {% endblock %}
 
 {% endblock %}
