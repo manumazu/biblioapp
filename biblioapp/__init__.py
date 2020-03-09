@@ -237,7 +237,8 @@ def listNodesForTag(tag_id):
     )
     return response     
   return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
-    biblio_name=globalVars['arduino_map']['arduino_name'], author=tag['tag'])  
+    biblio_name=globalVars['arduino_map']['arduino_name'], author=tag['tag'])
+
 
 @app.route('/book/<book_id>')
 @flask_login.login_required

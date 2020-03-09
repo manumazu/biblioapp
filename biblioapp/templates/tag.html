@@ -2,6 +2,7 @@
 {% block title %}Tag{% endblock %}
 {% block styles %}
     {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='tag.css')}}">
 {% endblock %}
 
 {% block body %}
@@ -14,6 +15,20 @@
 	<div class="container">
 
 	<h1>{{ author }} book's</h1>
+
+	<p>Use sliders to set color.</p>
+    Red
+    <input type="range" min="0" max="255" value="0" id="red"/>
+    Green
+    <input type="range" min="0" max="255" value="0" id="green"/>
+    Blue
+    <input type="range" min="0" max="255" value="0" id="blue"/>
+
+    <div id="rgbText">
+        &nbsp;
+    </div>
+    <div id="previewColor">
+    </div> 
 
 	  {%if books %}
 	  <ul>
@@ -38,6 +53,7 @@
 {% block scripts %}
   {{super()}}
   <script src="{{url_for('static', filename='app.js')}}"></script>
+  <script src="{{url_for('static', filename='tag.js')}}"></script>
 {% endblock %}
 
 {% endblock %}
