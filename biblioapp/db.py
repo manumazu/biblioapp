@@ -413,9 +413,17 @@ def get_tag(tag):
     return row
   return False
 
+def set_color_for_tag(id_tag, color):
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_tags SET color=%s WHERE id=%s", (color, id_tag))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True
+
 def get_tag_by_id(tag_id):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, tag, color FROM biblio_tags WHERE id=%s", tag_id)
+  mysql['cursor'].execute("SELECT id, tag, color, id_taxonomy FROM biblio_tags WHERE id=%s", tag_id)
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()

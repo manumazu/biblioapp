@@ -12,36 +12,51 @@
 {% endblock %}
 
 {% block content %}
+
+	{% if tag['color'] != None %}
+		{% set color = tag['color'].split(',') %}
+	{% endif %}
+
 	<div class="container">
 
-	<h1>{{ author }} book's</h1>
+	<h1>{{ tag['tag'] }}
+	{% if tag['id_taxonomy'] == 1 %} 
+		<a href="javascript:colorEditor();">
+		<span class="badge" {% if tag['color'] != None %} style="background-color:rgb({{ tag['color'] }}){%endif%}">
+			Edit color
+		</span></a>
+	{%endif%}
+	</h1> 
 
-<div class="modal" id="colorEditor">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Use sliders to set color</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-             <p>
-    		Red <input type="range" min="0" max="255" value="0" id="red" class="custom-range"/>
-    		Green <input type="range" min="0" max="255" value="0" id="green" class="custom-range"/>
-    		Blue <input type="range" min="0" max="255" value="0" id="blue" class="custom-range"/>
-	    </p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary">Save changes</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+	<div class="modal" id="colorEditor">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title">Use sliders to set color</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <p>
+	    		Red <input type="range" min="0" max="255" value="{%if color %}{{ color[0] }}{% else %}0{% endif %}" id="red" class="custom-range"/>
+	    		Green <input type="range" min="0" max="255" value="{%if color %}{{ color[1] }}{% else %}0{% endif %}" id="green" class="custom-range"/>
+	    		Blue <input type="range" min="0" max="255" value="{%if color %}{{ color[2] }}{% else %}0{% endif %}" id="blue" class="custom-range"/>
+	    		<div id="previewColor"></div> 
+	    		<div id="rgbText">&nbsp;</div>	    		
+		    </p>
+	      </div>
+	      <div class="modal-footer">
+	      	<input type="hidden" name="tag_id" id="tag_id" value="{{ tag['id'] }}">
+	        <button type="button" class="btn btn-primary" id="colorEditor-save">Save changes</button>
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 
 
-	  {%if books %}
+	{%if books %}
 	  <ul>
 	  	{% for book in books %}
 			<li><a href="{{ url_for('getBook', book_id=book['id']) }}">{{ book['author'] }}, <i>{{ book['title'] }}</i>, {{ book['year'] }}, {{ book['pages'] }}p</a>
