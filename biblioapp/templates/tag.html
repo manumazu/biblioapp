@@ -16,19 +16,30 @@
 
 	<h1>{{ author }} book's</h1>
 
-	<p>Use sliders to set color.</p>
-    Red
-    <input type="range" min="0" max="255" value="0" id="red"/>
-    Green
-    <input type="range" min="0" max="255" value="0" id="green"/>
-    Blue
-    <input type="range" min="0" max="255" value="0" id="blue"/>
-
-    <div id="rgbText">
-        &nbsp;
+<div class="modal" id="colorEditor">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Use sliders to set color</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+             <p>
+    		Red <input type="range" min="0" max="255" value="0" id="red" class="custom-range"/>
+    		Green <input type="range" min="0" max="255" value="0" id="green" class="custom-range"/>
+    		Blue <input type="range" min="0" max="255" value="0" id="blue" class="custom-range"/>
+	    </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
     </div>
-    <div id="previewColor">
-    </div> 
+  </div>
+</div>
+
 
 	  {%if books %}
 	  <ul>
