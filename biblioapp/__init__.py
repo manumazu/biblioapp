@@ -237,7 +237,24 @@ def listNodesForTag(tag_id):
     )
     return response     
   return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
-    biblio_name=globalVars['arduino_map']['arduino_name'], author=tag['tag'])
+    biblio_name=globalVars['arduino_map']['arduino_name'], tag=tag)
+
+@app.route('/ajax_tag_color/<tag_id>', methods=['POST'])
+@flask_login.login_required
+def ajaxTagColor(tag_id):
+  if request.method == 'POST':
+    red = request.form['red'] 
+    green = request.form['green'] 
+    blue = request.form['blue']
+    color = red+','+green+','+blue
+    result = False
+    if db.set_color_for_tag(tag_id, color):
+      result = True
+    response = app.response_class(
+      response=json.dumps(result),
+      mimetype='application/json'
+    )
+    return response
 
 
 @app.route('/book/<book_id>')
