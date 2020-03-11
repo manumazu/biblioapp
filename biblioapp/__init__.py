@@ -41,6 +41,7 @@ def selectArduino():
   return redirect(url_for('login', _scheme='https', _external=True))
 
 @app.route("/module/<app_id>", methods=['GET', 'POST'])
+@flask_login.login_required
 def editArduino(app_id):
   if(flask_login.current_user.is_authenticated):
     module = db.get_arduino_map(flask_login.current_user.id, app_id)
@@ -57,6 +58,7 @@ def editArduino(app_id):
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db)
 
 @app.route('/authors/')
+@flask_login.login_required
 def listAuthors():
   globalVars = initApp()
   if(globalVars['user_login']==False):
