@@ -69,18 +69,17 @@ def listAuthors():
 @app.route('/categories/')
 @app.route('/categories/<uuid>/')
 def listCategories(uuid = None):
-  if uuid is not None:
+  if(flask_login.current_user.is_authenticated):
+    globalVars = initApp()
+    user_id = globalVars['arduino_map']['user_id']
+    categories = db.get_categories_for_user(user_id)
+  elif uuid is None:
+      return redirect(url_for('login', _scheme='https', _external=True))
+  elif uuid is not None:
     user_app = db.get_app_for_uuid(uuid)
     user = db.get_user_for_uuid(uuid)
     user_id = user['id']
     categories = db.get_categories_for_app(user_app['id'])
-  else:
-    globalVars = initApp()
-    user_id = globalVars['arduino_map']['user_id']
-    categories = db.get_categories_for_user(user_id)
-    if(globalVars['user_login']==False):
-      return redirect(url_for('login', _scheme='https', _external=True))
-  if uuid is not None:
     data = {}
     data['list_title'] = user_app['arduino_name']
     hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
@@ -280,7 +279,14 @@ def getBook(book_id):
         book['address'] = address
         book['arduino_name'] = module['arduino_name']
         book['app_id'] = module['id']
-        book['hasRequest'] = hasRequest  
+        book['hasRequest'] = hasRequest
+    #send json when token mode
+    if('token' in request.args):
+      response = app.response_class(
+        response=json.dumps(book),
+        mimetype='application/json'
+      )
+      return response         
     return render_template('book.html', user_login=globalVars['user_login'], book=book, \
         biblio_name=globalVars['arduino_map']['arduino_name'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
   abort(404)
