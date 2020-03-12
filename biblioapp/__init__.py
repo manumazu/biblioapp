@@ -75,7 +75,7 @@ def listCategories(uuid = None):
     categories = db.get_categories_for_user(user_id)
   elif uuid is None:
       return redirect(url_for('login', _scheme='https', _external=True))
-  elif uuid is not None:
+  if uuid is not None:
     user_app = db.get_app_for_uuid(uuid)
     user = db.get_user_for_uuid(uuid)
     user_id = user['id']
@@ -305,6 +305,26 @@ def ajaxCategories():
     mimetype='application/json'
   )
   return response
+
+#post request from app
+@app.route('/borrow/', methods=['GET'])
+@flask_login.login_required
+def borrowBook():
+  globalVars = initApp()
+  ret = []
+  if (request.method == 'GET') and ('token' in request.args):
+    app_id = request.args.get('app_id')
+    book_id = request.args.get('book_id')
+    action = request.args.get('action')
+    db.set_borrow_book(app_id, book_id, action)
+    address = db.get_position_for_book(app_id, book_id)
+  if('token' in request.args):
+    ret.append({'item':book_id,'action':'borrow','address':address}) 
+    response = app.response_class(
+      response=json.dumps(ret),
+      mimetype='application/json'
+    )
+    return response    
 
 #post request from app
 @app.route('/locate/', methods=['GET', 'POST'])

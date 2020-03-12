@@ -226,6 +226,17 @@ def get_positions_for_row(app_id, row) :
     return row
   return False
 
+def set_borrow_book(app_id, item_id, mode) :
+  if mode == 'add':
+    borrowed = 1
+  if mode == 'remove':
+    borrowed = 0
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_position SET borrowed=%s WHERE id_item=%s and id_app=%s", (borrowed, item_id, app_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True
 
 def sort_items(app_id, user_id, items, row) :
   mysql = get_db()
