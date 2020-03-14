@@ -350,24 +350,16 @@ def locateBook():
   '''get params from arduino'''      
   if (request.method == 'GET') and ('token' in request.args):
     app_id = request.args.get('app_id')
-    column = request.args.get('column')
-    row = request.args.get('row')
     book_id = request.args.get('book_id')
-    leds_range = request.args.get('range')
-    led_column = request.args.get('led_column')
-    address = {}
-    address['range'] = leds_range
-    address['led_column'] = led_column
-    address['position'] = column
-    address['row'] = row
+    address = db.get_position_for_book(app_id, book_id)    
     if 'remove_request' in request.args:
       action = 'remove'
 
   if action == 'remove':
-    db.del_request(app_id, column, row)
+    db.del_request(app_id, address['position'], address['row'])
     retMsg = 'Location removed for book {}'.format(book_id)
   else: 
-    db.set_request(app_id, row, column, leds_range, led_column)
+    db.set_request(app_id, address['row'], address['position'], address['range'], address['led_column'])
     retMsg = 'Location requested for book {}'.format(book_id)
 
   if('token' in request.args):
