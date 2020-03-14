@@ -539,10 +539,13 @@ def searchBookReference():
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):
     ref = request.args.get('ref')
-    r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
-    data = r.json()
+    book = {}
+    if ref != 'new':
+      r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
+      data = r.json()
+      book = data['volumeInfo']
     #print(data['volumeInfo'])
-    return render_template('booksearch.html', user_login=globalVars['user_login'], book=data['volumeInfo'], ref=ref)
+    return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref)
   else:
     return render_template('booksearch.html', user_login=globalVars['user_login'])
 

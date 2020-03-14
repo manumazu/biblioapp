@@ -87,30 +87,42 @@
 	   </li>
 	{% endfor %}
 	</ul>
+	{% else %}
+		<i><a href="{{ url_for('searchBookReference') }}?ref=new">Add new book</a> 
 	{% endif %}
 
         <!-- Detail book search results -->
-	{% if book %} 
-        <h2>{{book['title']}}</h2>
-	<ul>
-	     {% if 'imageLinks' in book %}
-                 {% set image_format = namespace() %}
-                 {% for imageLink in book['imageLinks'] %}
-                    <!--li>{{imageLink}} :: {{book['imageLinks'][imageLink]}}</li-->
-                    {% if imageLink == 'small' or imageLink == 'thumbnail' %}
-                       {% set image_format.value = imageLink %}
-                    {% endif %}
-                 {% endfor %}
-                 <li><img src="{{book['imageLinks'][image_format.value]}}"></li>
-             {% endif %}
-	    {% for field in book %}
-                {% if field != 'imageLinks' %}
-	        <!--li>{{ field}} :: {{ book[field] }}</li-->
-                {% endif %}
-	    {% endfor %}
-	</ul>
+	{% if ref %} 
 
-        {% include '_book_form.html' %}
+		<!-- new item -->
+		{% if ref == 'new' %}
+			<h2>new book</h2>
+
+		<!-- search results -->
+	    {% else %}
+
+	    	<h2>{{book['title']}}</h2>
+			<ul>
+		     {% if 'imageLinks' in book %}
+	                 {% set image_format = namespace() %}
+	                 {% for imageLink in book['imageLinks'] %}
+	                    <!--li>{{imageLink}} :: {{book['imageLinks'][imageLink]}}</li-->
+	                    {% if imageLink == 'small' or imageLink == 'thumbnail' %}
+	                       {% set image_format.value = imageLink %}
+	                    {% endif %}
+	                 {% endfor %}
+	                 <li><img src="{{book['imageLinks'][image_format.value]}}"></li>
+	             {% endif %}
+		    {% for field in book %}
+	                {% if field != 'imageLinks' %}
+		        <!--li>{{ field}} :: {{ book[field] }}</li-->
+	                {% endif %}
+		    {% endfor %}
+			</ul>
+
+		{% endif %}
+
+			{% include '_book_form.html' %}
 
 	{% endif %}
 
