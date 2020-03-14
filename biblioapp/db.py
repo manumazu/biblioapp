@@ -164,13 +164,14 @@ def clean_request(app_id) :
 
 ''' manage book '''
 def get_bookapi(bookapi, user_id):
-  mysql = get_db()
-  mysql['cursor'].execute("SELECT id FROM biblio_book WHERE `reference`=%s and `id_user`=%s", (bookapi['reference'], user_id))
-  row = mysql['cursor'].fetchone()
-  mysql['cursor'].close()
-  mysql['conn'].close()
-  if row:
-    return row
+  if(bookapi['reference']!='new'):
+    mysql = get_db()
+    mysql['cursor'].execute("SELECT id FROM biblio_book WHERE `reference`=%s and `id_user`=%s", (bookapi['reference'], user_id))
+    row = mysql['cursor'].fetchone()
+    mysql['cursor'].close()
+    mysql['conn'].close()
+    if row:
+      return row
   return False
 
 def set_book(bookapi, user_id) :
