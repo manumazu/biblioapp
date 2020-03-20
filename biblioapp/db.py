@@ -98,7 +98,7 @@ def get_books_to_range(user_id) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT bb.* FROM biblio_book bb \
   left join `biblio_tag_node` btn on bb.id =  btn.id_node and btn.node_type='book' \
-  inner join `biblio_tags` bt on btn.id_tag =  bt.id and bt.id_taxonomy=2 \
+  left join `biblio_tags` bt on btn.id_tag =  bt.id and bt.id_taxonomy=2 \
 	left join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
 	where bp.id_item is null group by bb.id order by bt.tag, bb.title and bb.id_user=%s", int(user_id))
   rows = mysql['cursor'].fetchall()
