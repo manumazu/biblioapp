@@ -103,4 +103,9 @@ $(document).ready(function() {
 
   });
 
+  $('#form-del-book').on('submit', function() {
+    var res = confirm('Are you sure ?');
+    return res;
+  });
+
 });

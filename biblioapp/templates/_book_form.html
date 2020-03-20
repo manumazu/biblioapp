@@ -105,5 +105,13 @@
 
 </fieldset>
 </form>
+
+{% if book['address'] == None and 'id' in book %}
+<br />
+<form method="post" action="/bookdelete/" class="form-horizontal" id="form-del-book">
+	<input type="hidden" name="id" value="{{ book['id'] }}">
+	<input type="submit" value="Delete" class="btn btn-danger">
+</form>
+{% endif %}
 </div>
 </div>

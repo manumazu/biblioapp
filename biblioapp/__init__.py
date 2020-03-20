@@ -286,7 +286,7 @@ def getBook(book_id):
         response=json.dumps(book),
         mimetype='application/json'
       )
-      return response         
+      return response      
     return render_template('book.html', user_login=globalVars['user_login'], book=book, \
         biblio_name=globalVars['arduino_map']['arduino_name'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
   abort(404)
@@ -557,6 +557,8 @@ def bookReferencer():
     bookapi['editor'] = request.form['editor']
     bookapi['pages'] = request.form['pages']
     bookapi['year'] = request.form['year']
+    if 'id' in request.form:
+      bookapi['id'] = request.form['id']
     bookId = db.set_book(bookapi, globalVars['arduino_map']['user_id'])
     '''manage tags + taxonomy'''
     authorTags = tools.getLastnameFirstname(authors)
@@ -572,6 +574,19 @@ def bookReferencer():
     return redirect(url_for('myBookShelf', _scheme='https', _external=True))
   return render_template('bookreferencer.html', user_login=globalVars['user_login'])
 
+
+@app.route('/bookdelete/', methods=['POST'])
+@flask_login.login_required
+def bookDelete():
+  globalVars = initApp()
+  book_id = request.form['id']
+  book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
+  if book: 
+    db.clean_tag_for_node(book_id, 1)#clean tags for categories
+    db.clean_tag_for_node(book_id, 2)#clean tags for authors
+    db.del_book(book_id, globalVars['arduino_map']['user_id'])
+    flash('Book "{}" is deleted'.format(book['title']))
+    return redirect(url_for('myBookShelf', _scheme='https', _external=True))
 
 '''
 Authentication

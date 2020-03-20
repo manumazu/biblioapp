@@ -96,9 +96,11 @@ def get_books_for_row(app_id, numrow) :
 
 def get_books_to_range(user_id) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_book bb \
+  mysql['cursor'].execute("SELECT bb.* FROM biblio_book bb \
+  left join `biblio_tag_node` btn on bb.id =  btn.id_node and btn.node_type='book' \
+  inner join `biblio_tags` bt on btn.id_tag =  bt.id and bt.id_taxonomy=2 \
 	left join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
-	where bp.id_item is null order by bb.author, bb.title and bb.id_user=%s", int(user_id))
+	where bp.id_item is null group by bb.id order by bt.tag, bb.title and bb.id_user=%s", int(user_id))
   rows = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -113,6 +115,13 @@ def get_book(book_id, user_id) :
   mysql['conn'].close()
   if row:
     return row
+
+def del_book(book_id, user_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("DELETE FROM biblio_book where id=%s and id_user=%s",(book_id, user_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
 
 def get_request(app_id) :
   mysql = get_db()
@@ -175,9 +184,18 @@ def get_bookapi(bookapi, user_id):
   return False
 
 def set_book(bookapi, user_id) :
-  hasBook = get_bookapi(bookapi, user_id)
   datepub = tools.getYear(bookapi['year'])
-  if hasBook is False:
+  hasBook = {}
+  if 'id' in bookapi:
+    mysql = get_db()
+    mysql['cursor'].execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, `reference`=%s, \
+    `description`=%s WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], datepub, \
+    bookapi['pages'], bookapi['reference'], bookapi['description'], bookapi['id']))
+    mysql['conn'].commit()
+    mysql['cursor'].close()
+    mysql['conn'].close()
+    hasBook['id'] = bookapi['id']    
+  else:
     mysql = get_db()
     mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, `reference`, `description`) \
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s )", (user_id, bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], datepub, \
@@ -185,14 +203,6 @@ def set_book(bookapi, user_id) :
     mysql['conn'].commit()
     mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
     hasBook = mysql['cursor'].fetchone()
-    mysql['cursor'].close()
-    mysql['conn'].close()
-  else:
-    mysql = get_db()
-    mysql['cursor'].execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, `reference`=%s, \
-    `description`=%s WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], datepub, \
-    bookapi['pages'], bookapi['reference'], bookapi['description'], hasBook['id']))
-    mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
   return hasBook
