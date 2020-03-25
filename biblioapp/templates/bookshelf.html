@@ -26,9 +26,10 @@
 	{% if tidybooks != None %}
 	  {% for position,book in tidybooks[line] %}
 	  	{%if book['item_type']=='book' %}
-	     <li id="book_{{book['id']}}" class="ui-state-default">
-               {% if book['requested'] %}[R]{% endif %}
-               <span class="del">x</span>
+	     <li id="book_{{book['id']}}" class="ui-state-default coverbook">
+               {% if book['requested'] %}<span class="badge badge-success badge-pill">R</span>{% endif %}
+               {% if book['borrowed'] %}<span class="badge badge-info badge-pill">B</span>{% endif %}
+               <span class="badge badge-warning badge-pill del">X</span>
                <a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
          </li>
         {%else%}
@@ -46,7 +47,7 @@
 	<ul id="draggable">
     	{% if bookstorange %}
 	   {% for book in bookstorange %}
-	     <li id="book_{{book['id']}}" class="ui-state-default">
+	     <li id="book_{{book['id']}}" class="ui-state-default coverbook">
 		<span class="del">x</span><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
 	     </li>
 	   {% endfor %}

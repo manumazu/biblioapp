@@ -85,8 +85,8 @@ def get_tidy_books(app_id, line = None) :
 
 def get_books_for_row(app_id, numrow) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT bb.`id`, bb.`title`, bb.`author`, bp.`position`, bp.`row`, bp.`item_type`, bp.`led_column`\
-  FROM biblio_book bb inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
+  mysql['cursor'].execute("SELECT bb.`id`, bb.`title`, bb.`author`, bp.`position`, bp.`row`, bp.`item_type`, bp.`led_column`,\
+  bp.`borrowed` FROM biblio_book bb inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
   inner join biblio_app app on bp.id_app=app.id where app.id=%s and bp.row=%s order by row, led_column",(app_id,numrow))  
   rows = mysql['cursor'].fetchall()
   mysql['cursor'].close()
@@ -100,7 +100,7 @@ def get_books_to_range(user_id) :
   left join `biblio_tag_node` btn on bb.id =  btn.id_node and btn.node_type='book' \
   left join `biblio_tags` bt on btn.id_tag =  bt.id and bt.id_taxonomy=2 \
 	left join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
-	where bp.id_item is null group by bb.id order by bt.tag, bb.title and bb.id_user=%s", int(user_id))
+	where bp.id_item is null group by bb.id order by bt.tag and bb.id_user=%s", int(user_id))
   rows = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()

@@ -1,5 +1,4 @@
-<div class="panel panel-default">
-<div class="panel-body">
+<div class="jumbotron">
 <form method="post" action="/bookreferencer/" class="form-horizontal">
 {% if 'pageCount' in book %}
   {% set pages = book['pageCount'] %}
@@ -113,5 +112,4 @@
 	<input type="submit" value="Delete" class="btn btn-danger">
 </form>
 {% endif %}
-</div>
 </div>

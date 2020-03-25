@@ -33,10 +33,29 @@ ul.droppable li { cursor: pointer; }
 
 @media screen and (min-width: 640px) {
 
-  ul#draggable li,   ul#draggable2 li, ul.droppable li {
+  .coverbook {
     background: #eedc9a; 
-    border:1px solid #ddd;
-    padding:5px;
+    border:  1px solid black;
+    padding: 5px;
+    position:relative;
+    z-index:10    
+  }
+
+
+  .coverbook:before 
+  {
+      content:"";
+      display:block;
+      position:absolute;
+      z-index:-1;
+      top:2px;
+      left:2px;
+      right:2px;
+      bottom:2px;
+      border:2px solid #36F
+  }  
+
+  ul#draggable li,   ul#draggable2 li, ul.droppable li {
     height:120px;
     width:81px;
     float:left;
@@ -61,10 +80,9 @@ ul.droppable li { cursor: pointer; }
 
 .droppable li .del {
   float:right;
-  margin-left:5px;
-  color:red;
-  font-size:13px;
   font-weight:bold;
+  font-size: 0.6rem;
+  color: red;
 }
 
 #draggable li .del {
