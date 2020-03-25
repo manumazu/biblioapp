@@ -23,15 +23,14 @@
   		</button>
 
 	    <div class="collapse navbar-collapse" id="navbarColor01">
+		{% if user_login %}	    	
 		    <ul class="navbar-nav mr-auto">	      	
-		{% if user_login %}
 			<li class="nav-item active"><a class="nav-link" href="#">Welcome {{ user_login }}<span class="sr-only">(current)</span> !!</a></li>
 			<li><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
-		{% else %}
-			<li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
-		{% endif %}
 			<li class="nav-item"><a class="nav-link" href="{{ url_for('searchBookReference') }}">Add new reference</a></li>
-			<li class="nav-item"><a class="nav-link" href="{{ url_for('myBookShelf') }}">My "{{ biblio_name }}" Book Shelf</a></li>
+			{% if biblio_name|length > 0 %}
+				<li class="nav-item"><a class="nav-link" href="{{ url_for('myBookShelf') }}">My "{{ biblio_name }}" Book Shelf</a></li>
+			{% endif %}
 		    <li class="nav-item"><a class="nav-link" href="{{ url_for('listAuthors') }}">Authors</a></li>
 		    <li class="nav-item"><a class="nav-link" href="{{ url_for('listCategories') }}">Categories</a></li>			
 	      </ul>
@@ -41,6 +40,11 @@
 			</div>
 			<button type="submit" class="btn btn-secondary my-2 my-sm-0">Submit</button>
 	    </form>
+		{% else %}
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+		</ul>
+		{% endif %}	    
 	  </div>
 	</nav>
 

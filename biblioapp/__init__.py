@@ -528,7 +528,8 @@ def searchBookReference():
     r = requests.get(url)
     data = r.json()
     #print(url)
-    return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form)
+    return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
+      biblio_name=globalVars['arduino_map']['arduino_name'])
 
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):
@@ -539,9 +540,11 @@ def searchBookReference():
       data = r.json()
       book = data['volumeInfo']
     #print(data['volumeInfo'])
-    return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref)
+    return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
+      biblio_name=globalVars['arduino_map']['arduino_name'])
   else:
-    return render_template('booksearch.html', user_login=globalVars['user_login'])
+    return render_template('booksearch.html', user_login=globalVars['user_login'], \
+      biblio_name=globalVars['arduino_map']['arduino_name'])
 
 @app.route('/bookreferencer/', methods=['POST'])
 @flask_login.login_required

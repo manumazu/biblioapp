@@ -1,3 +1,12 @@
+$(document).ready(function() {
+	//hack for menu mobile show not working with bootstrap 3.3
+	$('.navbar-toggler').on('click', function() {
+		if($(this).attr('aria-expanded') == 'false')
+			$('#navbarColor01').addClass('show');
+		if($(this).attr('aria-expanded')=='true')
+			$('#navbarColor01').removeClass('show');
+	})
+});
 
 
    function ajax_postOrder(elements,row) {
