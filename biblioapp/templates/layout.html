@@ -28,7 +28,7 @@
 			<li class="nav-item active"><a class="nav-link" href="#">Welcome {{ user_login }}<span class="sr-only">(current)</span> !!</a></li>
 			<li><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
 			<li class="nav-item"><a class="nav-link" href="{{ url_for('searchBookReference') }}">Add new reference</a></li>
-			{% if biblio_name|length > 0 %}
+			{% if biblio_name != None and biblio_name|length > 0 %}
 				<li class="nav-item"><a class="nav-link" href="{{ url_for('myBookShelf') }}">My "{{ biblio_name }}" Book Shelf</a></li>
 			{% endif %}
 		    <li class="nav-item"><a class="nav-link" href="{{ url_for('listAuthors') }}">Authors</a></li>
