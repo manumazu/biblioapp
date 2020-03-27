@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for
 from flask_bootstrap import Bootstrap
-import flask_login, hashlib
+import flask_login, hashlib, base64
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -442,12 +442,25 @@ def locateBooksForTag(tag_id):
 def getRequestForModule(uuid):
   user_app = db.get_app_for_uuid(uuid)
   if(user_app):
-    data = db.get_request(user_app['id'])
-    response = app.response_class(
-          response=json.dumps(data),
-          mimetype='application/json'
-    )
-    return response
+    element = {}
+    datas = db.get_request(user_app['id'])
+    if datas:
+      for data in datas:
+        keysort = str(data['column'])+'-'+str(data['row'])
+        element[keysort] = {'action':'add','address':data}
+      element = sorted(element.items())
+
+      #format array for json output (remove key)
+      ret = []
+      for elem in element:
+        if elem[1] is not None:
+          ret.append(elem[1])
+
+      response = app.response_class(
+            response=json.dumps(ret),
+            mimetype='application/json'
+      )
+      return response
   abort(404)
 
 #remove all request from arduino for current module
