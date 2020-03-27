@@ -446,8 +446,8 @@ def getRequestForModule(uuid):
     datas = db.get_request(user_app['id'])
     if datas:
       for data in datas:
-        keysort = str(data['column'])+'-'+str(data['row'])
-        element[keysort] = {'action':'add','address':data}
+        keysort = str(data['column'])+'00'+str(data['row'])
+        element[int(keysort)] = {'action':'add','address':data}
       element = sorted(element.items())
 
       #format array for json output (remove key)
