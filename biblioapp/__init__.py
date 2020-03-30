@@ -9,7 +9,7 @@ app.config.from_object("config")
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
-Bootstrap(app)
+bootstrap = Bootstrap(app)
 
 from biblioapp import db, tools, models
 
