@@ -1,11 +1,18 @@
-<p>
-<form action="/locate/" method="post">
+<div class="jumbotron">
+<form action="/locate/" method="post" class="form-horizontal">
 <fieldset>
-  <legend>Locate on bookshelf :</legend>	
-  <div class="form-group">
-  	<label for="range" class="col-lg-2 control-label">Adjust book interval :</label>
-  	<div class="col-lg-1">
-    <select class="custom-select" name="range" id="range-adjust">
+  <div class="form-group form-inline">  
+  <label for="submit" class="col-lg-3 control-label">Locate on bookshelf :</label>	
+  {%if book['hasRequest'] %}
+    <input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
+  {% else %}
+    <input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
+  {% endif %}
+  </div>
+  <div class="form-group form-inline">
+  	<label for="range" class="col-lg-3 control-label">Adjust book interval :</label>
+  	<div class="col-lg-3">
+    <select name="range" id="range-adjust">
       <option>Adjust book interval</option>
       {% for i in range(1,10) %}
       <option value="{{i}}" {%if i==book['address']['range']%} selected="selected" {%endif%}>{{i}}</option>
@@ -20,11 +27,5 @@
 <input type="hidden" name="app_id" value="{{ book['app_id'] }}">
 </fieldset>
 
-{%if book['hasRequest'] %}
-	<input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
-{% else %}
-	<input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
-{% endif %}
-
 </form>
-</p>
+</div>

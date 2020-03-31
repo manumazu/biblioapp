@@ -8,7 +8,7 @@
 {% block styles %}
 {{super()}}
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.css')}}">
+    <!--link rel="stylesheet" href="{{url_for('static', filename='bootstrap.css')}}"-->
     <link rel="stylesheet" href="{{url_for('static', filename='app.css')}}">
 {% endblock %}
 
@@ -17,7 +17,7 @@
 {% block navbar %}
   {{ super() }}
 
-	<nav class="navbar navbar-expand-lg navbar-dark bg-light">
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 	     <a class="navbar-brand" href="/">Biblio App</a>
 	     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
     		<span class="navbar-toggler-icon"></span>

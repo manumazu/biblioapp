@@ -1,4 +1,4 @@
-from biblioapp import app, db, flask_login, login_manager, session, hashlib
+from biblioapp import app, db, flask_login, login_manager, session, hashlib, redirect, url_for
 
 
 users = {'foo@bar.tld': {'password': 'secret'}}
@@ -57,4 +57,5 @@ def request_loader(request):
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return 'Unauthorized'    
+    #return 'Unauthorized'
+    return redirect(url_for('login', _scheme='https', _external=True))  

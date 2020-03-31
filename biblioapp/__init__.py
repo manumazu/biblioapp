@@ -28,6 +28,7 @@ def initApp():
   return {'user_login':user_login,'arduino_map':arduino_map,'arduino_name':arduino_name}
 
 @app.route("/", methods=['GET', 'POST'])
+@flask_login.login_required
 def selectArduino():
   if(flask_login.current_user.is_authenticated):
     modules = db.get_arduino_for_user(flask_login.current_user.id)
@@ -38,7 +39,6 @@ def selectArduino():
         flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
         return redirect(url_for('myBookShelf', _scheme='https', _external=True))
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
-  return redirect(url_for('login', _scheme='https', _external=True))
 
 @app.route("/module/<app_id>", methods=['GET', 'POST'])
 @flask_login.login_required
@@ -61,8 +61,6 @@ def editArduino(app_id):
 @flask_login.login_required
 def listAuthors():
   globalVars = initApp()
-  if(globalVars['user_login']==False):
-    return redirect(url_for('login', _scheme='https', _external=True))
   return render_template('authors.html', user_login=globalVars['user_login'], db=db, user_id=globalVars['arduino_map']['user_id'], \
     biblio_name=globalVars['arduino_map']['arduino_name'])
 
@@ -626,12 +624,6 @@ def login():
         return redirect(url_for('selectArduino', _scheme='https', _external=True))
 
       return 'Bad login'
-
-@app.route('/protected')
-@flask_login.login_required
-def protected():
-  flash('Logged in as: ' + flask_login.current_user.name)
-  return redirect(url_for('selectArduino', _scheme='https', _external=True))
 
 @app.route('/logout')
 def logout():

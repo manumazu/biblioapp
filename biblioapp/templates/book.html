@@ -15,7 +15,7 @@
 {% block content %}
 	<div class="container">
 
-	<h2>{{ book['title'] }} - {{ book['author'] }}</h2>
+	<h1 class="mt-5 text-white font-weight-light">{{ book['title'] }} - {{ book['author'] }}</h1>
 
         {% include '_book_form.html' %}
 
@@ -24,37 +24,39 @@
 		{% include '_locate_form.html' %}
 		
 	{% else %}
-	<form class="form-horizontal">
-		<script>
-			var book_title="{{ book['title'] }}";
-			var book_author="{{ book['author'] }}";
-			var book_url="{{ url_for('getBook',book_id=book['id']) }}";
-		</script>
-		<fieldset>
-		<legend><a href="javascript:void(0);" id="rangebook-{{ book['id'] }}">Add book in bookshlef :</a></legend>	
-		 {% set lines=range(biblio_nb_rows) %} 
-		 <div class="form-group" id="shelf-num">
-		    <label for="select" class="col-lg-2 control-label">Select a shelf:</label>
-		    <div class="col-lg-3">
-			<select class="custom-select" id="select-shelf">
-			  <option selected="selected">Shelf number</option>
-	     		{% for line in lines %}
-			  <option value="{{line+1}}">Shelf {{line+1}}</option>
-		 	{% endfor %}
-			</select>
-		    </div>
-		 </div>
+	<div class="jumbotron">
+		<form class="form-horizontal">
+			<script>
+				var book_title="{{ book['title'] }}";
+				var book_author="{{ book['author'] }}";
+				var book_url="{{ url_for('getBook',book_id=book['id']) }}";
+			</script>
+			<fieldset>
+			<legend><a href="javascript:void(0);" id="rangebook-{{ book['id'] }}">+ Add this book in bookshlef</a></legend>	
+			 {% set lines=range(biblio_nb_rows) %} 
+			 <div class="form-group" id="shelf-num">
+			    <label for="select" class="col-lg-2 control-label">Select a shelf:</label>
+			    <div class="col-lg-3">
+				<select class="custom-select" id="select-shelf">
+				  <option selected="selected">Shelf number</option>
+		     		{% for line in lines %}
+				  <option value="{{line+1}}">Shelf {{line+1}}</option>
+			 	{% endfor %}
+				</select>
+			    </div>
+			 </div>
 
-		 <ul id="droppable_0" class="droppable">
-		 </ul>
+			 <ul id="droppable_0" class="droppable">
+			 </ul>
 
-		 <input id="save-pos" type="button" value="Save position" class="btn btn-success">
+			 <input id="save-pos" type="button" value="Save position" class="btn btn-success">
 
-	    </fieldset>
-	</form>
+		    </fieldset>
+		</form>
+	</div>
 	{% endif %}
 
-	<blockquote>
+	<blockquote class="blockquote text-left">
 	  <p>Description</p>
 	  <small>{{ book['description'] }}</small>
 	</blockquote>

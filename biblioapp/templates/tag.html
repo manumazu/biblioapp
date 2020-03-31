@@ -19,7 +19,7 @@
 
 	<div class="container">
 
-	<h1>{{ tag['tag'] }}
+	<h1 class="mt-5 text-white font-weight-light">{{ tag['tag'] }}
 	{% if tag['id_taxonomy'] == 1 %} 
 		<a href="javascript:colorEditor();">
 		<span class="badge" {% if tag['color'] != None %} style="background-color:rgb({{ tag['color'] }}){%endif%}">
@@ -30,7 +30,7 @@
 
 	<div class="modal" id="colorEditor">
 	  <div class="modal-dialog" role="document">
-	    <div class="modal-content">
+	    <div class="modal-content bg-secondary">
 	      <div class="modal-header">
 	        <h5 class="modal-title">Use sliders to set color</h5>
 	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
