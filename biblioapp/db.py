@@ -509,4 +509,26 @@ def get_user(email):
   if row:
     return row
   return None
- 
+
+def set_customcode(user_id, app_id, title, description, customcode) :
+  now = tools.getNow()
+  mysql = get_db()
+  mysql['cursor'].execute("INSERT INTO biblio_customcode (`id_app`, `id_user`, `title`, `description`, `customcode`) \
+    VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE `id_app`=%s, `title`=%s, `description`=%s, `customcode`=%s, \
+    `date_upd`=%s", (app_id, user_id, title, description, customcode, app_id, title, description, customcode, \
+     now.strftime("%Y-%m-%d %H:%M:%S")))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True
+
+def get_customcode(user_id, app_id, code_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT * FROM biblio_customcode where id_user=%s and id_app=%s and id=%s", \
+    (user_id, app_id, code_id))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False

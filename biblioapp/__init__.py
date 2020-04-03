@@ -18,6 +18,14 @@ global arduino_name, user_login
 def initApp():
   user_login = False
   if(flask_login.current_user.is_authenticated):
+    #prevent empty session for module : select first one
+    if 'app_id' not in session:
+      modules = db.get_arduino_for_user(flask_login.current_user.id)
+      for module in modules:
+        session['app_id'] = module['id']
+        session['app_name'] = module['arduino_name']
+        flash('Bookshelf "{}"selected'.format(module['arduino_name']))
+        break
     user_login = flask_login.current_user.name  
     arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
     arduino_name = arduino_map['arduino_name']
@@ -602,6 +610,26 @@ def bookDelete():
     db.del_book(book_id, globalVars['arduino_map']['user_id'])
     flash('Book "{}" is deleted'.format(book['title']))
     return redirect(url_for('myBookShelf', _scheme='https', _external=True))
+
+
+@app.route('/customcodes/', methods=['GET', 'POST'])
+@flask_login.login_required
+def customCodes():
+  globalVars = initApp()
+  if request.method == 'POST':
+    if request.is_json:
+        json_customcode = request.get_json()
+        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, None, json_customcode)
+        #print(json_customcode)
+        #print(request.data.decode())
+  return render_template('customcodes.html', user_login=globalVars['user_login'])
+
+@app.route('/customcode/<code_id>')
+@flask_login.login_required
+def customCode(code_id):
+  globalVars = initApp()
+  data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
+  return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode())
 
 '''
 Authentication
