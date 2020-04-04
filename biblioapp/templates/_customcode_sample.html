@@ -1,0 +1,52 @@
+	  <h2>Example :</h2>
+	  <p class="lead">"Turn on [all] LEDs with an offset of [5], on [each] strip with [different] colors."</p>
+	  <p>In this phrase, we have defined 4 variables :</p>
+
+	  <form class="form-horizontal">
+	  	<fieldset>
+	  	<div class="form-group form-inline">
+	  	  <input type="text" class="col-sm-1 form-control" name="nbLeds_val" placeholder="nbLeds">	
+	      <label for="nbLeds_val" class="col-lg-3 control-label">nbLeds = number of leds to display </label>
+	    </div>
+
+	  	<div class="form-group form-inline">
+		  <input type="text" class="col-sm-1 form-control" name="offset_val" placeholder="offset">	  		
+	      <label for="offset_val" class="col-lg-2 control-label">offset = number of the offset</label>
+	    </div>	
+
+	  	<div class="form-group form-inline">
+		  <input type="text" class="col-sm-1 form-control" name="nbStrips_val" placeholder="nbStrips">	  		
+	      <label for="nbStrips_val" class="col-lg-3 control-label">nbStrips = number of strips to display</label>
+	    </div>	
+
+	  	<div class="form-group form-inline">
+	      <input type="text" class="col-sm-2 form-control" name="colorCode_val" placeholder="colorCode">
+	      <label for="colorCode_val" class="col-lg-3 control-label">color = code or mode of the colors to be shown </label>
+	    </div>	
+	    </fieldset>	 
+	    {% if data|length > 0 %}
+	    	<input type="hidden" name="code_id" value="{{ data['id'] }}">
+	    {% endif %}
+	    <input type="button" name="customcode_update" id="customcode_update" value="Save code">   	       
+	  </form>
+
+	<!-- code version from sample -->
+	  <pre id="customCodePreview">
+
+app.forceExit = false;	  	
+var nbLeds = <span id="nbLeds_val"></span>;
+var offset = <span id="offset_val"></span>;
+var nbStrips = <span id="nbStrips_val"></span>;
+var color = <span id="colorCode_val"></span>;
+{{"
+for(n=0; n<nbLeds; n+=offset) { //loop for leds
+	var strip = 1;
+	while(strip<=nbStrips) { // loop for strips
+		if(app.forceExit) break; 
+		app.setBlockMessage(n, strip, offset, color, 0, 90);
+		await timer(70);
+		strip++;
+	}
+}
+"}}
+	  </pre>  

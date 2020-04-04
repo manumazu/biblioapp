@@ -619,17 +619,22 @@ def customCodes():
   if request.method == 'POST':
     if request.is_json:
         json_customcode = request.get_json()
-        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, None, json_customcode)
+        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, None, None, json_customcode)
         #print(json_customcode)
         #print(request.data.decode())
   return render_template('customcodes.html', user_login=globalVars['user_login'])
 
-@app.route('/customcode/<code_id>')
+@app.route('/customcode/<code_id>', methods=['GET', 'POST'])
 @flask_login.login_required
 def customCode(code_id):
   globalVars = initApp()
+  if request.method == 'POST':
+    if request.is_json:
+        json_customcode = request.get_json()
+        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, None, None, json_customcode)  
   data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
-  return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode())
+  return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
+    data=data)
 
 '''
 Authentication

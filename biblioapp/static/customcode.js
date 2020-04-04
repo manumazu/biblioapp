@@ -2,6 +2,8 @@ $(document).ready(function() {
 
 	$('#customCodePreview').hide();
 
+	var code_id = $('input[name="code_id"]').val();
+
 	$('#customcode_update').on('click', function() {
 
 		var nbLeds_val = $('input[name="nbLeds_val"]').val();
@@ -17,12 +19,14 @@ $(document).ready(function() {
 		$('#colorCode_val').html("'"+colorCode_val+"'");
 
 		$('#customCodePreview').show();
+		//hide old version
+		$('#customCodeCurrent').hide();
 
 		$.ajax({
 	  	      data: JSON.stringify($('#customCodePreview').text()),
 	  	      type: 'POST',
 	  	      contentType: 'application/json',
-	  	      url: '/customcodes/', 
+	  	      url: '/customcode/'+code_id, 
 	  	      dataType: 'json',
 	  	      complete: function(res){ alert('code saved'); }
 	      });
