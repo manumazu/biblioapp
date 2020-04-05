@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block title %}Custom Messages{% endblock %}
+{% block styles %}
+    {{super()}}
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+		
+	<h1 class="mt-5 text-white font-weight-light">Display leds on your way !</h1>
+
+	<p>Learn how programming with your leds : each step of your code can be easily controlled on the strips.</p>
+
+	<div class="jumbotron">
+	  
+	  {% include '_customcode_sample.html' %}
+
+	<!-- version currently saved -->
+	<pre id="customCodeCurrent">
+		{{ customcode }}
+	</pre>
+
+	</div>
+
+	{{ super() }}
+	</div>
+{% endblock %}
+
+{% block scripts %}
+  {{super()}}
+   <script src="{{url_for('static', filename='customcodes.js')}}" async=""></script>
+{% endblock %}
+
+{% endblock %}
