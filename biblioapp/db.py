@@ -510,15 +510,16 @@ def get_user(email):
     return row
   return None
 
-def set_customcode(user_id, app_id, code_id, title, description, customcode) :
+def set_customcode(user_id, app_id, code_id, title, description, customvars, customcode) :
   now = tools.getNow()
   mysql = get_db()
   if code_id is None :
-    mysql['cursor'].execute("INSERT INTO biblio_customcode (`id_app`, `id_user`, `title`, `description`, `customcode`) \
-    VALUES (%s, %s, %s, %s, %s)", (app_id, user_id, title, description, customcode))
+    mysql['cursor'].execute("INSERT INTO biblio_customcode (`id_app`, `id_user`, `title`, `description`, `customvars`, \
+      `customcode`) VALUES (%s, %s, %s, %s, %s, %s)", (app_id, user_id, title, description, customvars, customcode))
   else :
-    mysql['cursor'].execute("UPDATE biblio_customcode SET `id_app`=%s, `title`=%s, `description`=%s, `customcode`=%s, \
-    `date_upd`=%s WHERE id=%s", (app_id, title, description, customcode, now.strftime("%Y-%m-%d %H:%M:%S"), code_id))
+    mysql['cursor'].execute("UPDATE biblio_customcode SET `id_app`=%s, `title`=%s, `description`=%s, `customvars`=%s, \
+      `customcode`=%s, `date_upd`=%s WHERE id=%s", (app_id, title, description, customvars, customcode, \
+        now.strftime("%Y-%m-%d %H:%M:%S"), code_id))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()

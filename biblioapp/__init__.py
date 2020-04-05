@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for
+from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify
 from flask_bootstrap import Bootstrap
 import flask_login, hashlib, base64
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -616,11 +616,14 @@ def bookDelete():
 @flask_login.login_required
 def customCodes():
   globalVars = initApp()
+
+  #manage post data from json request
   if request.method == 'POST':
     if request.is_json:
-        json_customcode = request.get_json()
-        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, None, None, json_customcode)
-        #print(json_customcode)
+        jsonr = request.get_json()
+        #print(json)
+        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], None, \
+          json.dumps(jsonr['customvars']), jsonr['customcode'])
         #print(request.data.decode())
   return render_template('customcodes.html', user_login=globalVars['user_login'])
 
@@ -628,13 +631,27 @@ def customCodes():
 @flask_login.login_required
 def customCode(code_id):
   globalVars = initApp()
+
+  #manage post data from json request
   if request.method == 'POST':
     if request.is_json:
-        json_customcode = request.get_json()
-        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, None, None, json_customcode)  
+        jsonr = request.get_json()
+        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], None, \
+         json.dumps(jsonr['customvars']), jsonr['customcode'])  
+
   data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
+  customvars = ''
+  if len(data['customvars'])>0:
+    customvars = json.loads(data['customvars'])
+  #send json when token mode
+  if('token' in request.args):
+    response = app.response_class(
+      response=json.dumps(data['customcode'].decode()),
+      mimetype='application/json'
+    )
+    return response
   return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
-    data=data)
+    customvars=customvars, data=data)
 
 '''
 Authentication
