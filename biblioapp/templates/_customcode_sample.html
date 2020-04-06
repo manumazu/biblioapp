@@ -6,9 +6,14 @@
 	  	<fieldset>
 
 	  	<div class="form-group form-inline">
-	      <label for="colorCode_val" class="col-lg-1 control-label">Title </label>
-	      <input type="text" class="col-sm-5 form-control" name="code_title" placeholder="code Title" {% if data|length > 0 and data['title'] != None %}value="{{ data['title'] }}"{% endif %}>
+	      <label for="code_title" class="col-lg-1 control-label">Title </label>
+	      <input type="text" class="col-sm-5 form-control" name="code_title" id="code_title" placeholder="code Title" {% if data|length > 0 and data['title'] != None %}value="{{ data['title'] }}"{% endif %}>
 	    </div>	
+
+	    <div class="form-group form-inline">
+	      <label for="description" class="col-lg-1 control-label">Description</label>
+	      <textarea class="col-sm-5 form-control" id="description" name="description" rows="3">{% if data|length > 0 and data['description'] != None %}{{ data['description'] }}{% endif %}</textarea>
+	    </div>	 
 
 	  	<div class="form-group form-inline">
 	  	  <input type="text" class="col-sm-1 form-control" name="nbLeds_val" placeholder="nbLeds" {% if customvars|length > 0 %}value="{{ customvars['nbLeds_val'] }}"{% endif %}>	
@@ -34,7 +39,7 @@
 	    	<input type="hidden" name="code_id" value="{{ data['id'] }}">
 	    {% endif %}
 
-	    <input type="button" name="customcode_preview" id="btn-customcode_preview" class="btn btn-primary" value="Show code">
+	    <input type="button" name="customcode_preview" id="btn-customcode_preview" class="btn btn-primary" value="Code preview">
 	    <input type="button" name="customcode_update" id="btn-customcode_update" class="btn btn-success" value="Save code"> 
 
 	  </form>

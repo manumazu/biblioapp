@@ -535,3 +535,14 @@ def get_customcode(user_id, app_id, code_id) :
   if row:
     return row
   return False
+
+def get_customcodes(user_id, app_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd FROM biblio_customcode where id_user=%s and id_app=%s", \
+    (user_id, app_id))
+  row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False

@@ -616,16 +616,33 @@ def bookDelete():
 @flask_login.login_required
 def customCodes():
   globalVars = initApp()
-
+  codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])
+  print(codes)
+  #send json when token mode
+  if('token' in request.args):
+    data = {}
+    data['list_title'] = 'Your codes for ' + session['app_name']
+    hashmail = hashlib.md5(flask_login.current_user.id.encode('utf-8')).hexdigest()
+    for i in range(len(codes)):
+      codes[i]['url'] = url_for('customCode',code_id=codes[i]['id'])
+      codes[i]['token'] = hashmail
+    data['elements']= codes
+    response = app.response_class(
+      response=json.dumps(data),
+      mimetype='application/json'
+    )
+    return response  
+  if request.args.get('saved'):
+    flash('Your code is saved')  
   #manage post data from json request
   if request.method == 'POST':
     if request.is_json:
         jsonr = request.get_json()
         #print(json)
-        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], None, \
+        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
           json.dumps(jsonr['customvars']), jsonr['customcode'])
         #print(request.data.decode())
-  return render_template('customcodes.html', user_login=globalVars['user_login'])
+  return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json)
 
 @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -633,11 +650,11 @@ def customCode(code_id):
   globalVars = initApp()
 
   #manage post data from json request
-  if request.method == 'POST':
+  if request.method == '  POST':
     if request.is_json:
-        jsonr = request.get_json()
-        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], None, \
-         json.dumps(jsonr['customvars']), jsonr['customcode'])  
+        jsonr = request.get_json()       
+        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], jsonr['description'], \
+         json.dumps(jsonr['customvars']), jsonr['customcode'])
 
   data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
   customvars = ''

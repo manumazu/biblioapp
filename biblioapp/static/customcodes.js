@@ -34,6 +34,7 @@ $(document).ready(function() {
 
 		var elements = new Object();
 		elements['title'] = $('input[name="code_title"]').val();
+		elements['description'] = $('textarea[name="description"]').val();
 		elements['customcode'] = $('#customCodePreview').text();
 
 		var customvars = new Object();
@@ -54,7 +55,7 @@ $(document).ready(function() {
 	  	      contentType: 'application/json',
 	  	      url: dest_url, 
 	  	      dataType: 'json',
-	  	      complete: function(res){ alert('code saved'); }
+	  	      complete: function(res){ window.location='/customcodes/?saved='+code_id; }
 	      });
 	});
 
