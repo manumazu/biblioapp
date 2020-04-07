@@ -44,6 +44,8 @@ def selectArduino():
       if 'action' in request.form and request.form.get('action')=='select':
         session['app_id'] = request.form.get('module_id')
         session['app_name'] = request.form.get('module_name')
+        if request.form.get('numshelf') and int(request.form.get('numshelf'))>0:
+          session['app_numshelf'] = int(request.form.get('numshelf'))
         flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
         return redirect(url_for('myBookShelf', _scheme='https', _external=True))
     return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
@@ -88,7 +90,7 @@ def listCategories(uuid = None):
     categories = db.get_categories_for_app(user_app['id'])
     data = {}
     data['list_title'] = user_app['arduino_name']
-    hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
+    hashmail = tools.set_token(user['email'])
     for i in range(len(categories)):
       categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
       categories[i]['token'] = hashmail
@@ -114,7 +116,10 @@ def myBookShelf():
   globalVars = initApp()
   app_id = globalVars['arduino_map']['id']
   if request.method == 'GET' and request.args.get('rownum'):
+    session['app_numshelf'] = int(request.args.get('rownum'))
     shelfs = [int(request.args.get('rownum'))]
+  if request.method == 'GET' and 'app_numshelf' in session and int(session['app_numshelf'])>0:
+    shelfs = [int(session['app_numshelf'])]    
   else:
     shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
   elements = {}
@@ -136,8 +141,8 @@ def myBookShelf():
       elements[shelf] = sorted(element.items())
   bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
   return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
-      bookstorange=bookstorange, lines=shelfs, \
-      biblio_name=globalVars['arduino_map']['arduino_name'])
+      bookstorange=bookstorange, lines=shelfs, biblio_name=globalVars['arduino_map']['arduino_name'], \
+      nb_lines=globalVars['arduino_map']['nb_lines'], session=session)
 
 
 @app.route("/ajax_positions_inline/", methods=['GET'])
@@ -487,8 +492,11 @@ def setResetForModule(uuid):
 @app.route('/module/<uuid>/')
 def getModule(uuid):
   user_app = db.get_app_for_uuid(uuid)
+  user = db.get_user_for_uuid(uuid)
   if(user_app):
+    data = {}
     data = user_app
+    data['token'] = tools.set_token(user['email'])
     response = app.response_class(
           response=json.dumps(data),
           mimetype='application/json'
@@ -514,7 +522,7 @@ def listAuthorsForModule(uuid):
       if items:
         '''set url for authenticate requesting location from app'''
         for i in range(len(items)):
-          hashmail = hashlib.md5(user['email'].encode('utf-8')).hexdigest()
+          hashmail = tools.set_token(user['email'])
           items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
           items[i]['token'] = hashmail
         #data['elements'][j]['items'] = items
@@ -622,7 +630,7 @@ def customCodes():
   if('token' in request.args):
     data = {}
     data['list_title'] = 'Your codes for ' + session['app_name']
-    hashmail = hashlib.md5(flask_login.current_user.id.encode('utf-8')).hexdigest()
+    hashmail = tools.set_token(flask_login.current_user.id)
     for i in range(len(codes)):
       codes[i]['url'] = url_for('customCode',code_id=codes[i]['id'])
       codes[i]['token'] = hashmail
@@ -694,6 +702,7 @@ def login():
 
 @app.route('/logout')
 def logout():
+    session.clear()
     flask_login.logout_user()
     flash('Logged out')
     return redirect(url_for('login', _scheme='https', _external=True))

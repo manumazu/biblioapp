@@ -15,9 +15,19 @@
 
 <div class="container text-center">
   <h1 class="mt-5 text-white font-weight-light">Liste of books in your "{{ biblio_name }}" bookcase :</h1>
-  <p class="lead text-white-50">Drag elements to record their position in shelfs.</p>
- 
-	<div class="biblio">
+
+<p class="mb-1">
+  <div class="text-white-50 d-inline">Drag elements to record their position in shelfs.</div>
+  <div class="text-white-50 d-inline">Change shelf : 
+ 	<select class="col-sm-2 small" id="numshelf" name="numshelf" onchange="javascript:window.location='/app/?rownum='+$(this).val()">
+		<option value="0">All shelfs</option>
+     	{% for line in range(nb_lines) %}
+		  <option value="{{line+1}}" {% if session['app_numshelf']==(line+1) %}selected="selected"{% endif %}>Shelf {{line+1}}</option>
+	 	{% endfor %}
+	</select>
+   </div>
+</p>  
+  <div class="biblio">
 
 	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line)}}',{% endfor %}];</script>
 

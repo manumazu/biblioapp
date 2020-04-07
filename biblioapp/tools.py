@@ -1,5 +1,5 @@
 from datetime import datetime
-from biblioapp import app
+from biblioapp import app, hashlib
 
 def getYear(datestr):
   if len(datestr)>10:
@@ -24,6 +24,9 @@ def getLastnameFirstname(names):
     else:
       lnfn.append(namearr[0])
   return lnfn
+
+def set_token(email):
+  return hashlib.md5(email.encode('utf-8')).hexdigest()
 
 def led_range(nb_pages):
         if nb_pages.strip() == '':
