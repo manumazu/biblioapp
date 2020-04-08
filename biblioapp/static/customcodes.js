@@ -2,8 +2,17 @@ $(document).ready(function() {
 
 	$('#customCodePreview').hide();
 	$('#btn-customcode_update').hide();	
+	if($('input[name="colorCode_val"]').val() != 'color') 
+		$('#rgbCode').hide();
 
 	var code_id = $('input[name="code_id"]').val(); // key for update object
+
+	$('input[name="colorCode_val"]').on('change', function() {
+		if($('input[name="colorCode_val"]').val() == 'color') 
+			$('#rgbCode').show();
+		else
+			$('#rgbCode').hide();
+	});
 
 	//preview code
 	$('#btn-customcode_preview').on('click', function() {
@@ -13,11 +22,15 @@ $(document).ready(function() {
 		var offset_val = $('input[name="offset_val"]').val();
 		var nbStrips_val = $('input[name="nbStrips_val"]').val();	
 		var colorCode_val = $('input[name="colorCode_val"]').val();	
+		var rgbCode_val = 0;
+		if($('input[name="rgbCode_val"]').val() != '')
+			rgbCode_val = $('input[name="rgbCode_val"]').val();
 
 		$('#nbLeds_val').html(nbLeds_val);
 		$('#offset_val').html(offset_val);
 		$('#nbStrips_val').html(nbStrips_val);
 		$('#colorCode_val').html("'"+colorCode_val+"'");
+		$('#rgbCode_val').html("'"+rgbCode_val+"'");
 
 		//show preview
 		$('#customCodePreview').show();
@@ -42,6 +55,7 @@ $(document).ready(function() {
 		customvars['offset_val'] = $('input[name="offset_val"]').val();
 		customvars['nbStrips_val'] = $('input[name="nbStrips_val"]').val();
 		customvars['colorCode_val'] = $('input[name="colorCode_val"]').val();
+		customvars['rgbCode_val'] = $('input[name="rgbCode_val"]').val();
 		elements['customvars'] = customvars;
 
 		dest_url = '/customcodes/'; // new object

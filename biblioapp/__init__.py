@@ -621,11 +621,12 @@ def bookDelete():
 
 
 @app.route('/customcodes/', methods=['GET', 'POST'])
+@app.route('/customcodes/<uuid>/', methods=['GET', 'POST'])
 @flask_login.login_required
-def customCodes():
+def customCodes(uuid = None):
   globalVars = initApp()
   codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])
-  print(codes)
+  #print(codes)
   #send json when token mode
   if('token' in request.args):
     data = {}
@@ -658,9 +659,9 @@ def customCode(code_id):
   globalVars = initApp()
 
   #manage post data from json request
-  if request.method == '  POST':
+  if request.method == 'POST':
     if request.is_json:
-        jsonr = request.get_json()       
+        jsonr = request.get_json()
         db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], jsonr['description'], \
          json.dumps(jsonr['customvars']), jsonr['customcode'])
 
