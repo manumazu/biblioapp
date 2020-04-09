@@ -2,6 +2,7 @@
 {% block title %}Custom Messages{% endblock %}
 {% block styles %}
     {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='customcodes.css')}}">
 {% endblock %}
 
 {% block body %}
@@ -22,7 +23,7 @@
 	  {% include '_customcode_sample.html' %}
 
 	<!-- version currently saved -->
-	<pre id="customCodeCurrent">
+	<pre id="customCodeCurrent" class="text-white-50 bg-dark p-3 mt-3 customcode">
 		{{ customcode }}
 	</pre>
 

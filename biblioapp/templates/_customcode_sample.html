@@ -40,6 +40,23 @@
 	      <label for="rgbCode_val" class="col-lg-3 control-label">rgb = code of the color to be shown ("color" mode) </label>
 	    </div>	
 
+		<div class="form-group form-inline">
+			Define loop priority :
+			<div class="form-check ml-2">
+				<label class="form-check-label">
+				  <input type="radio" class="form-check-input" name="loop_priority" value="stripfirst" {% if customvars|length > 0 and customvars['loop_priority']=='stripfirst' %}checked=""{% endif %}>
+				  Strip first
+				</label>
+			</div>
+
+			<div class="form-check ml-2">
+				<label class="form-check-label">
+				  <input type="radio" class="form-check-input" name="loop_priority" value="ledsfirst" {% if customvars|length > 0 and customvars['loop_priority']=='ledsfirst' %}checked=""{% endif %}>
+				  Leds first
+				</label>
+			</div>	
+		</div>    
+
 	    </fieldset>	 
 	    {% if data|length > 0 %}
 	    	<input type="hidden" name="code_id" value="{{ data['id'] }}">
@@ -51,16 +68,16 @@
 	  </form>
 
 	<!-- code version from sample -->
-	  <pre id="customCodePreview">
-
+<pre id="customCodePreview" class="text-white-50 bg-dark p-3 mt-3 customcode">
+<code id="customvars">
 app.forceExit = false;	  	
 var nbLeds = <span id="nbLeds_val"></span>;
 var offset = <span id="offset_val"></span>;
 var nbStrips = <span id="nbStrips_val"></span>;
 var color = <span id="colorCode_val"></span>;
 var rgb = <span id="rgbCode_val"></span>;
-{{"
-for(n=0; n<nbLeds; n+=offset) { //loop for leds
+</code><code id="stripfirst">	
+{{"for(n=0; n<nbLeds; n+=offset) { //loop for leds
 	var strip = 1;
 	while(strip<=nbStrips) { // loop for strips
 		if(app.forceExit) break; 
@@ -70,4 +87,16 @@ for(n=0; n<nbLeds; n+=offset) { //loop for leds
 	}
 }
 "}}
-	  </pre>  
+</code><code id="ledsfirst">	
+{{"var strip = 1;
+while(strip<=nbStrips) { // loop for strips
+	for(n=0; n<nbLeds; n+=offset) { //loop for leds
+		if(app.forceExit) break; 
+		app.setBlockMessage(n, strip, offset, color, rgb, 90);
+		await timer(70);
+	}
+	strip++;	
+}
+"}}
+</code>
+</pre>

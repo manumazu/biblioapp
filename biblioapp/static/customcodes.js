@@ -1,6 +1,7 @@
 $(document).ready(function() {
 
 	$('#customCodePreview').hide();
+
 	$('#btn-customcode_update').hide();	
 	if($('input[name="colorCode_val"]').val() != 'color') 
 		$('#rgbCode').hide();
@@ -33,7 +34,14 @@ $(document).ready(function() {
 		$('#rgbCode_val').html("'"+rgbCode_val+"'");
 
 		//show preview
-		$('#customCodePreview').show();
+		var loop_priority = $('input[name="loop_priority"]:checked').val();
+		if(loop_priority=='ledsfirst')
+			$('#stripfirst').hide();
+		if(loop_priority=='stripfirst')
+			$('#ledsfirst').hide();		
+		$('#'+loop_priority).show();
+		$('#customCodePreview').show();		
+
 		//hide old version
 		if(code_id !== undefined) {
 			$('#customCodeCurrent').hide();
@@ -46,9 +54,11 @@ $(document).ready(function() {
 	$('#btn-customcode_update').on('click', function() {
 
 		var elements = new Object();
+		var loop_priority = $('input[name="loop_priority"]:checked').val();
+
 		elements['title'] = $('input[name="code_title"]').val();
 		elements['description'] = $('textarea[name="description"]').val();
-		elements['customcode'] = $('#customCodePreview').text();
+		elements['customcode'] = $('#customvars').text()+''+$('#'+loop_priority).text();
 
 		var customvars = new Object();
 		customvars['nbLeds_val'] = $('input[name="nbLeds_val"]').val();
@@ -56,6 +66,7 @@ $(document).ready(function() {
 		customvars['nbStrips_val'] = $('input[name="nbStrips_val"]').val();
 		customvars['colorCode_val'] = $('input[name="colorCode_val"]').val();
 		customvars['rgbCode_val'] = $('input[name="rgbCode_val"]').val();
+		customvars['loop_priority'] = loop_priority;
 		elements['customvars'] = customvars;
 
 		dest_url = '/customcodes/'; // new object
