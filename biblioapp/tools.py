@@ -42,3 +42,42 @@ def led_range(nb_pages):
 @app.context_processor
 def utility_processor():
     return dict(led_range=led_range)
+
+'''build blocks of nearby positions :
+agregate intervals and reduce messages to Arduino
+'''
+def build_block_position(positions):
+  cpt = 0
+  blockend = 0  
+  block = {}
+  blocks = []
+  blockelem = []
+  for i, pos in enumerate(positions): 
+    #check if current pos is following the previous pos
+    if int(pos['led_column']) == int(positions[i-1]['led_column'] + positions[i-1]['interval']): 
+
+      #store node ids inside 1 block
+      if positions[i-1]['id_node'] not in blockelem:
+        blockelem.append(positions[i-1]['id_node'])
+      if pos['id_node'] not in blockelem:        
+        blockelem.append(pos['id_node'])
+
+      #build block element : get first position and agragate intervals
+      cpt+=1
+      blockend += positions[i-1]['interval']
+      if cpt==1:
+        block = {'row':pos['row'], 'start':positions[i-1]['led_column']}
+      block.update({'interval':blockend+pos['interval'], 'nodes':blockelem})
+
+      #populate blocks list
+      if block not in blocks:
+        blocks.append(block)
+        
+    #reinit for next block
+    else:
+      block = {}
+      blockelem = []
+      blockend = 0
+      cpt = 0
+      
+  return blocks

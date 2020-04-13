@@ -418,6 +418,7 @@ def locateBooksForTag(tag_id):
     db.clean_request(module['id'])#clean all module's request
 
   element = {}
+  _positions = {}
   for node in nodes:
     address = db.get_position_for_book(module['id'], node['id_node'])
     if address:
@@ -427,11 +428,24 @@ def locateBooksForTag(tag_id):
       if(action=='remove'):#delete request for tag's nodes
         db.del_request(module['id'], address['position'], address['row'])
       keysort = str(address['position'])+'00'+str(address['row'])
-      element[int(keysort)] = {'item':book['title'],'action':action,'address':address,'tag':tag}      
+      element[int(keysort)] = {'item':book['title'],'action':action,'address':address,'tag':tag}
+
+      _poskey=address['row']*100+address['position']
+      _positions[_poskey]={'row':address['row'],'led_column':address['led_column'],'interval':address['range'], \
+      'color':tag['color'],'id_node':node['id_node']}
+
   if(action=='remove'):
     element = sorted(element.items(), reverse = True)
   else:
     element = sorted(element.items())
+
+  '''get elements for block build'''
+  elms = sorted(_positions.items())
+  out = []
+  for elm in elms:
+    out.append(elm[1])
+  blocks = tools.build_block_position(out)
+  print(blocks)
 
   ret = []
   for elem in element:
