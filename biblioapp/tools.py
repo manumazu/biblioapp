@@ -46,7 +46,7 @@ def utility_processor():
 '''build blocks of nearby positions :
 agregate intervals and reduce messages to Arduino
 '''
-def build_block_position(positions):
+def build_block_position(positions, action):
 
   cpt = 0
   blockend = 0  
@@ -55,10 +55,12 @@ def build_block_position(positions):
   blockelem = []
   uniqelem = []
 
+  #loop 1 : group nearby positions, and separate isolated postions 
   for i, pos in enumerate(positions): 
-    
+
     #check if current pos is following the previous pos
-    if int(pos['led_column']) == int(positions[i-1]['led_column'] + positions[i-1]['interval']): 
+    if int(pos['led_column']) == int(positions[i-1]['led_column'] + positions[i-1]['interval']) \
+    and pos['color'] == positions[i-1]['color'] and pos['row'] == positions[i-1]['row'] : 
 
       firstElem = positions[i-1]
 
@@ -68,7 +70,7 @@ def build_block_position(positions):
       if pos['id_node'] not in blockelem:        
         blockelem.append(pos['id_node'])
 
-      #remove block first element from isolated elements
+      #remove block first element from isolated list
       if firstElem['id_node'] in uniqelem:
         uniqelem.remove(firstElem['id_node'])
 
@@ -76,7 +78,7 @@ def build_block_position(positions):
       cpt+=1
       blockend += firstElem['interval']
       if cpt==1:
-        block = {'row':pos['row'], 'start':firstElem['led_column']}
+        block = {'row':pos['row'], 'index':i, 'start':firstElem['led_column'], 'color':pos['color'],}
       block.update({'interval':blockend+pos['interval'], 'nodes':blockelem})
 
       #populate blocks list
@@ -94,5 +96,22 @@ def build_block_position(positions):
       #store isolated elements
       uniqelem.append(pos['id_node'])
   
-  print(uniqelem)   
+  #loop 2 : build response for isolated elements
+  for i, pos in enumerate(positions): 
+    for id_node in uniqelem:
+      if id_node == pos['id_node']:
+        blocks.append({'row':pos['row'], 'index':i, 'start':pos['led_column'], 'color':pos['color'], 'interval':pos['interval'], 'nodes':[id_node]})
+
+  #reset order for blocks:
+  if(action=='remove'):
+    blocks.sort(key=sortIndexBlocks, reverse=True)
+  else:
+    blocks.sort(key=sortIndexBlocks)
+
   return blocks
+
+def sortIndexBlocks(elem):
+  return elem['index'] 
+
+def sortPositions(address):
+  return address['row']*100+address['led_column']
