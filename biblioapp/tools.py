@@ -47,26 +47,36 @@ def utility_processor():
 agregate intervals and reduce messages to Arduino
 '''
 def build_block_position(positions):
+
   cpt = 0
   blockend = 0  
   block = {}
   blocks = []
   blockelem = []
+  uniqelem = []
+
   for i, pos in enumerate(positions): 
+    
     #check if current pos is following the previous pos
     if int(pos['led_column']) == int(positions[i-1]['led_column'] + positions[i-1]['interval']): 
 
+      firstElem = positions[i-1]
+
       #store node ids inside 1 block
-      if positions[i-1]['id_node'] not in blockelem:
-        blockelem.append(positions[i-1]['id_node'])
+      if firstElem['id_node'] not in blockelem:
+        blockelem.append(firstElem['id_node'])
       if pos['id_node'] not in blockelem:        
         blockelem.append(pos['id_node'])
 
+      #remove block first element from isolated elements
+      if firstElem['id_node'] in uniqelem:
+        uniqelem.remove(firstElem['id_node'])
+
       #build block element : get first position and agragate intervals
       cpt+=1
-      blockend += positions[i-1]['interval']
+      blockend += firstElem['interval']
       if cpt==1:
-        block = {'row':pos['row'], 'start':positions[i-1]['led_column']}
+        block = {'row':pos['row'], 'start':firstElem['led_column']}
       block.update({'interval':blockend+pos['interval'], 'nodes':blockelem})
 
       #populate blocks list
@@ -75,9 +85,14 @@ def build_block_position(positions):
         
     #reinit for next block
     else:
+
       block = {}
       blockelem = []
       blockend = 0
       cpt = 0
-      
+
+      #store isolated elements
+      uniqelem.append(pos['id_node'])
+  
+  print(uniqelem)   
   return blocks
