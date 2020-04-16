@@ -143,12 +143,12 @@ def get_request_for_position(app_id, position, row) :
     return row
   return False 
 
-def set_request(app_id, row, column, interval, led_column) :
+def set_request(app_id, node_id, row, column, interval, led_column) :
   now = tools.getNow()
   mysql = get_db()
-  mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `row`, `column`, `range`, `led_column`) \
-    VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s, `led_column`=%s",  \
-  (app_id, row, column, interval, led_column, now.strftime("%Y-%m-%d %H:%M:%S"), interval, led_column))
+  mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `id_node`, `node_type`, `row`, `column`, `range`, `led_column`) \
+    VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s, `led_column`=%s",  \
+  (app_id, node_id, 'book', row, column, interval, led_column, now.strftime("%Y-%m-%d %H:%M:%S"), interval, led_column))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()

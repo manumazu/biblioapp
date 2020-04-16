@@ -78,7 +78,7 @@ def build_block_position(positions, action):
       cpt+=1
       blockend += firstElem['interval']
       if cpt==1:
-        block = {'row':pos['row'], 'index':i, 'start':firstElem['led_column'], 'color':pos['color'],}
+        block = {'action':action, 'row':pos['row'], 'index':i, 'start':firstElem['led_column'], 'color':pos['color'],}
       block.update({'interval':blockend+pos['interval'], 'nodes':blockelem})
 
       #populate blocks list
@@ -100,7 +100,8 @@ def build_block_position(positions, action):
   for i, pos in enumerate(positions): 
     for id_node in uniqelem:
       if id_node == pos['id_node']:
-        blocks.append({'row':pos['row'], 'index':i, 'start':pos['led_column'], 'color':pos['color'], 'interval':pos['interval'], 'nodes':[id_node]})
+        blocks.append({'action':action, 'row':pos['row'], 'index':i, 'start':pos['led_column'], \
+          'color':pos['color'], 'interval':pos['interval'], 'nodes':[id_node]})
 
   #reset order for blocks:
   if(action=='remove'):

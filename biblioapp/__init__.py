@@ -344,7 +344,7 @@ def borrowBook():
 def locateBook():
   globalVars = initApp()
   action = 'add'
-  ret = []
+  positions = []
 
   '''get form request params'''
   if (request.method == 'POST'):
@@ -371,13 +371,14 @@ def locateBook():
     db.del_request(app_id, address['position'], address['row'])
     retMsg = 'Location removed for book {}'.format(book_id)
   else: 
-    db.set_request(app_id, address['row'], address['position'], address['range'], address['led_column'])
+    db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'])
     retMsg = 'Location requested for book {}'.format(book_id)
 
   if('token' in request.args):
-    ret.append({'item':book_id,'action':action,'address':address})    
+    positions.append({'action':action, 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
+      'id_node':book_id}) 
     response = app.response_class(
-      response=json.dumps(ret),
+      response=json.dumps(positions),
       mimetype='application/json'
     )
     return response
@@ -417,45 +418,35 @@ def locateBooksForTag(tag_id):
   if(mode!='toggle'):
     db.clean_request(module['id'])#clean all module's request
 
-  element = {}
-  _positions = []
+  positions = []
   for node in nodes:
     address = db.get_position_for_book(module['id'], node['id_node'])
     if address:
       book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
       if(action=='add'):#add request for tag's nodes
-        db.set_request(module['id'], address['row'], address['position'], address['range'], address['led_column'])
+        db.set_request(module['id'], node['id_node'], address['row'], address['position'], address['range'], address['led_column'])
       if(action=='remove'):#delete request for tag's nodes
         db.del_request(module['id'], address['position'], address['row'])
-      keysort = str(address['position'])+'00'+str(address['row'])
-      element[int(keysort)] = {'item':book['title'],'action':action,'address':address,'tag':tag}
 
-      _positions.append({'row':address['row'],'led_column':address['led_column'],'interval':address['range'], \
-      'color':tag['color'],'id_node':node['id_node']})
-
-  if(action=='remove'):
-    element = sorted(element.items(), reverse = True)
-  else:
-    element = sorted(element.items())
+      if tag['color'] is None:
+        tag['color'] = ''
+      positions.append({'item':book['title'], 'action':action, 'row':address['row'], 'led_column':address['led_column'], \
+        'interval':address['range'], 'color':tag['color'], 'id_node':node['id_node']})
 
   '''get elements for block build'''
-  _positions.sort(key=tools.sortPositions)
-  blocks = tools.build_block_position(_positions, action)
-  print(blocks)
+  positions.sort(key=tools.sortPositions)
+  blocks = tools.build_block_position(positions, action)
+  #print(blocks)
 
-  ret = []
-  for elem in element:
-    if elem[1] is not None:
-      ret.append(elem[1])
   #send json when token mode
   if('token' in request.args):
     response = app.response_class(
-      response=json.dumps(ret),
+      response=json.dumps(blocks),
       mimetype='application/json'
     )
     return response
-  for book_title in ret:
-    flash('Location requested for book {}'.format(book_title['item']))
+  for i, book in enumerate(positions):
+    flash('Location requested for book {}'.format(book['item']))
   return redirect(url_for('listAuthors', _scheme='https', _external=True))
 
 #get request from arduino for current arduino_name
@@ -463,22 +454,19 @@ def locateBooksForTag(tag_id):
 def getRequestForModule(uuid):
   user_app = db.get_app_for_uuid(uuid)
   if(user_app):
-    element = {}
+    positions = []
     datas = db.get_request(user_app['id'])
-    if datas:
+    if datas:      
       for data in datas:
-        keysort = str(data['column'])+'00'+str(data['row'])
-        element[int(keysort)] = {'action':'add','address':data}
-      element = sorted(element.items())
+        positions.append({'action':'add', 'row':data['row'], 'led_column':data['led_column'], \
+        'interval':data['range'], 'color':'', 'id_node':data['id_node']})
 
-      #format array for json output (remove key)
-      ret = []
-      for elem in element:
-        if elem[1] is not None:
-          ret.append(elem[1])
+      positions.sort(key=tools.sortPositions)
+      blocks = tools.build_block_position(positions, 'add')
+      #print(blocks)
 
       response = app.response_class(
-            response=json.dumps(ret),
+            response=json.dumps(blocks),
             mimetype='application/json'
       )
       return response
