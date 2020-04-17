@@ -67,6 +67,59 @@ $(document).ready(function() {
       initialTags: bookCategories
     });
 
+    //search book to be permuted with
+    $( "#keyword" ).autocomplete({
+      source: function( request, response ) {
+        $.ajax( {
+          url: "/ajax_search/",
+          data: {
+            term: request.term
+          },
+          success: function( data ) {
+            response( data );
+          }
+        } );
+      },
+      minLength: 2,
+      select: function( event, ui ) {
+        $("#permute_book_id").val(ui.item.id);
+        $("#permute_book_title").val(ui.item.value);
+      }
+    } ); 
+
+  //send permutation request
+  $("#permute_action").on('click', function() {
+    var permute_book_id = $("#permute_book_id").val();
+    var permute_book_title = $("#permute_book_title").val();
+    var book_id = $('input[name="book_id"]').val();
+    var book_title = $('input[name="title"]').val();
+    if(book_id>0 && permute_book_id>0) 
+    {
+      $.ajax({
+            data: 'dest_id='+permute_book_id+'&from_id='+book_id,
+            type: 'GET',
+            url: '/ajax_permute_position/', //get items by position for given shelf 
+            dataType: 'json',
+            complete: function(res)
+            {
+              console.log(res.responseText);
+              var json=$.parseJSON(res.responseText);
+              if(book_id == permute_book_id) {
+                alert("Error : book can not be permuted on itself");
+              }
+              else if(json.success == false && json.dest_range !== undefined) {
+                var range = $("#range-adjust option:selected").val();
+                alert("Error : destination book interval is " + json.dest_range + " and current is "+range);
+              }
+              else if(json.success == true) {
+                alert("Permutation ok for : \"" + book_title + "\" <-> \"" + permute_book_title + "\"");
+                window.location = '/app/'
+              }
+            }
+      });
+    }
+  });
+
   $("#range-adjust").on('change', function() {
 
     var book_id = $('input[name="book_id"]').val();

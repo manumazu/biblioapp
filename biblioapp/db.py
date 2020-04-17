@@ -314,22 +314,12 @@ def get_static_positions(app_id, row):
     return row
   return False
 
-def del_item_position(app_id, item, user_id) :
-  position = get_position_for_book(app_id, item[1])
-  if position:
-    mysql = get_db()
-    mysql['cursor'].execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=%s", (item[1], item[0], position['id_app']))
-    mysql['conn'].commit()
-    mysql['cursor'].close()
-    mysql['conn'].close()
-  has_request = get_request_for_position(app_id, position['position'], position['row'])
-  #remove request
-  if has_request:
-    del_request(app_id, position['position'], position['row'])
-  #get list for remaining items and sort them again
-  items = get_positions_for_row(position['id_app'], position['row'])
-  if items:
-    sort_items(app_id, user_id, items, position['row'])
+def del_item_position(app_id, item_id, item_type, user_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=%s", (item_id, item_type, app_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
   return True
 
 ''' manage taxonomy '''
@@ -540,6 +530,18 @@ def get_customcodes(user_id, app_id) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd FROM biblio_customcode where id_user=%s and id_app=%s", \
     (user_id, app_id))
+  row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False
+
+def search_book(app_id, keyword) :
+  searchTerm = "%"+keyword+"%"
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT id, title, author FROM biblio_search where id_app=%s and \
+    (author like %s or title like %s or tags like %s)", (app_id, searchTerm, searchTerm, searchTerm))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()

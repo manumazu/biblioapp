@@ -205,11 +205,24 @@ def ajaxDelPosition():
   globalVars = initApp()
   if request.method == 'POST' and session.get('app_id'):
     for elem in request.form:
-       book = elem.split('_')
-       if db.del_item_position(session.get('app_id'), book, globalVars['arduino_map']['user_id']):
-         ret={'success':True}
-       else:
-         ret={'success':False}
+      book = elem.split('_') #vars book_[id]
+      item_id = book[1]
+      item_type = book[0]
+      #clean all position for books
+      position = db.get_position_for_book(session.get('app_id'), item_id)
+      if position:
+        db.del_item_position(session.get('app_id'), item_id, item_type, globalVars['arduino_map']['user_id'])
+        has_request = db.get_request_for_position(session.get('app_id'), position['position'], position['row'])
+        #remove request
+        if has_request:
+          db.del_request(session.get('app_id'), position['position'], position['row'])
+        #get list for remaining items and sort them again
+        items = db.get_positions_for_row(session.get('app_id'), position['row'])
+        if items:
+          db.sort_items(session.get('app_id'), user_id, items, position['row'])
+        ret={'success':True}
+      else:
+        ret={'success':False}
   response = app.response_class(
         response=json.dumps(ret),
         mimetype='application/json'
@@ -676,6 +689,51 @@ def customCode(code_id):
     return response
   return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
     customvars=customvars, data=data)
+
+@app.route('/ajax_search/')
+@flask_login.login_required
+def ajaxSearch():
+  globalVars = initApp()
+  results = db.search_book(session['app_id'], request.args.get('term'))
+  res = []
+  if results:
+    for result in results:
+      res.append({'id':result['id'], 'label':result['author']+' - '+result['title'], \
+        'value':result['title']}) 
+  response = app.response_class(
+    response=json.dumps(res),
+    mimetype='application/json'
+  )
+  return response  
+
+@app.route('/ajax_permute_position/')
+@flask_login.login_required
+def ajaxPermutePosition():
+  globalVars = initApp()
+  from_id = request.args.get('from_id')
+  dest_id = request.args.get('dest_id')
+  pos_from = db.get_position_for_book(session['app_id'], from_id)
+  pos_dest = db.get_position_for_book(session['app_id'], dest_id)
+  #test interval equality before permutation
+  if pos_from['range'] != pos_dest['range']:
+    message = {'success':False, 'dest_range':pos_dest['range']}
+  else:
+    #clean old positions
+    db.del_item_position(session.get('app_id'), from_id, 'book', globalVars['arduino_map']['user_id'])
+    db.del_item_position(session.get('app_id'), dest_id, 'book', globalVars['arduino_map']['user_id'])
+    #add new position for first book 
+    led_column_1 = db.set_position(session.get('app_id'), from_id, pos_dest['position'], pos_dest['row'], \
+      pos_dest['range'], 'book', pos_dest['led_column'])
+    #add new position for destination book 
+    led_column_2 = db.set_position(session.get('app_id'), dest_id, pos_from['position'], pos_from['row'], \
+      pos_from['range'], 'book', pos_from['led_column'])
+    message = {'success':True, from_id:led_column_1, dest_id:led_column_2}
+
+  response = app.response_class(
+    response=json.dumps(message),
+    mimetype='application/json'
+  )
+  return response    
 
 '''
 Authentication
