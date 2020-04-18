@@ -18,20 +18,11 @@
 
 <p class="mb-1">
   <div class="text-white-50 d-inline">Drag elements to record their position in shelfs.</div>
-  <div class="text-white-50 d-inline">Change shelf : 
- 	<select class="col-sm-2 small" id="numshelf" name="numshelf" onchange="javascript:window.location='/app/?rownum='+$(this).val()">
-		<option value="0">All shelfs</option>
-     	{% for line in range(nb_lines) %}
-		  <option value="{{line+1}}" {% if session['app_numshelf']==(line+1) %}selected="selected"{% endif %}>Shelf {{line+1}}</option>
-	 	{% endfor %}
-	</select>
-   </div>
-</p>  
 
 <ul class="nav nav-pills">
 {% for line in range(nb_lines) %}
   <li class="nav-item">
-    <a class="nav-link {% if line+1==1 %}active{% endif %}" data-toggle="tab" href="#droppable_{{(line+1)}}">Edit shelf {{(line+1)}}</a>
+    <a class="nav-link {% if session['app_numshelf']==line+1 %}active{% endif %}" data-toggle="tab" href="#droppable_{{(line+1)}}">Edit shelf {{(line+1)}}</a>
   </li>  
 {% endfor %}
 </ul>	
@@ -41,7 +32,7 @@
 	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line)}}',{% endfor %}];</script>	
 
 	{% for line in lines %}
-	<ul id="droppable_{{(line)}}" class="droppable success tab-pane fade {% if line==1 %}show active{% endif %}">
+	<ul id="droppable_{{(line)}}" class="droppable success tab-pane fade {% if line==session['app_numshelf'] %}show active{% endif %}">
 	{% if tidybooks != None %}
 	  {% for position,book in tidybooks[line] %}
 	  	{%if book['item_type']=='book' %}

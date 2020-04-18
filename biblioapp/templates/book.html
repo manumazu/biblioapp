@@ -34,7 +34,7 @@
 	    {% include '_book_form.html' %}
 		</div>
 
-		<div class="tab-pane fade show active" id="bookPosition">
+		<div class="tab-pane fade" id="bookPosition">
 		{% if book['address']['id_item'] %}
 			{% include '_locate_form.html' %}
 		{% else %}
@@ -42,7 +42,7 @@
 		{% endif %}
 		</div>
 
-		<div class="tab-pane fade show active" id="bookDesc">
+		<div class="tab-pane fade" id="bookDesc">
 			<blockquote class="blockquote text-left">
 			  <p>Description</p>
 			  <small>{{ book['description'] }}</small>

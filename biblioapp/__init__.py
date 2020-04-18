@@ -115,13 +115,9 @@ def listCategories(uuid = None):
 def myBookShelf():
   globalVars = initApp()
   app_id = globalVars['arduino_map']['id']
-  if request.method == 'GET' and request.args.get('rownum'):
-    session['app_numshelf'] = int(request.args.get('rownum'))
-    shelfs = [int(request.args.get('rownum'))]
-  if request.method == 'GET' and 'app_numshelf' in session and int(session['app_numshelf'])>0:
-    shelfs = [int(session['app_numshelf'])]    
-  else:
-    shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
+  if 'app_numshelf' not in session:
+    session['app_numshelf'] = 1
+  shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
   elements = {}
   for shelf in shelfs:
     books = db.get_books_for_row(app_id, shelf)
@@ -144,6 +140,17 @@ def myBookShelf():
       bookstorange=bookstorange, lines=shelfs, biblio_name=globalVars['arduino_map']['arduino_name'], \
       nb_lines=globalVars['arduino_map']['nb_lines'], session=session)
 
+@app.route("/ajax_set_bookshelf/", methods=['GET'])
+@flask_login.login_required
+def ajaxSetShelf(): 
+  globalVars = initApp()
+  if request.method == 'GET' and request.args.get('rownum'):
+    session['app_numshelf'] = int(request.args.get('rownum'))
+  response = app.response_class(
+      response=json.dumps(session['app_numshelf']),
+      mimetype='application/json'
+  )
+  return response
 
 @app.route("/ajax_positions_inline/", methods=['GET'])
 @flask_login.login_required

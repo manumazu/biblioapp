@@ -1,5 +1,17 @@
 $(document).ready(function() {
 
+   //set chosen shelf for session
+   $('.nav-link').on('click', function() {
+	   	var shelfnum = $(this).attr('href').split('_')[1];
+	   	console.log(shelfnum);
+		$.ajax({
+	  	      data: 'rownum='+shelfnum,
+	  	      type: 'GET',
+	  	      url: '/ajax_set_bookshelf/', //get items by position for given shelf
+		});
+   });
+
+   //change positions
    var selectedClass = 'ui-state-default';//, droppableElements=['#droppable_1', '#droppable_2', '#droppable_3'];
    var i = 0;
    var order = [];
