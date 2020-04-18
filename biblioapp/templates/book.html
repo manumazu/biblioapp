@@ -13,54 +13,42 @@
 {% endblock %}
 
 {% block content %}
-	<div class="container">
+<div class="container">
 
 	<h1 class="mt-5 text-white font-weight-light">{{ book['title'] }} - {{ book['author'] }}</h1>
 
-        {% include '_book_form.html' %}
+    <ul class="nav nav-tabs">
+	  <li class="nav-item">
+	    <a class="nav-link active" data-toggle="tab" href="#editBook">Edit book</a>
+	  </li>
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#bookPosition">Manage position</a>
+	  </li>	  
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#bookDesc">Book description</a>
+	  </li>	  
+	</ul>
 
-	{% if book['address']['id_item'] %}
+	<div id="myTabContent" class="tab-content">
+		<div class="tab-pane fade show active" id="editBook">
+	    {% include '_book_form.html' %}
+		</div>
 
-		{% include '_locate_form.html' %}
-		
-	{% else %}
-	<div class="jumbotron">
-		<form class="form-horizontal">
-			<script>
-				var book_title="{{ book['title'] }}";
-				var book_author="{{ book['author'] }}";
-				var book_url="{{ url_for('getBook',book_id=book['id']) }}";
-			</script>
-			<fieldset>
-			<legend><a href="javascript:void(0);" id="rangebook-{{ book['id'] }}">+ Add this book in bookshlef</a></legend>	
-			 {% set lines=range(biblio_nb_rows) %} 
-			 <div class="form-group" id="shelf-num">
-			    <label for="select" class="col-lg-2 control-label">Select a shelf:</label>
-			    <div class="col-lg-3">
-				<select class="custom-select" id="select-shelf">
-				  <option selected="selected">Shelf number</option>
-		     		{% for line in lines %}
-				  <option value="{{line+1}}">Shelf {{line+1}}</option>
-			 	{% endfor %}
-				</select>
-			    </div>
-			 </div>
+		<div class="tab-pane fade show active" id="bookPosition">
+		{% if book['address']['id_item'] %}
+			{% include '_locate_form.html' %}
+		{% else %}
+			{% include '_range_form.html' %}
+		{% endif %}
+		</div>
 
-			 <ul id="droppable_0" class="droppable">
-			 </ul>
-
-			 <input id="save-pos" type="button" value="Save position" class="btn btn-success">
-
-		    </fieldset>
-		</form>
+		<div class="tab-pane fade show active" id="bookDesc">
+			<blockquote class="blockquote text-left">
+			  <p>Description</p>
+			  <small>{{ book['description'] }}</small>
+			</blockquote>
+		</div>
 	</div>
-	{% endif %}
-
-	<blockquote class="blockquote text-left">
-	  <p>Description</p>
-	  <small>{{ book['description'] }}</small>
-	</blockquote>
-
 
 
 	<!--ul>
