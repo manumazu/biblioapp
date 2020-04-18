@@ -229,7 +229,8 @@ def get_position_for_book(app_id, book_id) :
 
 def get_positions_for_row(app_id, row) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id_item FROM biblio_position where id_app=%s and `row`=%s order by `position`",(app_id, row))
+  mysql['cursor'].execute("SELECT id_item FROM biblio_position where id_app=%s and `row`=%s \
+    and `item_type`<>'static' order by `position`",(app_id, row))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -252,21 +253,21 @@ def set_borrow_book(app_id, item_id, mode) :
 def sort_items(app_id, user_id, items, row) :
   mysql = get_db()
   i=0
-  sortable={}
+  sortable={} 
   for item in items :
     if 'id_item' in item:
       item_id=item['id_item']
     else:
-      item_id=item
-    if item_id.isnumeric():
+      item_id=item     
+    if item_id is not None:
       position = get_position_for_book(app_id, item_id)
       if position:
         interval = position['range'] 
       else:
         book = get_book(item_id, user_id)
         interval = tools.led_range(book['pages'])
-      i+=1
-      set_position(app_id, item_id, i, row, interval, 'book')
+    i+=1
+    set_position(app_id, item_id, i, row, interval, 'book')
     sortable[i]={'book':item_id,'position':i}
   mysql['cursor'].close()
   mysql['conn'].close()

@@ -27,12 +27,21 @@
 	</select>
    </div>
 </p>  
-  <div class="biblio">
 
-	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line)}}',{% endfor %}];</script>
+<ul class="nav nav-pills">
+{% for line in range(nb_lines) %}
+  <li class="nav-item">
+    <a class="nav-link {% if line+1==1 %}active{% endif %}" data-toggle="tab" href="#droppable_{{(line+1)}}">Edit shelf {{(line+1)}}</a>
+  </li>  
+{% endfor %}
+</ul>	
+
+<div class="biblio tab-content">
+
+	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line)}}',{% endfor %}];</script>	
 
 	{% for line in lines %}
-	<ul id="droppable_{{(line)}}" class="droppable success">
+	<ul id="droppable_{{(line)}}" class="droppable success tab-pane fade {% if line==1 %}show active{% endif %}">
 	{% if tidybooks != None %}
 	  {% for position,book in tidybooks[line] %}
 	  	{%if book['item_type']=='book' %}

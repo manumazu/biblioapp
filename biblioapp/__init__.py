@@ -219,7 +219,7 @@ def ajaxDelPosition():
         #get list for remaining items and sort them again
         items = db.get_positions_for_row(session.get('app_id'), position['row'])
         if items:
-          db.sort_items(session.get('app_id'), user_id, items, position['row'])
+          db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], items, position['row'])
         ret={'success':True}
       else:
         ret={'success':False}
