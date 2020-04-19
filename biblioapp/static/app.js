@@ -1,3 +1,5 @@
+/* save positions methods */
+
    function ajax_postOrder(elements,row) {
        /*row = element.split('_')[1];
        order = $(element).sortable('serialize');*/
@@ -22,3 +24,32 @@
       });
       $('#draggable li').draggable({scope: "d1"}); //set list draggable again
   }
+
+
+/* color editor methods */
+
+  function getColor() {
+    // returns a string of red, green, blue values
+    var color = [];
+    color.push($('#red').val());
+    color.push($('#green').val());
+    color.push($('#blue').val());
+    return color.join(',');
+	}
+
+	function updatePreview() {
+	    var c = getColor();
+	    $('#rgbText').text("Color is rgb(" + c  + ")");
+	    $('#previewColor').css('backgroundColor','rgb(' + c + ')');
+	}
+
+	function colorEditor() {
+	    $("#colorEditor").modal();
+	}
+
+	$(document).ready(function() {
+	    updatePreview();
+	    $('input[type=range]').on('input', function () {
+	        updatePreview();
+	    });
+	});

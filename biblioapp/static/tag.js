@@ -1,28 +1,4 @@
-function getColor() {
-    // returns a string of red, green, blue values
-    var color = [];
-    color.push($('#red').val());
-    color.push($('#green').val());
-    color.push($('#blue').val());
-    return color.join(',');
-}
-
-function updatePreview() {
-    var c = getColor();
-    $('#rgbText').text("Color is rgb(" + c  + ")");
-    $('#previewColor').css('backgroundColor','rgb(' + c + ')');
-}
-
-function colorEditor() {
-    $("#colorEditor").modal();
-}
-
 $(document).ready(function() {
-
-    updatePreview();
-    $('input[type=range]').on('input', function () {
-        updatePreview();
-    });
 
     $('#colorEditor-save').on('click', function() {
 
@@ -35,6 +11,8 @@ $(document).ready(function() {
                 success: function(res){
                     if(res==true)
                         $('#rgbText').text("Color saved");
+                    var c = getColor();
+                    $('.badge').css("background-color", "rgb("+c+")");
                 }
             });
         }

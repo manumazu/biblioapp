@@ -36,7 +36,7 @@
 	    </div>
 
 	  	<div class="form-group form-inline" id="rgbCode">
-	      <input type="text" class="col-sm-2 form-control" name="rgbCode_val" placeholder="rgb code" {% if customvars|length > 0 %}value="{{ customvars['rgbCode_val'] }}"{% endif %}>
+	      <input type="text" class="col-sm-2 form-control" name="rgbCode_val" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if customvars|length > 0 %}value="{{ customvars['rgbCode_val'] }}"{% endif %}>
 	      <label for="rgbCode_val" class="col-lg-3 control-label">rgb = code of the color to be shown ("color" mode) </label>
 	    </div>	
 
@@ -66,6 +66,22 @@
 	    <input type="button" name="customcode_update" id="btn-customcode_update" class="btn btn-success" value="Save code"> 
 
 	  </form>
+
+	{% if data|length > 0 %}
+		{% set code_id = data['id'] %}
+	{% else %}
+		{% set code_id = 0 %}
+	{% endif %}
+
+	{% if customvars|length > 0 %}
+		{% set color = customvars['rgbCode_val'].split(',') %}
+	{% else %}
+		{% set color = 0,0,0 %}
+	{% endif %}
+
+	{% with label = "code_id", value = code_id %}
+		{% include '_color_editor.html' %}
+	{% endwith %}	  
 
 	<!-- code version from sample -->
 <pre id="customCodePreview" class="text-white-50 bg-dark p-3 mt-3 customcode">

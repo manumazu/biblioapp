@@ -160,14 +160,15 @@ def jsonBookshelf():
   if request.method == 'GET' and request.args.get('row'):
     numrow = request.args.get('row')
     books = db.get_books_for_row(app_id, numrow)
-    element = {}
-    for row in books:
-      element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
-    'title':row['title'], 'author':row['author'], 'position':row['position'], 'url':'/book/'+str(row['id'])}
-      requested = db.get_request_for_position(app_id, row['position'], numrow)
-      if requested:
-        element[row['led_column']]['requested']=True
-    element = sorted(element.items())
+    element = {}    
+    if books:
+      for row in books:
+        element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
+      'title':row['title'], 'author':row['author'], 'position':row['position'], 'url':'/book/'+str(row['id'])}
+        requested = db.get_request_for_position(app_id, row['position'], numrow)
+        if requested:
+          element[row['led_column']]['requested']=True
+      element = sorted(element.items())
     response = app.response_class(
       response=json.dumps(element),
       mimetype='application/json'

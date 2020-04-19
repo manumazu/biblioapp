@@ -1,0 +1,26 @@
+	<div class="modal" id="colorEditor">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content bg-secondary">
+	      <div class="modal-header">
+	        <h5 class="modal-title">Use sliders to set color</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <p>
+	    		Red <input type="range" min="0" max="255" value="{%if color %}{{ color[0] }}{% else %}0{% endif %}" id="red" class="custom-range"/>
+	    		Green <input type="range" min="0" max="255" value="{%if color %}{{ color[1] }}{% else %}0{% endif %}" id="green" class="custom-range"/>
+	    		Blue <input type="range" min="0" max="255" value="{%if color %}{{ color[2] }}{% else %}0{% endif %}" id="blue" class="custom-range"/>
+	    		<div id="previewColor"></div> 
+	    		<div id="rgbText">&nbsp;</div>	    		
+		    </p>
+	      </div>
+	      <div class="modal-footer">
+	      	<input type="hidden" name="{{ label }}" id="{{ label }}" value="{{ value }}">
+	        <button type="button" class="btn btn-primary" id="colorEditor-save">Save changes</button>
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>

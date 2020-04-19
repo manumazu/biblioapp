@@ -84,4 +84,11 @@ $(document).ready(function() {
 	      });
 	});
 
+
+	$('#colorEditor-save').on('click', function() {
+		var c = getColor();
+		$('input[name="rgbCode_val"]').val(c);
+		$('#rgbText').text("RGB code update");
+	});
+
 });
