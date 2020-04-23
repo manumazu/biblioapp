@@ -559,9 +559,11 @@ def listAuthorsForModule(uuid):
 def searchBookReference():
   import requests
   globalVars = initApp()
-  '''search on api'''
+  data={}
+  url = "https://www.googleapis.com/books/v1/volumes"
+  query = "?key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
+  '''search on api for form'''
   if request.method == 'POST':
-    query = "key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
     if 'isbn' in request.form and request.form['isbn']:
       query += "ISBN:\""+request.form['isbn']+"\"&"
     if 'inauthor' in request.form and request.form['inauthor']:
@@ -570,12 +572,23 @@ def searchBookReference():
       query += "intitle:"+request.form['intitle']
     if 'query' in request.form:
       query += request.form['query']
-    url = "https://www.googleapis.com/books/v1/volumes?"+query
-    r = requests.get(url)
+    r = requests.get(url + query)
     data = r.json()
-    #print(url)
     return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
       biblio_name=globalVars['arduino_map']['arduino_name'])
+
+  '''get detail on mobile app'''
+  if request.method == 'GET' and request.args.get('token'):
+    query += "ISBN:\""+request.args.get('isbn')+"\""
+    r = requests.get(url + query)
+    data = r.json()
+    if 'items' in data:
+      data = data['items']
+    response = app.response_class(
+        response=json.dumps(data),
+        mimetype='application/json'
+    )
+    return response
 
   '''get detail on api'''
   if request.method == 'GET' and request.args.get('ref'):
