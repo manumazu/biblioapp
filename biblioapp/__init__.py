@@ -577,8 +577,8 @@ def searchBookReference():
     return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
       biblio_name=globalVars['arduino_map']['arduino_name'])
 
-  '''get detail on mobile app'''
-  if request.method == 'GET' and request.args.get('token'):
+  '''manage infos from mobile app'''
+  if request.method == 'GET' and request.args.get('isbn') and request.args.get('action')=='search_bookapi':
     query += "ISBN:\""+request.args.get('isbn')+"\""
     r = requests.get(url + query)
     data = r.json()
@@ -598,9 +598,33 @@ def searchBookReference():
       r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
       data = r.json()
       book = data['volumeInfo']
-    #print(data['volumeInfo'])
+      #print(book)
+    '''save book from mobile app'''
+    if request.args.get('token') and request.args.get('action')=='save_bookapi':
+      bookId = db.get_bookapi(ref, globalVars['arduino_map']['user_id'])
+      message = {}
+      if bookId:
+        message = {'result':'error', 'message':'This book is already in your shelfs'}
+      else:
+        bookapi={}
+        bookapi['author'] = book['authors']
+        bookapi['title'] = book['title']
+        bookapi['reference'] = ref
+        bookapi['isbn'] = request.args.get('isbn')
+        bookapi['description'] = book['description']
+        bookapi['editor'] = book['publisher']
+        bookapi['pages'] = book['pageCount']
+        bookapi['year'] = book['publishedDate']
+        print(bookapi)
+        '''bookId = db.set_book(bookapi, globalVars['arduino_map']['user_id'])  '''      
+      response = app.response_class(
+        response=json.dumps(message),
+        mimetype='application/json'
+      )
+      return response
+    '''display classic form for edition'''
     return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
-      biblio_name=globalVars['arduino_map']['arduino_name'])
+        biblio_name=globalVars['arduino_map']['arduino_name'])
   else:
     return render_template('booksearch.html', user_login=globalVars['user_login'], \
       biblio_name=globalVars['arduino_map']['arduino_name'])
