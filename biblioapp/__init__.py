@@ -584,13 +584,14 @@ def searchBookReference():
     data = r.json()
     if 'items' in data:
       data = data['items']
+    #print(data)
     response = app.response_class(
         response=json.dumps(data),
         mimetype='application/json'
     )
     return response
 
-  '''get detail on api'''
+  '''resume detail on api before saving'''
   if request.method == 'GET' and request.args.get('ref'):
     ref = request.args.get('ref')
     book = {}
@@ -607,16 +608,26 @@ def searchBookReference():
         message = {'result':'error', 'message':'This book is already in your shelfs'}
       else:
         bookapi={}
-        bookapi['author'] = book['authors']
+        authors = ', '.join(book['authors'])
+        bookapi['author'] = authors
         bookapi['title'] = book['title']
         bookapi['reference'] = ref
         bookapi['isbn'] = request.args.get('isbn')
-        bookapi['description'] = book['description']
+        bookapi['description'] = book['description'] if 'description' in book else ""
         bookapi['editor'] = book['publisher']
         bookapi['pages'] = book['pageCount']
         bookapi['year'] = book['publishedDate']
-        print(bookapi)
-        '''bookId = db.set_book(bookapi, globalVars['arduino_map']['user_id'])  '''      
+        #save process
+        bookId = db.set_book(bookapi, globalVars['arduino_map']['user_id'])
+        authorTags = tools.getLastnameFirstname(book['authors'])
+        authorTagids = db.set_tags(authorTags,'Authors')
+        if len(authorTagids)>0:
+          db.set_tag_node(bookId, authorTagids)
+        if bookId:
+          message = {'result':'success', 'message':'Book added with id '+str(bookId['id'])}
+        else:
+          message = {'result':'error', 'message':'Error saving book'}
+
       response = app.response_class(
         response=json.dumps(message),
         mimetype='application/json'
