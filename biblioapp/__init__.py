@@ -84,6 +84,7 @@ def listCategories(uuid = None):
   elif uuid is None:
       return redirect(url_for('login', _scheme='https', _external=True))
   if uuid is not None:
+    uuid = tools.uuid_decode(uuid)
     user_app = db.get_app_for_uuid(uuid)
     user = db.get_user_for_uuid(uuid)
     user_id = user['id']
@@ -346,7 +347,7 @@ def borrowBook():
   globalVars = initApp()
   ret = []
   if (request.method == 'GET') and ('token' in request.args):
-    app_id = request.args.get('app_id')
+    app_id = session['app_id']
     book_id = request.args.get('book_id')
     action = request.args.get('action')
     db.set_borrow_book(app_id, book_id, action)
@@ -382,7 +383,7 @@ def locateBook():
 
   '''get params from arduino'''      
   if (request.method == 'GET') and ('token' in request.args):
-    app_id = request.args.get('app_id')
+    app_id = session['app_id']
     book_id = request.args.get('book_id')
     address = db.get_position_for_book(app_id, book_id)    
     if 'remove_request' in request.args:
@@ -422,7 +423,8 @@ def locateBooksForTag(tag_id):
     tag['blue'] = colors[2]
 
   if('uuid' in request.args):
-    module = db.get_app_for_uuid(request.args.get('uuid'))
+    uuid = tools.uuid_decode(request.args.get('uuid'))
+    module = db.get_app_for_uuid(uuid)
   else:
     module = db.get_app_for_uuid(globalVars['arduino_map']['id_ble'])
   #app_modules = db.get_arduino_for_user(flask_login.current_user.id)
@@ -473,6 +475,7 @@ def locateBooksForTag(tag_id):
 #get request from arduino for current arduino_name
 @app.route('/request/<uuid>/')
 def getRequestForModule(uuid):
+  uuid = tools.uuid_decode(uuid)
   user_app = db.get_app_for_uuid(uuid)
   if(user_app):
     positions = []
@@ -497,6 +500,7 @@ def getRequestForModule(uuid):
 '''todo : must be protected'''
 @app.route('/reset/<uuid>/')
 def setResetForModule(uuid):
+  uuid = tools.uuid_decode(uuid)
   user_app = db.get_app_for_uuid(uuid)
   if(user_app):
     data = db.clean_request(user_app['id'])#clean all module's request
@@ -510,6 +514,7 @@ def setResetForModule(uuid):
 #get module infos from arduino for current arduino_name
 @app.route('/module/<uuid>/')
 def getModule(uuid):
+  uuid = tools.uuid_decode(uuid)
   user_app = db.get_app_for_uuid(uuid)
   user = db.get_user_for_uuid(uuid)
   if(user_app):
@@ -526,6 +531,7 @@ def getModule(uuid):
 #get authors liste from arduino for current arduino_name
 @app.route('/authors/<uuid>/')
 def listAuthorsForModule(uuid):
+  uuid = tools.uuid_decode(uuid)
   user_app = db.get_app_for_uuid(uuid)
   user = db.get_user_for_uuid(uuid)
   data = {}

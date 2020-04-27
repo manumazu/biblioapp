@@ -1,4 +1,4 @@
-from biblioapp import app, db, flask_login, login_manager, session, hashlib, redirect, url_for
+from biblioapp import app, db, tools, flask_login, login_manager, session, hashlib, redirect, url_for
 
 
 users = {'foo@bar.tld': {'password': 'secret'}}
@@ -28,6 +28,7 @@ def request_loader(request):
                 uuid = request.view_args.get('uuid')
             if 'uuid' in request.args:
                 uuid = request.args.get('uuid')
+            uuid = tools.uuid_decode(uuid)
             exist = db.get_user_for_uuid(uuid)
             if exist is None:
                 return

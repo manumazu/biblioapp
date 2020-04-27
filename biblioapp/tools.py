@@ -1,5 +1,5 @@
 from datetime import datetime
-from biblioapp import app, hashlib
+from biblioapp import app, hashlib, base64
 
 def getYear(datestr):
   if len(datestr)>10:
@@ -24,6 +24,10 @@ def getLastnameFirstname(names):
     else:
       lnfn.append(namearr[0])
   return lnfn
+
+def uuid_decode(encode):
+  decode = base64.b64decode(encode)
+  return decode
 
 def set_token(email):
   return hashlib.md5(email.encode('utf-8')).hexdigest()
