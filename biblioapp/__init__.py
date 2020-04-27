@@ -397,7 +397,7 @@ def locateBook():
 
   if('token' in request.args):
     positions.append({'action':action, 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
-      'id_node':book_id}) 
+      'id_node':book_id, 'borrowed':address['borrowed']}) 
     response = app.response_class(
       response=json.dumps(positions),
       mimetype='application/json'
