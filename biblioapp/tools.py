@@ -2,15 +2,23 @@ from datetime import datetime
 from biblioapp import app, hashlib, base64
 
 def getYear(datestr):
-  if len(datestr)>10:
-    datepub = datetime.strptime(datestr,'%Y-%m-%dT%H:%M:%S%z')
-    datepub = datepub.year
-  elif len(datestr)==10:
-    datepub = datetime.strptime(datestr,'%Y-%m-%d')
-    datepub = datepub.year
-  else:
-    datepub = datestr
-  return datepub
+  try:
+    datepub = datetime.strptime(datestr,'%b %d, %Y')
+    return datepub.year
+  except ValueError:
+    try:
+      datepub = datetime.strptime(datestr,'%B %d, %Y')
+      return datepub.year
+    except ValueError:
+      try:
+        datepub = datetime.strptime(datestr,'%Y-%m-%dT%H:%M:%S%z')
+        return datepub.year
+      except ValueError: 
+        try:
+          datepub = datetime.strptime(datestr,'%Y-%m-%d')
+          return datepub.year
+        except ValueError:
+          return datestr
 
 def getNow():
   return datetime.now()
@@ -120,3 +128,40 @@ def sortIndexBlocks(elem):
 
 def sortPositions(address):
   return address['row']*100+address['led_column']
+
+def formatBookApi(api, data, isbn):
+  bookapi = {}  
+  if api == 'openlibrary':
+    authors = []
+    if 'authors' in data:
+      for author in data['authors']:
+        authors.append(author['name'])
+    bookapi['authors'] = authors
+    bookapi['author'] = ', '.join(authors)
+    bookapi['title'] = data['title']
+    if 'subtitle' in data:
+      bookapi['title'] += ' - '+data['subtitle']
+    bookapi['reference'] = data['key']
+    bookapi['isbn'] = isbn
+    bookapi['editor'] = data['publishers'][0]['name'] if 'publishers' in data else ""
+    bookapi['description'] = data['note'] if 'note' in data else ""
+    bookapi['pages'] = data['number_of_pages'] if 'number_of_pages' in data else 0
+    bookapi['year'] = getYear(data['publish_date']) if 'publish_date' in data else ""
+
+  elif api == 'googleapis':
+    authors = []
+    if 'authors' in data['volumeInfo']:
+      authors = data['volumeInfo']['authors']
+    bookapi['authors'] = authors
+    bookapi['author'] = ', '.join(authors)
+    bookapi['title'] = data['volumeInfo']['title']
+    if 'subtitle' in data['volumeInfo']:
+      bookapi['title'] += ' - '+data['volumeInfo']['subtitle']
+    bookapi['reference'] = data['id']
+    bookapi['isbn'] = isbn
+    bookapi['editor'] = data['volumeInfo']['publisher'] if 'publishers' in data['volumeInfo'] else ""
+    bookapi['description'] = data['volumeInfo']['description'] if 'description' in data['volumeInfo'] else ""
+    bookapi['pages'] = data['volumeInfo']['pageCount'] if 'pageCount' in data['volumeInfo'] else 0
+    bookapi['year'] = getYear(data['volumeInfo']['publishedDate']) if 'publishedDate' in data['volumeInfo'] else ""    
+
+  return bookapi  

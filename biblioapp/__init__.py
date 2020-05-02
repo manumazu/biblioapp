@@ -566,6 +566,8 @@ def searchBookReference():
   import requests
   globalVars = initApp()
   data={}
+
+  '''Search books with google api'''  
   url = "https://www.googleapis.com/books/v1/volumes"
   query = "?key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
   '''search on api for form'''
@@ -584,15 +586,30 @@ def searchBookReference():
       biblio_name=globalVars['arduino_map']['arduino_name'])
 
   '''manage infos from mobile app'''
-  if request.method == 'GET' and request.args.get('isbn') and request.args.get('action')=='search_bookapi':
-    query += "ISBN:\""+request.args.get('isbn')+"\""
-    r = requests.get(url + query)
-    data = r.json()
-    if 'items' in data:
-      data = data['items']
-    #print(data)
+  if request.method == 'GET' and request.args.get('isbn'):
+    res = []
+
+    if request.args.get('action')=='search_googleapi':
+      query += "ISBN:\""+request.args.get('isbn')+"\""
+      r = requests.get(url + query)
+      data = r.json()     
+      if 'items' in data:
+        for item in data['items']:
+          res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn')))
+
+    '''Search books with openlibrary api'''
+    if request.args.get('action')=='search_openlibrary':
+      url = "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys="
+      query = "ISBN:"+request.args.get('isbn')
+      r = requests.get(url + query)
+      data = r.json()
+      #print(data)      
+      if query in data:
+        res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'))]  
+
+    #print(res)
     response = app.response_class(
-        response=json.dumps(data),
+        response=json.dumps(res),
         mimetype='application/json'
     )
     return response
@@ -644,7 +661,7 @@ def searchBookReference():
         biblio_name=globalVars['arduino_map']['arduino_name'])
   else:
     return render_template('booksearch.html', user_login=globalVars['user_login'], \
-      biblio_name=globalVars['arduino_map']['arduino_name'])
+      biblio_name=globalVars['arduino_map']['arduino_name'])  
 
 @app.route('/bookreferencer/', methods=['POST'])
 @flask_login.login_required
