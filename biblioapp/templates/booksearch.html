@@ -72,12 +72,10 @@
 		{% endif %}
 
 		<ul>
-		{% for isbn in field['volumeInfo']['industryIdentifiers'] %}
-		  {% if isbn['type'] == "ISBN_13" %}
-	 	    <input type="hidden" name="isbn" value="{{ isbn['identifier'] }}"> 
-		    <li>ISBN : {{ isbn['identifier'] }}</li>
-		  {% else %}
-		    <input type="hidden" name="isbn" value="">
+		{% for Ids in field['volumeInfo']['industryIdentifiers'] %}
+		  {% if Ids['type'] == "ISBN_13" %}
+		  	<input type="hidden" name="isbn" value="{{Ids['identifier']}}">
+		  	<li>ISBN : {{ Ids['identifier'] }}</li>
 		  {% endif %}
 		{% endfor %}
 		</ul>
@@ -88,8 +86,9 @@
 	{% endfor %}
 	</ul>
 	
-	<p><a href="{{ url_for('searchBookReference') }}?ref=new">Add new book</a> </p>
 	{% endif %}
+	
+	<p><a href="{{ url_for('searchBookReference') }}?ref=new">Add new book</a> </p>
 
         <!-- Detail book search results -->
 	{% if ref %} 

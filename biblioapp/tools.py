@@ -130,7 +130,20 @@ def sortPositions(address):
   return address['row']*100+address['led_column']
 
 def formatBookApi(api, data, isbn):
-  bookapi = {}  
+  bookapi = {}
+
+  if api == 'localform':
+    authors = data.getlist('authors[]')
+    bookapi['authors'] = authors
+    bookapi['author'] = ', '.join(authors)
+    bookapi['title'] = data['title']
+    bookapi['reference'] = data['reference']
+    bookapi['isbn'] = isbn
+    bookapi['description'] = data['description']
+    bookapi['editor'] = data['editor']
+    bookapi['pages'] = data['pages']
+    bookapi['year'] = data['year']
+
   if api == 'openlibrary':
     authors = []
     if 'authors' in data:
@@ -159,7 +172,7 @@ def formatBookApi(api, data, isbn):
       bookapi['title'] += ' - '+data['volumeInfo']['subtitle']
     bookapi['reference'] = data['id']
     bookapi['isbn'] = isbn
-    bookapi['editor'] = data['volumeInfo']['publisher'] if 'publishers' in data['volumeInfo'] else ""
+    bookapi['editor'] = data['volumeInfo']['publisher'] if 'publisher' in data['volumeInfo'] else ""
     bookapi['description'] = data['volumeInfo']['description'] if 'description' in data['volumeInfo'] else ""
     bookapi['pages'] = data['volumeInfo']['pageCount'] if 'pageCount' in data['volumeInfo'] else 0
     bookapi['year'] = getYear(data['volumeInfo']['publishedDate']) if 'publishedDate' in data['volumeInfo'] else ""    

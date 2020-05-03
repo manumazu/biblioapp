@@ -585,20 +585,32 @@ def searchBookReference():
     return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
       biblio_name=globalVars['arduino_map']['arduino_name'])
 
-  '''manage infos from mobile app'''
-  if request.method == 'GET' and request.args.get('isbn'):
-    res = []
+  '''display classic form for edition'''
+  if request.method == 'GET' and request.args.get('ref'):
+    ref = request.args.get('ref')
+    book = {}
+    if ref != 'new':
+      r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
+      data = r.json()
+      book = data['volumeInfo']    
+    return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
+        biblio_name=globalVars['arduino_map']['arduino_name'])
 
-    if request.args.get('action')=='search_googleapi':
+  '''manage infos from mobile app'''
+  if request.method == 'GET' and request.args.get('token') and request.args.get('isbn'):
+    res = []
+    '''Search books with googleapis api'''
+    if request.args.get('search_api')=='googleapis':
       query += "ISBN:\""+request.args.get('isbn')+"\""
+      print(url + query)
       r = requests.get(url + query)
-      data = r.json()     
+      data = r.json() 
       if 'items' in data:
         for item in data['items']:
           res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn')))
 
     '''Search books with openlibrary api'''
-    if request.args.get('action')=='search_openlibrary':
+    if request.args.get('search_api')=='openlibrary':
       url = "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys="
       query = "ISBN:"+request.args.get('isbn')
       r = requests.get(url + query)
@@ -612,88 +624,77 @@ def searchBookReference():
         response=json.dumps(res),
         mimetype='application/json'
     )
-    return response
-
-  '''resume detail on api before saving'''
-  if request.method == 'GET' and request.args.get('ref'):
-    ref = request.args.get('ref')
-    book = {}
-    if ref != 'new':
-      r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
-      data = r.json()
-      book = data['volumeInfo']
-      #print(book)
-    '''save book from mobile app'''
-    if request.args.get('token') and request.args.get('action')=='save_bookapi':
-      bookId = db.get_bookapi(ref, globalVars['arduino_map']['user_id'])
-      message = {}
-      if bookId:
-        message = {'result':'error', 'message':'This book is already in your shelfs'}
-      else:
-        bookapi={}
-        authors = ', '.join(book['authors'])
-        bookapi['author'] = authors
-        bookapi['title'] = book['title']
-        bookapi['reference'] = ref
-        bookapi['isbn'] = request.args.get('isbn')
-        bookapi['description'] = book['description'] if 'description' in book else ""
-        bookapi['editor'] = book['publisher']
-        bookapi['pages'] = book['pageCount']
-        bookapi['year'] = book['publishedDate']
-        #save process
-        bookId = db.set_book(bookapi, globalVars['arduino_map']['user_id'])
-        authorTags = tools.getLastnameFirstname(book['authors'])
-        authorTagids = db.set_tags(authorTags,'Authors')
-        if len(authorTagids)>0:
-          db.set_tag_node(bookId, authorTagids)
-        if bookId:
-          message = {'result':'success', 'message':'Book added with id '+str(bookId['id'])}
-        else:
-          message = {'result':'error', 'message':'Error saving book'}
-
-      response = app.response_class(
-        response=json.dumps(message),
-        mimetype='application/json'
-      )
-      return response
-    '''display classic form for edition'''
-    return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
-        biblio_name=globalVars['arduino_map']['arduino_name'])
+    return response           
   else:
     return render_template('booksearch.html', user_login=globalVars['user_login'], \
-      biblio_name=globalVars['arduino_map']['arduino_name'])  
+      biblio_name=globalVars['arduino_map']['arduino_name']) 
 
-@app.route('/bookreferencer/', methods=['POST'])
+@app.route('/bookreferencer/', methods=['POST', 'GET'])
 @flask_login.login_required
 def bookReferencer():
   globalVars = initApp()
+
+  '''save classic data from form'''
   if request.method == 'POST':
-    authors = request.form.getlist('authors[]')
-    bookapi={}
-    bookapi['author'] = ', '.join(authors)
-    bookapi['title'] = request.form['title']
-    bookapi['reference'] = request.form['reference']
-    bookapi['isbn'] = request.form['isbn']
-    bookapi['description'] = request.form['description']
-    bookapi['editor'] = request.form['editor']
-    bookapi['pages'] = request.form['pages']
-    bookapi['year'] = request.form['year']
+    book = tools.formatBookApi('localform', request.form, request.form['isbn'])  
     if 'id' in request.form:
-      bookapi['id'] = request.form['id']
-    bookId = db.set_book(bookapi, globalVars['arduino_map']['user_id'])
-    '''manage tags + taxonomy'''
-    authorTags = tools.getLastnameFirstname(authors)
-    authorTagids = db.set_tags(authorTags,'Authors')
-    if len(authorTagids)>0:
-      db.set_tag_node(bookId, authorTagids)    
-    db.clean_tag_for_node(bookId['id'], 1) #clean tags categories  before update
-    categ = request.form['tags']
-    if len(categ)>0:
-      catTagIds = db.set_tags(categ.split(','),'Categories')
-      if len(catTagIds)>0:
-        db.set_tag_node(bookId, catTagIds)
+      book['id'] = request.form['id']
+    bookSave(book, globalVars['arduino_map']['user_id'], request.form['tags'])
     return redirect(url_for('myBookShelf', _scheme='https', _external=True))
-  return render_template('bookreferencer.html', user_login=globalVars['user_login'])
+    #return render_template('bookreferencer.html', user_login=globalVars['user_login'])    
+
+  '''save book from mobile app'''
+  if request.method == 'GET' and request.args.get('token') and request.args.get('save_bookapi'):
+    import requests
+    ref = request.args.get('ref')
+    isbn = request.args.get('isbn')
+    source_api = request.args.get('save_bookapi')
+
+    '''resume detail on api before saving'''
+    if source_api=='googleapis':
+      r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
+      data = r.json()
+      book = tools.formatBookApi('googleapis', data, isbn) 
+    if source_api=='openlibrary':
+      r = requests.get("https://openlibrary.org/api/volumes/brief/isbn/"+isbn+".json")
+      data = r.json()
+      book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn)
+
+    #save process
+    bookId = db.get_bookapi(isbn, globalVars['arduino_map']['user_id'])
+    message = {}
+
+    if bookId:
+      message = {'result':'error', 'message':'This book is already in your shelfs'}
+    #add book
+    else:
+      bookId = bookSave(book, globalVars['arduino_map']['user_id'])
+      if bookId:
+        message = {'result':'success', 'message':'Book added with id '+str(bookId['id'])}
+      else:
+        message = {'result':'error', 'message':'Error saving book'}
+
+    response = app.response_class(
+      response=json.dumps(message),
+      mimetype='application/json'
+    )
+    return response
+
+def bookSave(book, user_id, tags = None):
+  bookId = db.set_book(book, user_id)
+  #manage tags + taxonomy
+  #author tags
+  authorTags = tools.getLastnameFirstname(book['authors'])
+  authorTagids = db.set_tags(authorTags,'Authors')
+  if len(authorTagids)>0:
+    db.set_tag_node(bookId, authorTagids)
+  #categories
+  if tags is not None :  
+    db.clean_tag_for_node(bookId['id'], 1) #clean tags categories  before update
+    catTagIds = db.set_tags(tags.split(','),'Categories')
+    if len(catTagIds)>0:
+      db.set_tag_node(bookId, catTagIds)
+  return bookId
 
 
 @app.route('/bookdelete/', methods=['POST'])
