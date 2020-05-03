@@ -2,6 +2,7 @@ from datetime import datetime
 from biblioapp import app, hashlib, base64
 
 def getYear(datestr):
+  print(datestr)
   try:
     datepub = datetime.strptime(datestr,'%b %d, %Y')
     return datepub.year
