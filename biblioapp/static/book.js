@@ -80,7 +80,7 @@ $(document).ready(function() {
           }
         } );
       },
-      minLength: 2,
+      minLength: 3,
       select: function( event, ui ) {
         $("#permute_book_id").val(ui.item.id);
         $("#permute_book_title").val(ui.item.value);

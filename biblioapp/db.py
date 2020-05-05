@@ -249,7 +249,6 @@ def set_borrow_book(app_id, item_id, mode) :
   return True
 
 def sort_items(app_id, user_id, items, row) :
-  mysql = get_db()
   i=0
   sortable={} 
   for item in items :
@@ -267,8 +266,6 @@ def sort_items(app_id, user_id, items, row) :
     i+=1
     set_position(app_id, item_id, i, row, interval, 'book')
     sortable[i]={'book':item_id,'position':i}
-  mysql['cursor'].close()
-  mysql['conn'].close()
   return sortable
 
 def set_position(app_id, item_id, position, row, interval, item_type, led_column = None) :

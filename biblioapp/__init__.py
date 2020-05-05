@@ -775,13 +775,38 @@ def customCode(code_id):
 def ajaxSearch():
   globalVars = initApp()
   results = db.search_book(session['app_id'], request.args.get('term'))
-  res = []
-  if results:
-    for result in results:
-      res.append({'id':result['id'], 'label':result['author']+' - '+result['title'], \
-        'value':result['title']}) 
+  term = request.args.get('term')
+  data = {}
+  if len(term) > 2:
+    #search for mobile app
+    if request.method == 'GET' and request.args.get('token'):
+      books = []    
+      if results:
+          #for node in nodes:
+          for i in range(len(results)):
+              book = db.get_book(results[i]['id'], globalVars['arduino_map']['user_id'])
+              books.append(book)
+              app_modules = db.get_arduino_for_user(flask_login.current_user.id)
+              for module in app_modules:
+                address = db.get_position_for_book(module['id'], book['id'])
+                if address:
+                  books[i]['address'] = address
+          data['list_title'] = str(len(results)) 
+          data['list_title'] += " books " if len(results) > 1 else " book "
+          data['list_title'] += "for \""+request.args.get('term')+"\""
+      else:
+        data['list_title'] = "No result for \""+request.args.get('term')+"\""
+      data['items'] = books
+    #autcomplete for book permutation
+    else:
+      data = []
+      if results:
+        for result in results:
+          data.append({'id':result['id'], 'label':result['author']+' - '+result['title'], \
+            'value':result['title']})
+
   response = app.response_class(
-    response=json.dumps(res),
+    response=json.dumps(data),
     mimetype='application/json'
   )
   return response  
