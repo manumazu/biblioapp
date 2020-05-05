@@ -34,8 +34,11 @@ def getLastnameFirstname(names):
   return lnfn
 
 def uuid_decode(encode):
-  decode = base64.b64decode(encode)
-  return decode
+  try:
+    decode = base64.b64decode(encode)
+    return decode
+  except ValueError:
+    return False
 
 def set_token(email):
   return hashlib.md5(email.encode('utf-8')).hexdigest()

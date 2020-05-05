@@ -85,27 +85,28 @@ def listCategories(uuid = None):
       return redirect(url_for('login', _scheme='https', _external=True))
   if uuid is not None:
     uuid = tools.uuid_decode(uuid)
-    user_app = db.get_app_for_uuid(uuid)
-    user = db.get_user_for_uuid(uuid)
-    user_id = user['id']
-    categories = db.get_categories_for_app(user_app['id'])
-    data = {}
-    data['list_title'] = user_app['arduino_name']
-    hashmail = tools.set_token(user['email'])
-    for i in range(len(categories)):
-      categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
-      categories[i]['token'] = hashmail
-      if categories[i]['color'] is not None:
-        colors = categories[i]['color'].split(",")
-        categories[i]['red'] = colors[0]
-        categories[i]['green'] = colors[1]
-        categories[i]['blue'] = colors[2]
-    data['elements']=categories
-    response = app.response_class(
-      response=json.dumps(data),
-      mimetype='application/json'
-    )
-    return response
+    if uuid:
+      user_app = db.get_app_for_uuid(uuid)
+      user = db.get_user_for_uuid(uuid)
+      user_id = user['id']
+      categories = db.get_categories_for_app(user_app['id'])
+      data = {}
+      data['list_title'] = user_app['arduino_name']
+      hashmail = tools.set_token(user['email'])
+      for i in range(len(categories)):
+        categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
+        categories[i]['token'] = hashmail
+        if categories[i]['color'] is not None:
+          colors = categories[i]['color'].split(",")
+          categories[i]['red'] = colors[0]
+          categories[i]['green'] = colors[1]
+          categories[i]['blue'] = colors[2]
+      data['elements']=categories
+      response = app.response_class(
+        response=json.dumps(data),
+        mimetype='application/json'
+      )
+      return response
   else:
     return render_template('categories.html', user_login=globalVars['user_login'], categories=categories, \
     biblio_name=globalVars['arduino_map']['arduino_name'])
@@ -346,7 +347,7 @@ def ajaxCategories():
 def borrowBook():
   globalVars = initApp()
   ret = []
-  if (request.method == 'GET') and ('token' in request.args):
+  if request.method == 'GET' and 'token' in request.args:
     app_id = session['app_id']
     book_id = request.args.get('book_id')
     action = request.args.get('action')
@@ -424,7 +425,8 @@ def locateBooksForTag(tag_id):
 
   if('uuid' in request.args):
     uuid = tools.uuid_decode(request.args.get('uuid'))
-    module = db.get_app_for_uuid(uuid)
+    if uuid:
+      module = db.get_app_for_uuid(uuid)
   else:
     module = db.get_app_for_uuid(globalVars['arduino_map']['id_ble'])
   #app_modules = db.get_arduino_for_user(flask_login.current_user.id)
@@ -476,24 +478,25 @@ def locateBooksForTag(tag_id):
 @app.route('/request/<uuid>/')
 def getRequestForModule(uuid):
   uuid = tools.uuid_decode(uuid)
-  user_app = db.get_app_for_uuid(uuid)
-  if(user_app):
-    positions = []
-    datas = db.get_request(user_app['id'])
-    if datas:      
-      for data in datas:
-        positions.append({'action':'add', 'row':data['row'], 'led_column':data['led_column'], \
-        'interval':data['range'], 'color':'', 'id_node':data['id_node']})
+  if uuid:
+    user_app = db.get_app_for_uuid(uuid)
+    if(user_app):
+      positions = []
+      datas = db.get_request(user_app['id'])
+      if datas:      
+        for data in datas:
+          positions.append({'action':'add', 'row':data['row'], 'led_column':data['led_column'], \
+          'interval':data['range'], 'color':'', 'id_node':data['id_node']})
 
-      positions.sort(key=tools.sortPositions)
-      blocks = tools.build_block_position(positions, 'add')
-      #print(blocks)
+        positions.sort(key=tools.sortPositions)
+        blocks = tools.build_block_position(positions, 'add')
+        #print(blocks)
 
-      response = app.response_class(
-            response=json.dumps(blocks),
-            mimetype='application/json'
-      )
-      return response
+        response = app.response_class(
+              response=json.dumps(blocks),
+              mimetype='application/json'
+        )
+        return response
   abort(404)
 
 #remove all request from arduino for current module
@@ -501,63 +504,66 @@ def getRequestForModule(uuid):
 @app.route('/reset/<uuid>/')
 def setResetForModule(uuid):
   uuid = tools.uuid_decode(uuid)
-  user_app = db.get_app_for_uuid(uuid)
-  if(user_app):
-    data = db.clean_request(user_app['id'])#clean all module's request
-    response = app.response_class(
-          response=json.dumps(data),
-          mimetype='application/json'
-    )
-    return response
+  if uuid:
+    user_app = db.get_app_for_uuid(uuid)
+    if(user_app):
+      data = db.clean_request(user_app['id'])#clean all module's request
+      response = app.response_class(
+            response=json.dumps(data),
+            mimetype='application/json'
+      )
+      return response
   abort(404)  
 
 #get module infos from arduino for current arduino_name
 @app.route('/module/<uuid>/')
 def getModule(uuid):
   uuid = tools.uuid_decode(uuid)
-  user_app = db.get_app_for_uuid(uuid)
-  user = db.get_user_for_uuid(uuid)
-  if(user_app):
-    data = {}
-    data = user_app
-    data['token'] = tools.set_token(user['email'])
-    response = app.response_class(
-          response=json.dumps(data),
-          mimetype='application/json'
-    )
-    return response
+  if uuid:
+    user_app = db.get_app_for_uuid(uuid)
+    user = db.get_user_for_uuid(uuid)
+    if(user_app):
+      data = {}
+      data = user_app
+      data['token'] = tools.set_token(user['email'])
+      response = app.response_class(
+            response=json.dumps(data),
+            mimetype='application/json'
+      )
+      return response
   abort(404)  
 
 #get authors liste from arduino for current arduino_name
 @app.route('/authors/<uuid>/')
 def listAuthorsForModule(uuid):
   uuid = tools.uuid_decode(uuid)
-  user_app = db.get_app_for_uuid(uuid)
-  user = db.get_user_for_uuid(uuid)
-  data = {}
-  if(user_app):
-    data['list_title'] = user_app['arduino_name']
-    data['elements']=[]
-    alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
-    for j in range(len(alphabet)):
-      '''data['elements'][j]={}
-      data['elements'][j]['initial']=alphabet[j]'''
-      #print(data)
-      items = db.get_authors_for_app(user_app['id'], alphabet[j])
-      if items:
-        '''set url for authenticate requesting location from app'''
-        for i in range(len(items)):
-          hashmail = tools.set_token(user['email'])
-          items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
-          items[i]['token'] = hashmail
-        #data['elements'][j]['items'] = items
-      data['elements'].append({'initial':alphabet[j],'items':items})
+  if uuid:  
+    user_app = db.get_app_for_uuid(uuid)
+    user = db.get_user_for_uuid(uuid)
+    data = {}
+    if(user_app):
+      data['list_title'] = user_app['arduino_name']
+      data['elements']=[]
+      alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+      for j in range(len(alphabet)):
+        '''data['elements'][j]={}
+        data['elements'][j]['initial']=alphabet[j]'''
+        #print(data)
+        items = db.get_authors_for_app(user_app['id'], alphabet[j])
+        if items:
+          '''set url for authenticate requesting location from app'''
+          for i in range(len(items)):
+            hashmail = tools.set_token(user['email'])
+            items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
+            items[i]['token'] = hashmail
+          #data['elements'][j]['items'] = items
+        data['elements'].append({'initial':alphabet[j],'items':items})
 
-    response = app.response_class(
-          response=json.dumps(data),
-          mimetype='application/json'
-    )
-    return response
+      response = app.response_class(
+            response=json.dumps(data),
+            mimetype='application/json'
+      )
+      return response
   abort(404)    
 
 @app.route('/booksearch/', methods=['GET', 'POST'])
