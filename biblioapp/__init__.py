@@ -58,6 +58,9 @@ def editArduino(app_id):
     session['app_id'] = module['id']
     session['app_name'] = module['arduino_name']
     if request.method == 'POST':
+      if 'module_name' in request.form:
+        if db.set_module(request.form):
+          return redirect(url_for('editArduino', _scheme='https', _external=True, app_id=request.form.get('module_id')))
       if request.is_json:
         data = request.get_json()
         for numrow in data:

@@ -32,7 +32,24 @@
 			<h4>Edit module properties :</h4>
 			<form method="POST" action="{{ url_for('editArduino', app_id=module['id']) }}" id="formEditArduino">
 				<input type="hidden" name="module_id" value="{{ module['id'] }}">
-				<input type="text" name="module_name" value="{{ module['arduino_name'] }}">
+
+				<div class="form-group form-inline">
+					<input type="text" class="col-sm-2 form-control" name="module_name" value="{{ module['arduino_name'] }}">
+					<label for="module_name" class="col-lg-3 control-label">Set your bookshelf's name</label>
+				</div>
+
+				{% include '_color_editor.html' %}
+			  	<div class="form-group form-inline">
+			      <input type="text" class="col-sm-2 form-control" name="mood_color" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if 'mood_color' in module %}value="{{ module['mood_color'] }}"{% endif %}>
+			      <label for="mood_color" class="col-lg-3 control-label">Set the default color of the leds</label>
+			    </div>
+
+				<input type="hidden" name="action" value="edit">
+				<input type="submit" class="btn btn-info" id="saveModule" value="Save">
+			</form>			    
+		</p>
+		<p>
+			<h4>Edit static positions :</h4>	    			
 
 				<ul id="shelf">
 				{% for line in range(module['nb_lines']) %}
@@ -54,9 +71,7 @@
 				{% endfor %}
 				</ul>
 
-				<input type="hidden" name="action" value="edit">
-				<button type="button" class="btn btn-info" id="saveModule">Update</button>
-			</form>
+			<button type="button" class="btn btn-info" id="saveStaticPositions">Update</button>		
 		</p>
 		</li>
 	  {% endif %}

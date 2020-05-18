@@ -68,7 +68,7 @@ $(document).ready(function() {
 		}
 	}
 
-	$("#saveModule").on('click', function() {
+	$("#saveStaticPositions").on('click', function() {
 	 //'/module/<app_id>'
 	 	var lines = new Object();
 		$(sliderList).each(function(i, static) {
@@ -94,6 +94,12 @@ $(document).ready(function() {
 		    type: 'POST',
 		    url: $("#formEditArduino").attr('action')
 		});
+	});
+
+	$('#colorEditor-save').on('click', function() {
+		var c = getColor();
+		$('input[name="mood_color"]').val(c);
+		$('#rgbText').text("RGB code update");
 	});
 
 });

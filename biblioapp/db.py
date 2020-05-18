@@ -54,7 +54,16 @@ def get_user_for_uuid(uuid):
   mysql['conn'].close()
   if row:
     return row
-  return None    
+  return None
+
+def set_module(data) :
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_app SET arduino_name=%s, mood_color=%s WHERE id=%s", \
+    (data['module_name'], data['mood_color'], data['module_id']))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True   
 
 def get_tidy_books(app_id, line = None) :
   mysql = get_db()
