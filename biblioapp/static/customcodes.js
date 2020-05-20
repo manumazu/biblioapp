@@ -26,12 +26,14 @@ $(document).ready(function() {
 		var rgbCode_val = 0;
 		if($('input[name="rgbCode_val"]').val() != '')
 			rgbCode_val = $('input[name="rgbCode_val"]').val();
+		var delay_val = $('input[name="delay_val"]').val();	
 
 		$('#nbLeds_val').html(nbLeds_val);
 		$('#offset_val').html(offset_val);
 		$('#nbStrips_val').html(nbStrips_val);
 		$('#colorCode_val').html("'"+colorCode_val+"'");
 		$('#rgbCode_val').html("'"+rgbCode_val+"'");
+		$('#delay_val').html(delay_val);
 
 		//show preview
 		var loop_priority = $('input[name="loop_priority"]:checked').val();
@@ -43,7 +45,7 @@ $(document).ready(function() {
 		$('#customCodePreview').show();		
 
 		//hide old version
-		if(code_id !== undefined) {
+		if(code_id != 0) {
 			$('#customCodeCurrent').hide();
 		}
 		//show save button		
@@ -66,11 +68,12 @@ $(document).ready(function() {
 		customvars['nbStrips_val'] = $('input[name="nbStrips_val"]').val();
 		customvars['colorCode_val'] = $('input[name="colorCode_val"]').val();
 		customvars['rgbCode_val'] = $('input[name="rgbCode_val"]').val();
+		customvars['delay_val'] = $('input[name="delay_val"]').val();
 		customvars['loop_priority'] = loop_priority;
 		elements['customvars'] = customvars;
 
 		dest_url = '/customcodes/'; // new object
-		if(code_id !== undefined) {
+		if(code_id != 0) {
 			dest_url = '/customcode/'+code_id; // update current object
 		}
 

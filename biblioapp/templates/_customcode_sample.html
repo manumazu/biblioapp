@@ -38,7 +38,12 @@
 	  	<div class="form-group form-inline" id="rgbCode">
 	      <input type="text" class="col-sm-2 form-control" name="rgbCode_val" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if customvars|length > 0 %}value="{{ customvars['rgbCode_val'] }}"{% endif %}>
 	      <label for="rgbCode_val" class="col-lg-3 control-label">rgb = code of the color to be shown ("color" mode) </label>
-	    </div>	
+	    </div>
+
+	  	<div class="form-group form-inline">
+	      <input type="text" class="col-sm-2 form-control" name="delay_val" placeholder="delay" value="{% if 'delay_val' in customvars %}{{ customvars['delay_val'] }}{% else %}50{% endif %}">
+	      <label for="delay_val" class="col-lg-3 control-label">delay = wait interval between each instruction (milli second, 50 ms min) </label>
+	    </div>	    	
 
 		<div class="form-group form-inline">
 			Define loop priority :
@@ -92,13 +97,14 @@ var offset = <span id="offset_val"></span>;
 var nbStrips = <span id="nbStrips_val"></span>;
 var color = <span id="colorCode_val"></span>;
 var rgb = <span id="rgbCode_val"></span>;
+var delay = <span id="delay_val"></span>;
 </code><code id="stripfirst">	
 {{"for(n=0; n<nbLeds; n+=offset) { //loop for leds
 	var strip = 1;
 	while(strip<=nbStrips) { // loop for strips
 		if(app.forceExit) break; 
-		app.setBlockMessage(n, strip, offset, color, rgb, 90);
-		await timer(70);
+		app.setBlockMessage(n, strip, offset, color, rgb);
+		await timer(delay);
 		strip++;
 	}
 }
@@ -108,8 +114,8 @@ var rgb = <span id="rgbCode_val"></span>;
 while(strip<=nbStrips) { // loop for strips
 	for(n=0; n<nbLeds; n+=offset) { //loop for leds
 		if(app.forceExit) break; 
-		app.setBlockMessage(n, strip, offset, color, rgb, 90);
-		await timer(70);
+		app.setBlockMessage(n, strip, offset, color, rgb);
+		await timer(delay);
 	}
 	strip++;	
 }
