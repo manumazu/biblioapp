@@ -38,6 +38,10 @@
 					<label for="module_name" class="col-lg-3 control-label">Set your bookshelf's name</label>
 				</div>
 
+				{% if module['mood_color'] != None %}
+					{% set color = module['mood_color'].split(',') %}
+				{% endif %}				
+
 				{% include '_color_editor.html' %}
 			  	<div class="form-group form-inline">
 			      <input type="text" class="col-sm-2 form-control" name="mood_color" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if 'mood_color' in module %}value="{{ module['mood_color'] }}"{% endif %}>
