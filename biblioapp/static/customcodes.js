@@ -1,12 +1,13 @@
 $(document).ready(function() {
 
 	$('#customCodePreview').hide();
+	$('#blink_val').hide();
 
 	$('#btn-customcode_update').hide();	
 	if($('input[name="colorCode_val"]').val() != 'color') 
 		$('#rgbCode').hide();
 
-	var code_id = $('input[name="code_id"]').val(); // key for update object
+	var code_id = $('input[name="code_id"]').val(); // key for update object	
 
 	$('input[name="colorCode_val"]').on('change', function() {
 		if($('input[name="colorCode_val"]').val() == 'color') 
@@ -14,6 +15,7 @@ $(document).ready(function() {
 		else
 			$('#rgbCode').hide();
 	});
+
 
 	//preview code
 	$('#btn-customcode_preview').on('click', function() {
@@ -27,6 +29,7 @@ $(document).ready(function() {
 		if($('input[name="rgbCode_val"]').val() != '')
 			rgbCode_val = $('input[name="rgbCode_val"]').val();
 		var delay_val = $('input[name="delay_val"]').val();	
+		var blink_val = $('#blink_val').text();			
 
 		$('#nbLeds_val').html(nbLeds_val);
 		$('#offset_val').html(offset_val);
@@ -35,6 +38,16 @@ $(document).ready(function() {
 		$('#rgbCode_val').html("'"+rgbCode_val+"'");
 		$('#delay_val').html(delay_val);
 
+		var blink = $('input[name="blink"]:checked').val();
+		if(blink=='on') {
+			$('#codeblink').text(blink_val);
+			$('#stripblink').text(blink_val);
+		}
+		if(blink=='off') {
+			$('#codeblink').text('');
+			$('#stripblink').text('');
+		}
+
 		//show preview
 		var loop_priority = $('input[name="loop_priority"]:checked').val();
 		if(loop_priority=='ledsfirst')
@@ -42,6 +55,7 @@ $(document).ready(function() {
 		if(loop_priority=='stripfirst')
 			$('#ledsfirst').hide();		
 		$('#'+loop_priority).show();
+
 		$('#customCodePreview').show();		
 
 		//hide old version
@@ -62,6 +76,8 @@ $(document).ready(function() {
 		elements['description'] = $('textarea[name="description"]').val();
 		elements['customcode'] = $('#customvars').text()+''+$('#'+loop_priority).text();
 
+		//console.log($('#'+loop_priority).text());return;
+
 		var customvars = new Object();
 		customvars['nbLeds_val'] = $('input[name="nbLeds_val"]').val();
 		customvars['offset_val'] = $('input[name="offset_val"]').val();
@@ -69,6 +85,7 @@ $(document).ready(function() {
 		customvars['colorCode_val'] = $('input[name="colorCode_val"]').val();
 		customvars['rgbCode_val'] = $('input[name="rgbCode_val"]').val();
 		customvars['delay_val'] = $('input[name="delay_val"]').val();
+		customvars['blink'] = $('input[name="blink"]:checked').val();		
 		customvars['loop_priority'] = loop_priority;
 		elements['customvars'] = customvars;
 

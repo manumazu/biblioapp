@@ -45,6 +45,24 @@
 	      <label for="delay_val" class="col-lg-3 control-label">delay = wait interval between each instruction (milli second, 50 ms min) </label>
 	    </div>	    	
 
+
+		<div class="form-group form-inline">
+			Blink mode :
+			<div class="form-check ml-2">
+				<label class="form-check-label">
+				  <input type="radio" class="form-check-input" name="blink" value="on" {% if customvars|length > 0 and customvars['blink']=='on' %}checked=""{% endif %}>
+				  Enable
+				</label>
+			</div>
+
+			<div class="form-check ml-2">
+				<label class="form-check-label">
+				  <input type="radio" class="form-check-input" name="blink" value="off" {% if customvars|length > 0 and customvars['blink']=='off' %}checked=""{% endif %}>
+				  Disable
+				</label>
+			</div>	
+		</div>  
+
 		<div class="form-group form-inline">
 			Define loop priority :
 			<div class="form-check ml-2">
@@ -88,7 +106,9 @@
 		{% include '_color_editor.html' %}
 	{% endwith %}	  
 
-	<!-- code version from sample -->
+<!-- code version from sample -->
+<span id="blink_val" style="display: none;">app.setBlockMessage(n, strip, offset, 'down', rgb);
+		await timer(delay);</span>	
 <pre id="customCodePreview" class="text-white-50 bg-dark p-3 mt-3 customcode">
 <code id="customvars">
 app.forceExit = false;	  	
@@ -104,7 +124,8 @@ var delay = <span id="delay_val"></span>;
 	while(strip<=nbStrips) { // loop for strips
 		if(app.forceExit) break; 
 		app.setBlockMessage(n, strip, offset, color, rgb);
-		await timer(delay);
+		await timer(delay);"}}
+		<span id="stripblink"></span>{{"
 		strip++;
 	}
 }
@@ -115,7 +136,8 @@ while(strip<=nbStrips) { // loop for strips
 	for(n=0; n<nbLeds; n+=offset) { //loop for leds
 		if(app.forceExit) break; 
 		app.setBlockMessage(n, strip, offset, color, rgb);
-		await timer(delay);
+		await timer(delay);"}}
+		<span id="codeblink"></span>{{"
 	}
 	strip++;	
 }
