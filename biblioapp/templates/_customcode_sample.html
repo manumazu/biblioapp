@@ -23,7 +23,12 @@
 	  	<div class="form-group form-inline">
 		  <input type="text" class="col-sm-1 form-control" name="offset_val" placeholder="offset" {% if customvars|length > 0 %}value="{{ customvars['offset_val'] }}"{% endif %}>	  		
 	      <label for="offset_val" class="col-lg-2 control-label">offset = number of the offset</label>
-	    </div>	
+	    </div>
+
+	  	<div class="form-group form-inline">
+		  <input type="text" class="col-sm-1 form-control" name="start_val" placeholder="start" value="{% if customvars|length > 0 %}{{ customvars['start_val'] }}{% else %}0{% endif %}">	  		
+	      <label for="start_val" class="col-lg-2 control-label">start = starting position</label>
+	    </div>	    	
 
 	  	<div class="form-group form-inline">
 		  <input type="text" class="col-sm-1 form-control" name="nbStrips_val" placeholder="nbStrips" {% if customvars|length > 0 %}value="{{ customvars['nbStrips_val'] }}"{% endif %}>	  		
@@ -43,11 +48,28 @@
 	  	<div class="form-group form-inline">
 	      <input type="text" class="col-sm-2 form-control" name="delay_val" placeholder="delay" value="{% if 'delay_val' in customvars %}{{ customvars['delay_val'] }}{% else %}50{% endif %}">
 	      <label for="delay_val" class="col-lg-3 control-label">delay = wait interval between each instruction (milli second, 50 ms min) </label>
-	    </div>	    	
-
+	    </div>	
 
 		<div class="form-group form-inline">
-			Blink mode :
+			Turning leds direction :
+			<div class="form-check ml-2">
+				<label class="form-check-label">
+				  <input type="radio" class="form-check-input" name="direction" value="off2on" {% if customvars|length > 0 and customvars['direction']=='off2on' %}checked=""{% endif %}>
+				  Off to On
+				</label>
+			</div>
+
+			<div class="form-check ml-2">
+				<label class="form-check-label">
+				  <input type="radio" class="form-check-input" name="direction" value="on2off" {% if customvars|length > 0 and customvars['direction']=='on2off' %}checked=""{% endif %}>
+				  On to Off
+				</label>
+			</div>	
+		</div>	        	
+
+
+		<div class="form-group form-inline" id="blink-mode">
+			Blink mode (only for turning on leds) :
 			<div class="form-check ml-2">
 				<label class="form-check-label">
 				  <input type="radio" class="form-check-input" name="blink" value="on" {% if customvars|length > 0 and customvars['blink']=='on' %}checked=""{% endif %}>
@@ -78,7 +100,7 @@
 				  Leds first
 				</label>
 			</div>	
-		</div>    
+		</div>    		  
 
 	    </fieldset>	 
 	    {% if data|length > 0 %}
@@ -107,37 +129,37 @@
 	{% endwith %}	  
 
 <!-- code version from sample -->
-<span id="blink_val" style="display: none;">app.setBlockMessage(n, strip, offset, 'down', rgb);
-		await timer(delay);</span>	
 <pre id="customCodePreview" class="text-white-50 bg-dark p-3 mt-3 customcode">
-<code id="customvars">
-app.forceExit = false;	  	
+<code id="customvars">app.forceExit = false;
 var nbLeds = <span id="nbLeds_val"></span>;
 var offset = <span id="offset_val"></span>;
+var start = <span id="start_val"></span>;
 var nbStrips = <span id="nbStrips_val"></span>;
 var color = <span id="colorCode_val"></span>;
 var rgb = <span id="rgbCode_val"></span>;
 var delay = <span id="delay_val"></span>;
-</code><code id="stripfirst">	
-{{"for(n=0; n<nbLeds; n+=offset) { //loop for leds
+</code>
+<code id="showAll" style="display: none;">//turn on all specified leds
+app.setBlockMessage(0, 1, nbLeds*nbStrips, color, rgb);
+await timer(delay);
+//loop for turning off leds</code><code id="stripfirst"><span id="forstrip"></span>{{" { //loop for leds
 	var strip = 1;
 	while(strip<=nbStrips) { // loop for strips
-		if(app.forceExit) break; 
-		app.setBlockMessage(n, strip, offset, color, rgb);
-		await timer(delay);"}}
-		<span id="stripblink"></span>{{"
+		if(app.forceExit) break;"}}
+		<span id="msgstrip"></span>
+{{"		await timer(delay);"}}
+		<span id="blinkstrip"></span>{{"
 		strip++;
 	}
 }
 "}}
-</code><code id="ledsfirst">	
-{{"var strip = 1;
-while(strip<=nbStrips) { // loop for strips
-	for(n=0; n<nbLeds; n+=offset) { //loop for leds
-		if(app.forceExit) break; 
-		app.setBlockMessage(n, strip, offset, color, rgb);
-		await timer(delay);"}}
-		<span id="codeblink"></span>{{"
+</code><code id="ledsfirst">{{"var strip = 1;
+while(strip<=nbStrips) { // loop for strips"}}
+	<span id="forleds"></span>{{" { //loop for leds
+		if(app.forceExit) break;"}}
+		<span id="msgleds"></span>
+{{"		await timer(delay);"}}
+		<span id="blinkled"></span>{{"
 	}
 	strip++;	
 }
