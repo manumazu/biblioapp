@@ -2,7 +2,8 @@ $(document).ready(function() {
 
 	$('#customCodePreview').hide();
 
-	$('#btn-customcode_update').hide();	
+	$('#btn-customcode_draft').hide();	
+	$('#btn-customcode_publish').hide();	
 	if($('input[name="colorCode_val"]').val() != 'color') 
 		$('#rgbCode').hide();
 
@@ -53,12 +54,12 @@ $(document).ready(function() {
 		$('#rgbCode_val').html("'"+rgbCode_val+"'");
 		$('#delay_val').html(delay_val);
 
-		//manage loops : increment or decrement leds
-		var direction = $('input[name="direction"]:checked').val();			
+		//manage loops : increment or decrement leds	
 		var off2on = "for(n=start; n<nbLeds; n+=offset)";
 		var on2off = "for(n=nbLeds; n>start; n-=offset)";
 		var msg2off = "app.setBlockMessage(n-offset, strip, offset, 'down', rgb);";
 		var msg2on = "app.setBlockMessage(n, strip, offset, color, rgb);";
+		var direction = $('input[name="direction"]:checked').val();			
 		$('#forleds').text(eval(direction));
 		$('#forstrip').text(eval(direction));
 		if(direction=='on2off') {
@@ -102,55 +103,17 @@ $(document).ready(function() {
 			$('#customCodeCurrent').hide();
 		}
 		//show save button		
-		$('#btn-customcode_update').show();
+		$('#btn-customcode_draft').show();
+		$('#btn-customcode_publish').show();
 	});
 
 
-	$('#btn-customcode_update').on('click', function() {
+	$('#btn-customcode_draft').on('click', function() {
+		saveCustomCode(code_id, false);
+	});
 
-		var elements = new Object();
-		var loop_priority = $('input[name="loop_priority"]:checked').val();
-
-		elements['title'] = $('input[name="code_title"]').val();
-		elements['description'] = $('textarea[name="description"]').val();
-		//elements['customcode'] = "async function cc() {" + $('#customvars').text()+''+$('#'+loop_priority).text() + "} \ncc();";
-		
-		elements['customcode'] = $('#customvars').text();
-		var direction = $('input[name="direction"]:checked').val();
-		if(direction=='on2off') {
-			elements['customcode'] += '\n'+$('#showAll').text();
-		}
-		elements['customcode'] += '\n'+$('#'+loop_priority).text();
-
-
-		//console.log(elements['customcode']);return;
-
-		var customvars = new Object();
-		customvars['nbLeds_val'] = $('input[name="nbLeds_val"]').val();
-		customvars['offset_val'] = $('input[name="offset_val"]').val();
-		customvars['start_val'] = $('input[name="start_val"]').val();
-		customvars['nbStrips_val'] = $('input[name="nbStrips_val"]').val();
-		customvars['colorCode_val'] = $('input[name="colorCode_val"]').val();
-		customvars['rgbCode_val'] = $('input[name="rgbCode_val"]').val();
-		customvars['delay_val'] = $('input[name="delay_val"]').val();
-		customvars['blink'] = $('input[name="blink"]:checked').val();		
-		customvars['direction'] = $('input[name="direction"]:checked').val();		
-		customvars['loop_priority'] = loop_priority;
-		elements['customvars'] = customvars;
-
-		dest_url = '/customcodes/'; // new object
-		if(code_id != 0) {
-			dest_url = '/customcode/'+code_id; // update current object
-		}
-
-		$.ajax({
-	  	      data: JSON.stringify(elements),
-	  	      type: 'POST',
-	  	      contentType: 'application/json',
-	  	      url: dest_url, 
-	  	      dataType: 'json',
-	  	      complete: function(res){ window.location='/customcodes/?saved='+code_id; }
-	      });
+	$('#btn-customcode_publish').on('click', function() {
+		saveCustomCode(code_id, true);
 	});
 
 
@@ -161,3 +124,51 @@ $(document).ready(function() {
 	});
 
 });
+
+function saveCustomCode(code_id, published) {
+
+	var elements = new Object();
+	var loop_priority = $('input[name="loop_priority"]:checked').val();
+
+	elements['title'] = $('input[name="code_title"]').val();
+	elements['description'] = $('textarea[name="description"]').val();
+	elements['published'] = published;
+	
+	//elements['customcode'] = "async function cc() {" + $('#customvars').text()+''+$('#'+loop_priority).text() + "} \ncc();";
+	elements['customcode'] = $('#customvars').text();
+	var direction = $('input[name="direction"]:checked').val();
+	if(direction=='on2off') {
+		elements['customcode'] += '\n'+$('#showAll').text();
+	}
+	elements['customcode'] += '\n'+$('#'+loop_priority).text();
+
+
+	//console.log(elements['customcode']);return;
+
+	var customvars = new Object();
+	customvars['nbLeds_val'] = $('input[name="nbLeds_val"]').val();
+	customvars['offset_val'] = $('input[name="offset_val"]').val();
+	customvars['start_val'] = $('input[name="start_val"]').val();
+	customvars['nbStrips_val'] = $('input[name="nbStrips_val"]').val();
+	customvars['colorCode_val'] = $('input[name="colorCode_val"]').val();
+	customvars['rgbCode_val'] = $('input[name="rgbCode_val"]').val();
+	customvars['delay_val'] = $('input[name="delay_val"]').val();
+	customvars['blink'] = $('input[name="blink"]:checked').val();		
+	customvars['direction'] = $('input[name="direction"]:checked').val();		
+	customvars['loop_priority'] = loop_priority;
+	elements['customvars'] = customvars;
+
+	dest_url = '/customcodes/'; // new object
+	if(code_id != 0) {
+		dest_url = '/customcode/'+code_id; // update current object
+	}
+
+	$.ajax({
+  	      data: JSON.stringify(elements),
+  	      type: 'POST',
+  	      contentType: 'application/json',
+  	      url: dest_url, 
+  	      dataType: 'json',
+  	      complete: function(res){ window.location='/customcodes/?saved='+code_id; }
+      });
+}

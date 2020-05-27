@@ -32,7 +32,7 @@
 		</thead>
 		<tbody>
 		{% for customcode in customcodes %}
-		    <tr class="table-secondary">
+		    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}">
 		      <th scope="row">#{{ customcode['id'] }}</th>
 		      <td><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
 		      <td>{{ customcode['description'] }}</td>

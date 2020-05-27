@@ -725,10 +725,10 @@ def bookDelete():
 @flask_login.login_required
 def customCodes(uuid = None):
   globalVars = initApp()
-  codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])
   #print(codes)
   #send json when token mode
   if('token' in request.args):
+    codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], True)
     data = {}
     data['list_title'] = 'Your codes for ' + session['app_name']
     hashmail = tools.set_token(flask_login.current_user.id)
@@ -751,6 +751,7 @@ def customCodes(uuid = None):
         db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
           json.dumps(jsonr['customvars']), jsonr['customcode'])
         #print(request.data.decode())
+  codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])        
   return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json)
 
 @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
@@ -763,7 +764,7 @@ def customCode(code_id):
     if request.is_json:
         jsonr = request.get_json()
         db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], jsonr['description'], \
-         json.dumps(jsonr['customvars']), jsonr['customcode'])
+         jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
 
   data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
   customvars = ''

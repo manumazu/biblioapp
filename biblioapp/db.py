@@ -505,15 +505,16 @@ def get_user(email):
     return row
   return None
 
-def set_customcode(user_id, app_id, code_id, title, description, customvars, customcode) :
+def set_customcode(user_id, app_id, code_id, title, description, published, customvars, customcode) :
   now = tools.getNow()
   mysql = get_db()
   if code_id is None :
-    mysql['cursor'].execute("INSERT INTO biblio_customcode (`id_app`, `id_user`, `title`, `description`, `customvars`, \
-      `customcode`) VALUES (%s, %s, %s, %s, %s, %s)", (app_id, user_id, title, description, customvars, customcode))
+    mysql['cursor'].execute("INSERT INTO biblio_customcode (`id_app`, `id_user`, `title`, `description`, `published`, \
+      `customvars`, `customcode`) VALUES (%s, %s, %s, %s, %s, %s, %s)", (app_id, user_id, title, description, published, \
+        customvars, customcode))
   else :
-    mysql['cursor'].execute("UPDATE biblio_customcode SET `id_app`=%s, `title`=%s, `description`=%s, `customvars`=%s, \
-      `customcode`=%s, `date_upd`=%s WHERE id=%s", (app_id, title, description, customvars, customcode, \
+    mysql['cursor'].execute("UPDATE biblio_customcode SET `id_app`=%s, `title`=%s, `description`=%s, `published`=%s, \
+      `customvars`=%s, `customcode`=%s, `date_upd`=%s WHERE id=%s", (app_id, title, description, published, customvars, customcode, \
         now.strftime("%Y-%m-%d %H:%M:%S"), code_id))
   mysql['conn'].commit()
   mysql['cursor'].close()
@@ -531,10 +532,14 @@ def get_customcode(user_id, app_id, code_id) :
     return row
   return False
 
-def get_customcodes(user_id, app_id) :
+def get_customcodes(user_id, app_id, published_only = False) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd FROM biblio_customcode where id_user=%s and id_app=%s", \
-    (user_id, app_id))
+  if published_only == True :
+    mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd, published FROM biblio_customcode \
+    where id_user=%s and id_app=%s and published=1", (user_id, app_id))    
+  else :
+    mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd, published FROM biblio_customcode \
+    where id_user=%s and id_app=%s", (user_id, app_id))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
