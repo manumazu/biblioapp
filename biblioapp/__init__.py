@@ -749,7 +749,7 @@ def customCodes(uuid = None):
         jsonr = request.get_json()
         #print(json)
         db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
-          json.dumps(jsonr['customvars']), jsonr['customcode'])
+          jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
         #print(request.data.decode())
   codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])        
   return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json)
