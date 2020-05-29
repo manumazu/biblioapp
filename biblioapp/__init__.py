@@ -780,6 +780,22 @@ def customCode(code_id):
   return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
     customvars=customvars, data=data)
 
+@app.route('/customeffects/<uuid>/')
+@flask_login.login_required
+def customEffects(uuid = None):
+  globalVars = initApp()
+  if('token' in request.args):
+    effects = [ 'rainbow', 'rainbowWithGlitter', 'confetti', 'sinelon' , 'juggle', 'bpm' ]
+    data = {}
+    data['list_title'] = 'Effects for ' + session['app_name']
+    hashmail = tools.set_token(flask_login.current_user.id)
+    data['elements']= effects
+    response = app.response_class(
+      response=json.dumps(data),
+      mimetype='application/json'
+    )
+    return response    
+
 @app.route('/ajax_search/')
 @flask_login.login_required
 def ajaxSearch():
