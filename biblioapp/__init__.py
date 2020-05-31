@@ -266,6 +266,7 @@ def listNodesForTag(tag_id):
               books[i]['app_id'] = module['id']
               books[i]['app_uuid'] = module['uuid']
               books[i]['app_mac'] = module['mac']
+              books[i]['color'] = tag['color']
               books[i]['hasRequest'] = hasRequest
       data['items'] = books
   #send json when token mode
@@ -389,6 +390,7 @@ def locateBook():
   if (request.method == 'GET') and ('token' in request.args):
     app_id = session['app_id']
     book_id = request.args.get('book_id')
+    color = request.args.get('color')
     address = db.get_position_for_book(app_id, book_id)    
     if 'remove_request' in request.args:
       action = 'remove'
@@ -401,8 +403,11 @@ def locateBook():
     retMsg = 'Location requested for book {}'.format(book_id)
 
   if('token' in request.args):
-    positions.append({'action':action, 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
-      'id_node':book_id, 'borrowed':address['borrowed']}) 
+    data = {'action':action, 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
+      'id_node':book_id, 'borrowed':address['borrowed']}
+    if color != 'null':
+      data.update({'color':color})
+    positions.append(data) 
     response = app.response_class(
       response=json.dumps(positions),
       mimetype='application/json'
