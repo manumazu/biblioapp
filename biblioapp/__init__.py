@@ -266,8 +266,9 @@ def listNodesForTag(tag_id):
               books[i]['app_id'] = module['id']
               books[i]['app_uuid'] = module['uuid']
               books[i]['app_mac'] = module['mac']
-              books[i]['color'] = tag['color']
               books[i]['hasRequest'] = hasRequest
+              if tag['color'] is not None:
+                books[i]['color'] = tag['color']
       data['items'] = books
   #send json when token mode
   if('token' in request.args):
@@ -405,7 +406,7 @@ def locateBook():
   if('token' in request.args):
     data = {'action':action, 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
       'id_node':book_id, 'borrowed':address['borrowed']}
-    if color != 'null':
+    if color != None :
       data.update({'color':color})
     positions.append(data) 
     response = app.response_class(
