@@ -1,6 +1,6 @@
 /* save positions methods */
 
-   function ajax_postOrder(elements,row) {
+   function ajax_postOrder(elements,row, button) {
        /*row = element.split('_')[1];
        order = $(element).sortable('serialize');*/
        $.ajax({
@@ -11,6 +11,11 @@
 		      //json=JSON.parse(res.responseText);
 		      console.log(res);
 		      //window.location='/app/';
+		      $(button).text("Changes saved");
+		      $(button).addClass('btn-success');
+		    },
+		    complete: function() {
+		    	window.setTimeout(function() {$(button).hide()}, 1000);	
 		    }
 	    });
    }

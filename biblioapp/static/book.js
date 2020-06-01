@@ -2,7 +2,7 @@ $(document).ready(function() {
 
   $('#shelf-num').hide();
   $('#droppable_0').hide();
-  $('#save-pos').hide();
+  $('#save-order').hide();
   var drop_selector = 'ul[id^="droppable"]';
 
   $('a[id^="rangebook"]').on('click', function() 
@@ -48,16 +48,18 @@ $(document).ready(function() {
         //get id for current shelf element
       },*/
       stop: function(e, ui) {
-        $('#save-pos').show();
+        $('#save-order').removeClass('btn-success');
+        $('#save-order').text('Save changes');        
+        $('#save-order').show();
       }
   });
   $(drop_selector).disableSelection();
 
-  $('#save-pos').on('click', function() {
+  $('#save-order').on('click', function() {
     var current_selector = '#'+$(drop_selector).attr('id'); 
     var elements = $(current_selector).sortable('serialize');
     var row = current_selector.split('_')[1];
-    ajax_postOrder(elements,row);
+    ajax_postOrder(elements,row, this);
   });
 
   $('#tags').tagEditor({
