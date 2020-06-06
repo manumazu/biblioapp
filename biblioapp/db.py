@@ -37,7 +37,7 @@ def get_arduino_for_user(user_email):
 
 def get_app_for_uuid(uuid) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, arduino_name, mood_color FROM biblio_app WHERE id_ble=%s",(uuid))
+  mysql['cursor'].execute("SELECT * FROM biblio_app WHERE id_ble=%s",(uuid))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()

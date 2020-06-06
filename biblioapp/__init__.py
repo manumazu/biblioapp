@@ -534,6 +534,7 @@ def getModule(uuid):
     if(user_app):
       data = {}
       data = user_app
+      data['total_leds'] = user_app['nb_lines']*user_app['nb_cols']
       data['token'] = tools.set_token(user['email'])
       response = app.response_class(
             response=json.dumps(data),
