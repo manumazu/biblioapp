@@ -1,6 +1,8 @@
 $(document).ready(function() {	
 
 	$(sliderList).each(function(i, static) {
+		console.log(static);
+
     	var handler = [];
     	var margin = [];
 		i++;
@@ -24,22 +26,23 @@ $(document).ready(function() {
  	});
 
 
-	function setSlider ( index, values ) {	
+	function setSlider ( index, values) {	
 		//console.log(values);
 		$("#slider_" + index).slider({
 		  min: 0,
 		  max: 61,
 		  values: values,
-		  change: function( event, ui ) {
-		  	console.log(ui.handle.offsetLeft);
-			showSliderVal(index, ui.values, ui.handle.offsetLeft);	
-		  },
-		  /*create: function( event, ui ) {
-		  	//showSliderVal(index, values);
-		  }
-	      /*slide: function( event, ui ) {
-	        console.log( ui.value );
-	      }*/
+	      create: function (event, ui) {
+	        $.each( values, function(i, v){
+	            updateValue({
+	                value: v,
+	                handle: $('#slider_'+index+' .ui-slider-handle').eq(i) 
+	            });
+	        });
+	      },		  
+	      slide: function (event, ui) {
+	        updateValue(ui);
+	      }
 		});
 	}	
 
@@ -67,6 +70,10 @@ $(document).ready(function() {
 			//}*/
 		}
 	}
+
+	function updateValue (ui) {
+	    $(ui.handle).attr('data-value', ui.value);
+	};
 
 	$("#saveStaticPositions").on('click', function() {
 	 //'/module/<app_id>'

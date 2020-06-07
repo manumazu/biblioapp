@@ -1,19 +1,37 @@
-ul.static { list-style: none; width: 700px; margin-bottom: 35px }
+ul.static { display: none;}
 
-ul.static li {
-    /*background: #eedc9a; 
-    border:1px solid #ddd;
-    padding:5px;
-    height:120px;
-    width:81px;
-    float:left;*/
-    margin-top:5px;
-    font-size:15px; 
-    margin-left: -30px ;
-    /*margin-right:10px;
-    color:#212326;
-    box-shadow: 2px 1px 2px rgba(0,0,0,.10);
-    /*border-radius: .5em;
-    /*z-index: 5;*/
-  }
+.ui-slider {
+    margin-top: 50px;
+}
+
+/* Add tooltips to slider handles */
+ .ui-slider-handle:after {
+    content : attr(data-value);
+    position: absolute;
+    bottom: 30px;
+    left: -10px;
+    min-width: 40px;
+    height: 20px;
+    background-color: #eee;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    border: #ddd 1px solid;
+    color: #333;
+    font: .7em/1em Arial, Sans-Serif;
+    padding: 1px;
+    text-align: center;
+}
+.ui-slider-handle:before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 8px solid #eee;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    top: -8px;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -1px;
+}  
 

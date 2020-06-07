@@ -55,9 +55,8 @@
 		<p>
 			<h4>Edit static positions :</h4>	    			
 
-				<ul id="shelf">
+				<div id="shelf">
 				{% for line in range(module['nb_lines']) %}
-					<li>Edit separators for shelf {{ line+1 }} :
 						<ul id="static_{{ line+1 }}" class="static">
 						{% set statics = db.get_static_positions(module['id'], line+1) %}
 						{% if statics %}
@@ -66,14 +65,15 @@
 							{% endfor %}
 						{% endif %}						
 						</ul>
-						<div id="slider_{{ line+1 }}" style="width:700px"></div>
+						{{ line+1 }}
+            <div id="slider_{{ line+1 }}" style="width:700px"></div>
 						<script type="text/javascript">
 							sliderList.push("static_{{ line+1 }}");
 						</script>
-					</li>
+
 					<p id="add_{{ line+1 }}" class="text-primary">+add separator</p>
 				{% endfor %}
-				</ul>
+				</div>
 
 			<button type="button" class="btn btn-info" id="saveStaticPositions">Update</button>		
 		</p>
