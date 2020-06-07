@@ -21,7 +21,7 @@ $(document).ready(function() {
    	if(typeof droppableElements!='undefined') 
    	{
 	   	droppableElements.forEach(function(element) 
-	   	{   	
+	   	{ 
 		   	$(element).droppable({
 			      scope: "d1",
 			      activeClass: "ui-state-default",
@@ -42,7 +42,7 @@ $(document).ready(function() {
 					});
 			     }
 			}).sortable({
-			      items: "li",
+			      items: "li:not(.non-draggable)",
 			      sort: function() {
 					$( this ).removeClass("ui-state-default");
 			      },
