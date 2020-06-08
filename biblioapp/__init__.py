@@ -62,20 +62,26 @@ def editArduino(app_id):
         if db.set_module(request.form):
           return redirect(url_for('editArduino', _scheme='https', _external=True, app_id=request.form.get('module_id')))
       if request.is_json:
+        mode = request.args.get('mode')
+        if mode == 'preview':
+          db.clean_request(app_id) #clean request for preview
         data = request.get_json()
         for numrow in data:
           positions = data[numrow]
           for i in range(len(positions)):
             pos = i+1
-            db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])
+            if mode == 'save':
+              db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])
+            if mode == 'preview':
+              db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static')
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
 
 @app.route('/authors/')
 @flask_login.login_required
 def listAuthors():
   globalVars = initApp()
-  return render_template('authors.html', user_login=globalVars['user_login'], db=db, user_id=globalVars['arduino_map']['user_id'], \
-    biblio_name=globalVars['arduino_map']['arduino_name'])
+  return render_template('authors.html', user_login=flask_login.current_user.name, db=db, user_id=globalVars['arduino_map']['user_id'], \
+    biblio_name=session.get('app_name'))
 
 @app.route('/categories/')
 @app.route('/categories/<uuid>/')
@@ -400,7 +406,7 @@ def locateBook():
     db.del_request(app_id, address['position'], address['row'])
     retMsg = 'Location removed for book {}'.format(book_id)
   else: 
-    db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'])
+    db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'], 'book')
     retMsg = 'Location requested for book {}'.format(book_id)
 
   if('token' in request.args):
@@ -458,7 +464,7 @@ def locateBooksForTag(tag_id):
     if address:
       book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
       if(action=='add'):#add request for tag's nodes
-        db.set_request(module['id'], node['id_node'], address['row'], address['position'], address['range'], address['led_column'])
+        db.set_request(module['id'], node['id_node'], address['row'], address['position'], address['range'], address['led_column'], 'book')
       if(action=='remove'):#delete request for tag's nodes
         db.del_request(module['id'], address['position'], address['row'])
 

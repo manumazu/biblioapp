@@ -79,7 +79,7 @@
 		<div class="tab-pane fade" id="shelfSep">
 
 			<h3>Edit separators between books:</h3>	
-      <p>Set the emplacement of shelf supports foreach rows in your bookshelf. Measure the distance from the start of the LEDs strip to the first support, then to the second ..., then drag the handle to the measured emplactement.</p>    			
+      <p>Set the emplacement of shelf supports foreach rows in your bookshelf. Measure the distance from the start of the LEDs strip to the first support, then to the second ..., then drag the handle to the measured emplacement.</p>    			
 
 				<div id="shelf">
 
@@ -102,12 +102,27 @@
 							sliderList.push("static_{{ line+1 }}");
 						</script>
 
-					<p id="add_{{ line+1 }}" class="text-primary">+add separator</p>
+					<div id="add_{{ line+1 }}" class="text-primary">+add separator</div>
 				{% endfor %}
 
 				</div>
 
-			<button type="button" class="btn btn-info" id="saveStaticPositions">Update</button>	
+      <div class="alert alert-info alert-dismissible fade show" role="alert" id="alertPreview">
+        <strong>Preview is set !</strong> You should check with "Get distant requests" in BiblioApp.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="alert alert-success alert-dismissible fade show" role="alert" id="alertSave">
+        <strong>Separator positions are saved !</strong> Your bookshelf is well configured. 
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>      
+
+			<button type="button" class="btn btn-info" id="previewStaticPositions">Preview on shelf</button>  
+      <button type="button" class="btn btn-success" id="saveStaticPositions">Save separators</button>	
 
     </div>
 

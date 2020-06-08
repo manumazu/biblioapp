@@ -1,4 +1,7 @@
-$(document).ready(function() {	
+$(document).ready(function() {
+
+	$('#alertPreview').hide();	
+	$('#alertSave').hide();
 
 	$(sliderList).each(function(i, static) {
 		//console.log(static);
@@ -42,7 +45,7 @@ $(document).ready(function() {
 	                handle: $('#slider_'+index+' .ui-slider-handle').eq(i) 
 	            });
 	        });
-	      },		  
+	      },  
 	      slide: function (event, ui) {
 	        updateValue(ui);
 	      }
@@ -71,9 +74,8 @@ $(document).ready(function() {
 	    $(ui.handle).attr('data-value', cm_val + " cm"); //Math.round(ui.value*1.63*100)/100 + " cm");
 	};
 
-	$("#saveStaticPositions").on('click', function() {
-	 //'/module/<app_id>'
-	 	var lines = new Object();
+	function getSlideElements() {
+		var lines = new Object();
 		$(sliderList).each(function(i, static) {
 			var handler = [];
 			i++;
@@ -87,7 +89,12 @@ $(document).ready(function() {
 			}
 	 	});
 
-	 	var elements = JSON.stringify(lines);
+	 	return JSON.stringify(lines);
+	}
+
+	$("#saveStaticPositions").on('click', function() {
+	 //'/module/<app_id>'
+	 	var elements = getSlideElements();
 	 	//console.log(elements);
 
 		$.ajax({
@@ -95,9 +102,30 @@ $(document).ready(function() {
         	contentType: 'application/json',
 			data: elements,
 		    type: 'POST',
-		    url: $("#formEditArduino").attr('action')
+		    url: $("#formEditArduino").attr('action')+'?mode=save',
+		    complete: function() {
+		    	$('#alertPreview').hide();
+		    	$('#alertSave').show();		    	
+		    }
 		});
 	});
+
+	$("#previewStaticPositions").on('click', function() {
+	 	var elements = getSlideElements();
+	 	//console.log(elements);
+
+		$.ajax({
+			dataType: 'json',
+        	contentType: 'application/json',
+			data: elements,
+		    type: 'POST',
+		    url: $("#formEditArduino").attr('action')+'?mode=preview',
+		    complete: function() {
+		    	$('#alertPreview').show();
+		    	$('#alertSave').hide();	
+		    }
+		});
+	});	
 
 	$('#colorEditor-save').on('click', function() {
 		var c = getColor();
