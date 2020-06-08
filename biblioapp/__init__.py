@@ -68,7 +68,7 @@ def editArduino(app_id):
           for i in range(len(positions)):
             pos = i+1
             db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])
-    return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db)
+    return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
 
 @app.route('/authors/')
 @flask_login.login_required

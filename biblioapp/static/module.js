@@ -1,7 +1,7 @@
 $(document).ready(function() {	
 
 	$(sliderList).each(function(i, static) {
-		console.log(static);
+		//console.log(static);
 
     	var handler = [];
     	var margin = [];
@@ -30,8 +30,11 @@ $(document).ready(function() {
 		//console.log(values);
 		$("#slider_" + index).slider({
 		  min: 0,
-		  max: 61,
+		  max: parseInt(nb_cols)-1,
 		  values: values,
+		  change: function( event, ui ) {
+			updatePositionValues(index, ui.values);	
+		  },
 	      create: function (event, ui) {
 	        $.each( values, function(i, v){
 	            updateValue({
@@ -46,7 +49,7 @@ $(document).ready(function() {
 		});
 	}	
 
-	function showSliderVal(index, values, posLeft) 
+	function updatePositionValues(index, values) 
 	{
 		for(i=0;i<values.length;i++) 
 		{
@@ -54,25 +57,18 @@ $(document).ready(function() {
 			if(separator.length) { //update existing value
 				separator.text(values[i]);
 			}
-			else { //add new separator // style="padding-left:'+ margin +'"
-				//console.log(margin);
+			else { //add new separator 
 				$("#static_" + index).append('<li id="sep_'+ index +'_'+ (i+1) +'">'+ values[i] +'</li>');
 			}
-			separator.css({ "width" : posLeft+"px", "text-align" : "right"});			
-			//computeListWidth(separator,values)
-			//if(i>0) {
-			/*	for (var j = 1; j <= values.length ; j++) {
-					console.log(j);
-					margin[i] = ((values[i]/61)*700)-margin[i-j]+30;
-					//separator.css({ "width" : margin[i]+"px"});
-					console.log(i-j);
-				}
-			//}*/
 		}
 	}
 
 	function updateValue (ui) {
-	    $(ui.handle).attr('data-value', ui.value);
+		var cm_val = ((parseInt(ui.value))*1.65)+1;
+		cm_val = Math.round(cm_val*10)/10;
+		nb_leds = parseInt(ui.value)+1;
+		//console.log('led number', nb_leds);
+	    $(ui.handle).attr('data-value', cm_val + " cm"); //Math.round(ui.value*1.63*100)/100 + " cm");
 	};
 
 	$("#saveStaticPositions").on('click', function() {

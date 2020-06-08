@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}modules{% endblock %}
+{% block title %}Bookshelf module{% endblock %}
 {% block styles %}
 	<link rel="stylesheet" href="{{url_for('static', filename='module.css')}}">
     {{super()}}
@@ -19,43 +19,74 @@
 
 	<div class="container">
 		
-	<h1 class="mt-5 text-white font-weight-light">Select a book shelf module :</h1>
+	<h1 class="mt-5 text-white font-weight-light">Edit your bookshelf :</h1>
 	
 	  {% if module %}
-		<h3>{{ module['arduino_name'] }}</h3>
-			<ul>
-				<li>Id BLE : {{ module['id_ble'] }}</li>
-				<li>Nb rows : {{ module['nb_lines'] }}</li>
-				<li>Nb cols / row : {{ module['nb_cols'] }}</li>
-			</ul>
-		<p>
-			<h4>Edit module properties :</h4>
-			<form method="POST" action="{{ url_for('editArduino', app_id=module['id']) }}" id="formEditArduino">
-				<input type="hidden" name="module_id" value="{{ module['id'] }}">
 
-				<div class="form-group form-inline">
-					<input type="text" class="col-sm-2 form-control" name="module_name" value="{{ module['arduino_name'] }}">
-					<label for="module_name" class="col-lg-3 control-label">Set your bookshelf's name</label>
-				</div>
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#editProp">Module properties</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#shelfSep">Shelf separators</a>
+      </li>     
+    </ul>
 
-				{% if module['mood_color'] != None %}
-					{% set color = module['mood_color'].split(',') %}
-				{% endif %}				
+    <div id="myTabContent" class="tab-content">
 
-				{% include '_color_editor.html' %}
-			  	<div class="form-group form-inline">
-			      <input type="text" class="col-sm-2 form-control" name="mood_color" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if 'mood_color' in module %}value="{{ module['mood_color'] }}"{% endif %}>
-			      <label for="mood_color" class="col-lg-3 control-label">Set the default color of the leds</label>
-			    </div>
+    <div class="tab-pane fade show active" id="editProp">
 
-				<input type="hidden" name="action" value="edit">
-				<input type="submit" class="btn btn-info" id="saveModule" value="Save">
-			</form>			    
-		</p>
-		<p>
-			<h4>Edit static positions :</h4>	    			
+  		<h4>Bookshelf characteristics : </h4>
+  			<ul>
+          <li>Name : "{{ module['arduino_name'] }}"</li>
+  				<li>Id BLE : {{ module['id_ble'] }}</li>
+  				<li>Nb rows : {{ module['nb_lines'] }}</li>
+  				<li>Nb leds / row : {{ module['nb_cols'] }}</li>
+  			</ul>
+  		<p>
+  			<h4>Edit module properties :</h4>
+  			<form method="POST" action="{{ url_for('editArduino', app_id=module['id']) }}" id="formEditArduino">
+  				<input type="hidden" name="module_id" value="{{ module['id'] }}">
+
+          <fieldset>
+          <div class="form-group form-inline">
+            <label for="module_name" class="col-lg-2 control-label">Bookshelf name</label>
+    				<div class="col-lg-3">
+              <input type="text" class="form-control" name="module_name" value="{{ module['arduino_name'] }}">
+    				</div>
+          </div>
+
+  				{% if module['mood_color'] != None %}
+  					{% set color = module['mood_color'].split(',') %}
+  				{% endif %}				
+
+  				{% include '_color_editor.html' %}
+  			  	<div class="form-group form-inline">
+              <label for="mood_color" class="col-lg-2 control-label">Default mood color</label> 
+              <div class="col-lg-3">             
+  			       <input type="text" class="form-control" name="mood_color" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if 'mood_color' in module %}value="{{ module['mood_color'] }}"{% endif %}>
+              </div>
+  			    </div>
+          </fieldset>
+
+  				<input type="hidden" name="action" value="edit">
+  				<input type="submit" class="btn btn-info" id="saveModule" value="Save">
+  			</form>			    
+  		</p>
+
+    </div>
+
+		<div class="tab-pane fade" id="shelfSep">
+
+			<h3>Edit separators between books:</h3>	
+      <p>Set the emplacement of shelf supports foreach rows in your bookshelf. Measure the distance from the start of the LEDs strip to the first support, then to the second ..., then drag the handle to the measured emplactement.</p>    			
 
 				<div id="shelf">
+
+        <script type="text/javascript">
+          var nb_cols = {{ module['nb_cols'] }};
+        </script>
+
 				{% for line in range(module['nb_lines']) %}
 						<ul id="static_{{ line+1 }}" class="static">
 						{% set statics = db.get_static_positions(module['id'], line+1) %}
@@ -65,20 +96,22 @@
 							{% endfor %}
 						{% endif %}						
 						</ul>
-						{{ line+1 }}
-            <div id="slider_{{ line+1 }}" style="width:700px"></div>
+						<span>Row {{ line+1 }}</span>
+            <div id="slider_{{ line+1 }}"></div>
 						<script type="text/javascript">
 							sliderList.push("static_{{ line+1 }}");
 						</script>
 
 					<p id="add_{{ line+1 }}" class="text-primary">+add separator</p>
 				{% endfor %}
+
 				</div>
 
-			<button type="button" class="btn btn-info" id="saveStaticPositions">Update</button>		
-		</p>
-		</li>
-	  {% endif %}
+			<button type="button" class="btn btn-info" id="saveStaticPositions">Update</button>	
+
+    </div>
+
+    {% endif %}
 
 	{{ super() }}
 	</div>

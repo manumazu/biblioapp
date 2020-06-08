@@ -1,16 +1,37 @@
+#shelf {
+  border:1px solid #fff;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;  
+  padding: 10px;
+  width:100%;
+  margin-left:0px;
+  margin-bottom: 10px;
+}
+
 ul.static { display: none;}
 
-.ui-slider {
-    margin-top: 50px;
+.ui-slider-horizontal {
+    height: 80px !important;
+    width: 100% ! important;
+}
+.ui-widget-content {
+    background: #4e5d6c url(/static/img/three-books.svg) repeat-x !important; /*"Icon made by Freepick from www.flaticon.com"*/
 }
 
 /* Add tooltips to slider handles */
- .ui-slider-handle:after {
+.ui-state-default {
+    height: 80px !important;
+    background: repeating-linear-gradient(-45deg, transparent, transparent 10px, #ccc 10px, #ccc 20px) !important;
+    width: 10px !important;
+    top:0px !important;
+}
+
+.ui-slider-handle:after {
     content : attr(data-value);
     position: absolute;
-    bottom: 30px;
-    left: -10px;
-    min-width: 40px;
+    bottom: 40px;
+    left: -30px;
+    min-width: 70px;
     height: 20px;
     background-color: #eee;
     -webkit-border-radius: 3px;
