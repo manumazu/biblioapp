@@ -3,9 +3,14 @@
   -webkit-border-radius: 3px;
   border-radius: 3px;  
   padding: 10px;
+  padding-left: 20px;
   width:100%;
   margin-left:0px;
   margin-bottom: 10px;
+}
+
+#shelf span {
+    margin-left: -10px;
 }
 
 ul.static { display: none;}
@@ -13,6 +18,7 @@ ul.static { display: none;}
 .ui-slider-horizontal {
     height: 80px !important;
     width: 100% ! important;
+    margin-top: 10px;
 }
 .ui-widget-content {
     background: #4e5d6c url(/static/img/three-books.svg) repeat-x !important; /*"Icon made by Freepick from www.flaticon.com"*/
@@ -21,9 +27,10 @@ ul.static { display: none;}
 /* Add tooltips to slider handles */
 .ui-state-default {
     height: 80px !important;
-    background: repeating-linear-gradient(-45deg, transparent, transparent 10px, #ccc 10px, #ccc 20px) !important;
+    background: repeating-linear-gradient(-45deg, #4e5d6c, #4e5d6c 10px, #ccc 10px, #ccc 20px) !important;
     width: 10px !important;
     top:0px !important;
+    margin-left: 0px !important;
 }
 
 .ui-slider-handle:after {
