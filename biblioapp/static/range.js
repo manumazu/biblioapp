@@ -40,7 +40,7 @@ $(document).ready(function() {
 					ui.draggable.find('span').one('click', function() { //delete new item
 					   ajax_supprItem($( this ));
 					});
-			     }
+			     },
 			}).sortable({
 			      items: "li:not(.non-draggable)",
 			      sort: function() {
