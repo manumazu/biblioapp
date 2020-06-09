@@ -56,12 +56,28 @@ def get_user_for_uuid(uuid):
     return row
   return None
 
+def get_module(id) :
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT * FROM biblio_app WHERE id=%s",(id))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row   
+
 def set_module(data) :
   module={}
   if 'module_id' in data:
     mysql = get_db()
-    mysql['cursor'].execute("UPDATE biblio_app SET arduino_name=%s, mood_color=%s WHERE id=%s", \
-      (data['module_name'], data['mood_color'], data['module_id']))
+    #user mode
+    if 'action' in data and data['action']=='user_edit':
+      mysql['cursor'].execute("UPDATE biblio_app SET arduino_name=%s, mood_color=%s WHERE id=%s", \
+        (data['module_name'], data['mood_color'], data['module_id']))
+    #admin mode
+    if 'action' in data and data['action']=='admin':
+      mysql['cursor'].execute("UPDATE biblio_app SET arduino_name=%s, `id_ble`=%s, `nb_lines`=%s, `nb_cols`=%s, \
+        `leds_interval`=%s  WHERE id=%s", (data['module_name'], data['id_ble'], data['nb_lines'], data['nb_cols'], \
+          data['leds_interval'], data['module_id']))
     mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
@@ -69,7 +85,7 @@ def set_module(data) :
   else:
     mysql = get_db()
     mysql['cursor'].execute("INSERT INTO biblio_app (`arduino_name`, `id_ble`, `nb_lines`, `nb_cols`, `leds_interval`) \
-    VALUES (%s, %s, %s, %s)", (data['module_name'], data['id_ble'], data['nb_lines'], data['nb_cols'], data['leds_interval']))
+    VALUES (%s, %s, %s, %s, %s)", (data['module_name'], data['id_ble'], data['nb_lines'], data['nb_cols'], data['leds_interval']))
     mysql['conn'].commit()
     mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
     module = mysql['cursor'].fetchone()

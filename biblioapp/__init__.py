@@ -38,43 +38,54 @@ def initApp():
 @app.route("/", methods=['GET', 'POST'])
 @flask_login.login_required
 def selectArduino():
-  if(flask_login.current_user.is_authenticated):
-    modules = db.get_arduino_for_user(flask_login.current_user.id)
-    if request.method == 'POST':
-      if 'action' in request.form and request.form.get('action')=='select':
-        session['app_id'] = request.form.get('module_id')
-        session['app_name'] = request.form.get('module_name')
-        if request.form.get('numshelf') and int(request.form.get('numshelf'))>0:
-          session['app_numshelf'] = int(request.form.get('numshelf'))
-        flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
-        return redirect(url_for('myBookShelf', _scheme='https', _external=True))
-    return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
+  modules = db.get_arduino_for_user(flask_login.current_user.id)
+  if request.method == 'POST':
+    if 'action' in request.form and request.form.get('action')=='select':
+      session['app_id'] = request.form.get('module_id')
+      session['app_name'] = request.form.get('module_name')
+      if request.form.get('numshelf') and int(request.form.get('numshelf'))>0:
+        session['app_numshelf'] = int(request.form.get('numshelf'))
+      flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
+      return redirect(url_for('myBookShelf', _scheme='https', _external=True))
+  return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
 
 @app.route("/module/<app_id>", methods=['GET', 'POST'])
 @flask_login.login_required
 def editArduino(app_id):
-  if(flask_login.current_user.is_authenticated):
-    module = db.get_arduino_map(flask_login.current_user.id, app_id)
-    session['app_id'] = module['id']
-    session['app_name'] = module['arduino_name']
+  module = db.get_arduino_map(flask_login.current_user.id, app_id)
+  session['app_id'] = module['id']
+  session['app_name'] = module['arduino_name']
+  if request.method == 'POST':
+    if 'module_name' in request.form:
+      if db.set_module(request.form):
+        return redirect(url_for('editArduino', _scheme='https', _external=True, app_id=request.form.get('module_id')))
+    if request.is_json:
+      mode = request.args.get('mode')
+      if mode == 'preview':
+        db.clean_request(app_id) #clean request for preview
+      data = request.get_json()
+      for numrow in data:
+        positions = data[numrow]
+        for i in range(len(positions)):
+          pos = i+1
+          if mode == 'save': 
+            db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])
+          if mode == 'preview':
+            db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static')
+  return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
+
+@app.route("/adminmodule/", methods=['GET', 'POST'])
+@flask_login.login_required
+def newArduino():
+  if flask_login.current_user.id == 'emmanuel.mazurier@gmail.com':
+    module = {}
     if request.method == 'POST':
-      if 'module_name' in request.form:
-        if db.set_module(request.form):
-          return redirect(url_for('editArduino', _scheme='https', _external=True, app_id=request.form.get('module_id')))
-      if request.is_json:
-        mode = request.args.get('mode')
-        if mode == 'preview':
-          db.clean_request(app_id) #clean request for preview
-        data = request.get_json()
-        for numrow in data:
-          positions = data[numrow]
-          for i in range(len(positions)):
-            pos = i+1
-            if mode == 'save':
-              db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])
-            if mode == 'preview':
-              db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static')
-    return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
+      module = db.set_module(request.form)
+      if 'id' in module:
+          return redirect(url_for('newArduino', _scheme='https', _external=True, module_id=module['id']))
+    if request.args.get('module_id'):
+      module = db.get_module(request.args.get('module_id'))
+    return render_template('module_admin.html', user_login=flask_login.current_user.name, module=module, biblio_name=session.get('app_name'))
 
 @app.route('/authors/')
 @flask_login.login_required

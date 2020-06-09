@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+{% block title %}New module{% endblock %}
+{% block styles %}
+	<link rel="stylesheet" href="{{url_for('static', filename='module.css')}}">
+    {{super()}}
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+{% block content %}
+
+	<script type="text/javascript">
+		var sliderList = new Array();
+	</script>
+
+	<div class="container">
+		
+	<h1 class="mt-5 text-white font-weight-light">New module for bookshelf (after purchase) :</h1>
+	
+      {% if module %}
+    		<h4>Bookshelf characteristics : </h4>
+    			<ul>
+            <li>Name : "{{ module['arduino_name'] }}"</li>
+    				<li>Id BLE : {{ module['id_ble'] }}</li>
+    				<li>Nb rows : {{ module['nb_lines'] }}</li>
+    				<li>Nb leds / row : {{ module['nb_cols'] }}</li>
+            <li>leds interval : {{ module['leds_interval']/100 }} cm</li>
+    			</ul>
+      {% endif %}
+
+  			<h4>Edit module properties :</h4>
+  			<form method="POST" action="{{ url_for('newArduino') }}" id="formEditArduino">
+
+          <fieldset>
+          <div class="form-group form-inline">
+            <label for="module_name" class="col-lg-2 control-label">Bookshelf name</label>
+    				<div class="col-lg-3">
+              <input type="text" class="form-control" name="module_name" placeholder="arduino_name" value="{% if 'arduino_name' in module %}{{ module['arduino_name'] }}{% endif %}">
+    				</div>
+          </div>
+
+            <div class="form-group form-inline">
+              <label for="mood_color" class="col-lg-2 control-label">Rows number in bookshelf</label> 
+              <div class="col-lg-3">             
+               <input type="text" class="form-control" name="nb_lines" placeholder="nb_lines" value="{% if 'nb_lines' in module %}{{ module['nb_lines'] }}{% endif %}">
+              </div>
+            </div>
+
+            <div class="form-group form-inline">
+              <label for="mood_color" class="col-lg-2 control-label">Leds number per row</label> 
+              <div class="col-lg-3">             
+               <input type="text" class="form-control" name="nb_cols" placeholder="nb_cols" value="{% if 'nb_lines' in module %}{{ module['nb_cols'] }}{% endif %}">
+              </div>
+            </div>
+
+            <div class="form-group form-inline">
+              <label for="mood_color" class="col-lg-2 control-label">Interval measure (mm) between 2 leds</label> 
+              <div class="col-lg-3">             
+               <input type="text" class="form-control" name="leds_interval" placeholder="leds_interval" value="{% if 'leds_interval' in module %}{{ module['leds_interval'] }}{% endif %}">
+              </div>
+            </div>
+
+  			  	<div class="form-group form-inline">
+              <label for="mood_color" class="col-lg-2 control-label">Bibus ID</label> 
+              <div class="col-lg-3">             
+  			       <input type="text" class="form-control" name="id_ble" placeholder="Bibus Identifier" value="{% if 'id_ble' in module %}{{ module['id_ble'] }}{% endif %}">
+              </div>
+  			    </div>
+          </fieldset>
+          {% if 'id' in module %}
+  				  <input type="hidden" name="module_id" value="{{ module['id'] }}">
+          {% endif %}
+          <input type="hidden" name="action" value="admin">
+  				<input type="submit" class="btn btn-info" id="saveModule" value="Save">
+  			</form>			    
+
+	{{ super() }}
+	</div>
+{% endblock %}
+
+{% block scripts %}
+  {{super()}}
+  <script src="{{url_for('static', filename='app.js')}}"></script>
+{% endblock %}
+
+{% endblock %}
