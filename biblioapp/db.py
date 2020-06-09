@@ -57,13 +57,25 @@ def get_user_for_uuid(uuid):
   return None
 
 def set_module(data) :
-  mysql = get_db()
-  mysql['cursor'].execute("UPDATE biblio_app SET arduino_name=%s, mood_color=%s WHERE id=%s", \
-    (data['module_name'], data['mood_color'], data['module_id']))
-  mysql['conn'].commit()
-  mysql['cursor'].close()
-  mysql['conn'].close()
-  return True   
+  module={}
+  if 'module_id' in data:
+    mysql = get_db()
+    mysql['cursor'].execute("UPDATE biblio_app SET arduino_name=%s, mood_color=%s WHERE id=%s", \
+      (data['module_name'], data['mood_color'], data['module_id']))
+    mysql['conn'].commit()
+    mysql['cursor'].close()
+    mysql['conn'].close()
+    module['id'] = data['module_id']
+  else:
+    mysql = get_db()
+    mysql['cursor'].execute("INSERT INTO biblio_app (`arduino_name`, `id_ble`, `nb_lines`, `nb_cols`, `leds_interval`) \
+    VALUES (%s, %s, %s, %s)", (data['module_name'], data['id_ble'], data['nb_lines'], data['nb_cols'], data['leds_interval']))
+    mysql['conn'].commit()
+    mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
+    module = mysql['cursor'].fetchone()
+    mysql['cursor'].close()
+    mysql['conn'].close()
+  return module   
 
 def get_tidy_books(app_id, line = None) :
   mysql = get_db()

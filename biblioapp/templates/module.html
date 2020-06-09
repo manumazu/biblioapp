@@ -42,6 +42,7 @@
   				<li>Id BLE : {{ module['id_ble'] }}</li>
   				<li>Nb rows : {{ module['nb_lines'] }}</li>
   				<li>Nb leds / row : {{ module['nb_cols'] }}</li>
+          <li>leds interval : {{ module['leds_interval']/100 }} cm</li>
   			</ul>
   		<p>
   			<h4>Edit module properties :</h4>
@@ -85,6 +86,7 @@
 
         <script type="text/javascript">
           var nb_cols = {{ module['nb_cols'] }};
+          var leds_interval = {{ module['leds_interval']/100 }};
         </script>
 
 				{% for line in range(module['nb_lines']) %}

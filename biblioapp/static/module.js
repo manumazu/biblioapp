@@ -67,7 +67,7 @@ $(document).ready(function() {
 	}
 
 	function updateValue (ui) {
-		var cm_val = ((parseInt(ui.value))*1.65)+1;
+		var cm_val = ((parseInt(ui.value))*leds_interval)+0.5;
 		cm_val = Math.round(cm_val*10)/10;
 		nb_leds = parseInt(ui.value)+1;
 		//console.log('led number', nb_leds);
