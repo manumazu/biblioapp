@@ -43,8 +43,17 @@ ul.droppable li { cursor: pointer; }
     background: #eedc9a; 
     border:  1px solid black;
     padding: 5px;
-    position:relative;
-    z-index:10    
+    z-index:10;
+    overflow: hidden; 
+    position:relative;    
+    text-align: center;      
+  }
+
+  .coverbook a{
+    top: 20px;
+    left:5px;
+    right: 5px;
+    position:absolute;
   }
 
 
@@ -59,7 +68,14 @@ ul.droppable li { cursor: pointer; }
       right:2px;
       bottom:2px;
       border:2px solid #36F
-  }  
+  } 
+
+  .highlight {
+      border: 1px solid red;
+      font-weight: bold;
+      font-size: 45px;
+      background-color: lightblue;
+  }   
 
   ul#draggable li,   ul#draggable2 li, ul.droppable li {
     height:120px;
@@ -82,6 +98,15 @@ ul.droppable li { cursor: pointer; }
       #ccc 10px,
       #ccc 20px);
   }
+}
+
+.droppable li .borrowed {
+  font-size: 0.6rem;  
+}
+
+.droppable li .requested {
+  float:left;
+  font-size: 0.6rem;  
 }
 
 .droppable li .del {

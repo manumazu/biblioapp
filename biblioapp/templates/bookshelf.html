@@ -37,10 +37,10 @@
 	  {% for position,book in tidybooks[line] %}
 	  	{%if book['item_type']=='book' %}
 	     <li id="book_{{book['id']}}" class="ui-state-default coverbook">
-               {% if book['requested'] %}<span class="badge badge-success badge-pill">R</span>{% endif %}
-               {% if book['borrowed'] %}<span class="badge badge-info badge-pill">B</span>{% endif %}
+               {% if book['requested'] %}<span class="badge badge-success badge-pill requested">R</span>{% endif %}
+               {% if book['borrowed'] %}<span class="badge badge-info badge-pill borrowed">B</span>{% endif %}
                <span class="badge badge-warning badge-pill del">X</span>
-               <a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} - {{ book['title'] }}</a>
+               <a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} <br /> <strong>{{ book['title'] }}</strong></a>
          </li>
         {%else%}
         	<li class="non-draggable">&nbsp;</li>

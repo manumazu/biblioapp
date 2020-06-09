@@ -50,7 +50,8 @@ $(document).ready(function() {
 			      	$('#save-order').removeClass('btn-success');
 			      	$('#save-order').text('Save changes');
 			        $('#save-order').show();
-			      }
+			      },
+			      placeholder: "highlight",
 		   	});
 
 		   	/*$(element).delay( 1000 ).sortable({
