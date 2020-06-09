@@ -51,7 +51,7 @@ ul.droppable li { cursor: pointer; }
 @media screen and (min-width: 640px) {
 
   .ui-state-hover, .ui-state-default {
-    background: #ccc;
+    background: var(--secondary);
   }
 
   .coverbook {
@@ -71,7 +71,7 @@ ul.droppable li { cursor: pointer; }
     height: 115px;
     width: 80px;
     padding: 5px 3px;
-    background: #4e5d6c;    
+    background: var(--secondary);
     -webkit-border-radius: 3px;
     border-radius: 3px;      
   }
@@ -82,7 +82,7 @@ ul.droppable li { cursor: pointer; }
 
   .highlight {
       /*border: 1px solid black;*/
-      background-color: #ccc;
+      background-color: var(--secondary);
   }   
 
   ul#draggable li,   ul#draggable2 li, ul.droppable li {
