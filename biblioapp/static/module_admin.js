@@ -24,4 +24,27 @@ $(document).ready(function() {
 		$('input[name="id_ble"]').val(bibusId);
 	}
 
+	$('#formAdminArduino').submit(function(event) {
+		var test = true;
+		var msg = "";
+		if($('input[name="striplength"]').val()=='') {
+			test = false;
+			msg += "Strip length \n";
+		}
+		if($('input[name="nb_lines"]').val()=='') {
+			test = false;
+			msg += "Rows num \n";
+		}
+		if($('#ledspermeter option:selected').val()=='Nb Leds') {
+			test = false;
+			msg += "Nb Leds \n";
+		}
+		if(!test) {
+			alert("These values are mandatory :\n"+msg);
+			event.preventDefault();
+		}
+		else
+			return;
+	});
+
 });

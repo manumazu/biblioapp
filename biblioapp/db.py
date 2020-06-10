@@ -100,6 +100,14 @@ def update_id_ble(module_id, id_ble) :
   mysql['cursor'].close()
   mysql['conn'].close() 
 
+def set_user_app(id_user, id_app) :
+  mysql = get_db()
+  mysql['cursor'].execute("INSERT INTO biblio_user_app (`id_user`, `id_app`) VALUES (%s, %s) \
+    ON DUPLICATE KEY UPDATE `id_user`=%s", (id_user, id_app, id_user))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()  
+
 def get_tidy_books(app_id, line = None) :
   mysql = get_db()
   if line == None:

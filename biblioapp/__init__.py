@@ -77,8 +77,10 @@ def editArduino(app_id):
 @app.route("/adminmodule/", methods=['GET', 'POST'])
 @flask_login.login_required
 def newArduino():
+  globalVars = initApp()
   if flask_login.current_user.id == 'emmanuel.mazurier@gmail.com':
     module = {}
+    user_id = globalVars['arduino_map']['user_id']
     if request.method == 'POST':
       data = {}
       data['action'] = request.form.get('action')
@@ -94,10 +96,11 @@ def newArduino():
       if request.form.get('module_id'):
         data['module_id'] = request.form.get('module_id')
       #print(data)
-      #save module and set id_ble
+      #save module, set user_app, and set id_ble
       module = db.set_module(data)
       if 'id' in module:
           module = db.get_module(module['id'])
+          db.set_user_app(user_id, module['id'])
           if module['id_ble']=='xxxx':
             id_ble = tools.set_id_ble(module)
             db.update_id_ble(module['id'], id_ble)
