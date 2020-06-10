@@ -70,7 +70,7 @@ $(document).ready(function() {
 		var cm_val = ((parseInt(ui.value))*leds_interval)+0.5;
 		cm_val = Math.round(cm_val*10)/10;
 		nb_leds = parseInt(ui.value)+1;
-		//console.log('led number', nb_leds);
+		console.log('led number', nb_leds);
 	    $(ui.handle).attr('data-value', cm_val + " cm"); //Math.round(ui.value*1.63*100)/100 + " cm");
 	};
 

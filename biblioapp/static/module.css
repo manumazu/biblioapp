@@ -1,4 +1,4 @@
-#formEditArduino .control-label {
+#formEditArduino .control-label, #formAdminArduino .control-label {
     justify-content: left;
 }
 

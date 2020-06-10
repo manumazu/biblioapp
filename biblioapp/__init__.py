@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify
 from flask_bootstrap import Bootstrap
-import flask_login, hashlib, base64
+import flask_login, hashlib, base64, math
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -80,8 +80,27 @@ def newArduino():
   if flask_login.current_user.id == 'emmanuel.mazurier@gmail.com':
     module = {}
     if request.method == 'POST':
-      module = db.set_module(request.form)
+      data = {}
+      data['action'] = request.form.get('action')
+      data['module_name'] = request.form.get('module_name')
+      data['nb_lines'] = request.form.get('nb_lines')
+      striplength = request.form.get('striplength')
+      ledspermeter = request.form.get('ledspermeter')
+      leds_interval = (100/int(ledspermeter)) 
+      nb_cols = round((float(striplength)/leds_interval)+0.5) # nb_leds per strip
+      data['leds_interval'] = math.floor(leds_interval*100) # interval btw leds in mm
+      data['nb_cols'] = nb_cols
+      data['id_ble'] = "xxxx" #set empty id_ble
+      if request.form.get('module_id'):
+        data['module_id'] = request.form.get('module_id')
+      #print(data)
+      #save module and set id_ble
+      module = db.set_module(data)
       if 'id' in module:
+          module = db.get_module(module['id'])
+          if module['id_ble']=='xxxx':
+            id_ble = tools.set_id_ble(module)
+            db.update_id_ble(module['id'], id_ble)
           return redirect(url_for('newArduino', _scheme='https', _external=True, module_id=module['id']))
     if request.args.get('module_id'):
       module = db.get_module(request.args.get('module_id'))

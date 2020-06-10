@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}New module{% endblock %}
+{% block title %}{% if module %}Admin "{{ module['arduino_name'] }}" {% else %}New module{% endif %}{% endblock %}
 {% block styles %}
 	<link rel="stylesheet" href="{{url_for('static', filename='module.css')}}">
     {{super()}}
@@ -19,7 +19,7 @@
 
 	<div class="container">
 		
-	<h1 class="mt-5 text-white font-weight-light">New module for bookshelf (after purchase) :</h1>
+	<h1 class="mt-5 text-white font-weight-light">Admin BIBUS module for bookshelf :</h1>
 	
       {% if module %}
     		<h4>Bookshelf characteristics : </h4>
@@ -33,15 +33,15 @@
       {% endif %}
 
   			<h4>Edit module properties :</h4>
-  			<form method="POST" action="{{ url_for('newArduino') }}" id="formEditArduino">
+  			<form method="POST" action="{{ url_for('newArduino') }}" id="formAdminArduino">
 
           <fieldset>
-          <div class="form-group form-inline">
-            <label for="module_name" class="col-lg-2 control-label">Bookshelf name</label>
-    				<div class="col-lg-3">
-              <input type="text" class="form-control" name="module_name" placeholder="arduino_name" value="{% if 'arduino_name' in module %}{{ module['arduino_name'] }}{% endif %}">
-    				</div>
-          </div>
+            <div class="form-group form-inline">
+              <label for="module_name" class="col-lg-2 control-label">Bookshelf name</label>
+      				<div class="col-lg-3">
+                <input type="text" class="form-control" name="module_name" placeholder="arduino_name" value="{% if 'arduino_name' in module %}{{ module['arduino_name'] }}{% endif %}">
+      				</div>
+            </div>        
 
             <div class="form-group form-inline">
               <label for="mood_color" class="col-lg-2 control-label">Rows number in bookshelf</label> 
@@ -49,6 +49,38 @@
                <input type="text" class="form-control" name="nb_lines" placeholder="nb_lines" value="{% if 'nb_lines' in module %}{{ module['nb_lines'] }}{% endif %}">
               </div>
             </div>
+
+            <div class="form-group form-inline">
+              <label for="mood_color" class="col-lg-2 control-label">Strip length</label> 
+              <div class="col-lg-3">             
+               <input type="text" class="form-control" name="striplength" placeholder="length (cm)" value="">
+              </div>
+            </div>            
+
+            <div class="form-group form-inline">
+                <label for="ledspermeter" class="col-lg-2 control-label">Nb Leds per meter</label>
+                <div class="col-lg-3">
+                <select id="ledspermeter" name="ledspermeter">
+                  <option>Nb Leds</option>
+                  <option value="60">60</option>
+                  <option value="144">144</option>
+                </select>
+              </div>
+            </div> 
+
+            <div class="form-group form-inline">
+              <label for="id_ble" class="col-lg-2 control-label">Bibus ID</label> 
+              <div class="col-lg-3">             
+               <input type="text" class="form-control" name="id_ble" placeholder="Bibus Identifier" value="{% if 'id_ble' in module %}{{ module['id_ble'] }}{% endif %}" disabled>
+              </div>
+            </div>
+
+            <!--div class="form-group form-inline">
+              <label for="mood_color" class="col-lg-2 control-label">Bibus ID</label> 
+              <div class="col-lg-3">             
+               <input type="text" class="form-control" name="id_ble" placeholder="Bibus Identifier" value="{% if 'id_ble' in module %}{{ module['id_ble'] }}{% endif %}">
+              </div>
+            </div>                        
 
             <div class="form-group form-inline">
               <label for="mood_color" class="col-lg-2 control-label">Leds number per row</label> 
@@ -62,14 +94,8 @@
               <div class="col-lg-3">             
                <input type="text" class="form-control" name="leds_interval" placeholder="leds_interval" value="{% if 'leds_interval' in module %}{{ module['leds_interval'] }}{% endif %}">
               </div>
-            </div>
+            </div-->
 
-  			  	<div class="form-group form-inline">
-              <label for="mood_color" class="col-lg-2 control-label">Bibus ID</label> 
-              <div class="col-lg-3">             
-  			       <input type="text" class="form-control" name="id_ble" placeholder="Bibus Identifier" value="{% if 'id_ble' in module %}{{ module['id_ble'] }}{% endif %}">
-              </div>
-  			    </div>
           </fieldset>
           {% if 'id' in module %}
   				  <input type="hidden" name="module_id" value="{{ module['id'] }}">
@@ -84,6 +110,7 @@
 
 {% block scripts %}
   {{super()}}
+  <script src="{{url_for('static', filename='module_admin.js')}}"></script>
   <script src="{{url_for('static', filename='app.js')}}"></script>
 {% endblock %}
 

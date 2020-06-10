@@ -91,7 +91,14 @@ def set_module(data) :
     module = mysql['cursor'].fetchone()
     mysql['cursor'].close()
     mysql['conn'].close()
-  return module   
+  return module 
+
+def update_id_ble(module_id, id_ble) : 
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_app SET id_ble=%s WHERE id=%s", (id_ble, module_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close() 
 
 def get_tidy_books(app_id, line = None) :
   mysql = get_db()
