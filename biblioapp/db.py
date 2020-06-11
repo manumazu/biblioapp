@@ -331,6 +331,7 @@ def set_position(app_id, item_id, position, row, interval, item_type, led_column
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
+  #print(mysql['cursor']._last_executed)
   return led_column
 
 '''compute sum of intervals for setting physical position'''
@@ -362,12 +363,14 @@ def get_static_positions(app_id, row):
     return row
   return False
 
-def del_item_position(app_id, item_id, item_type, user_id) :
+def del_item_position(app_id, item_id, item_type, numrow) :
   mysql = get_db()
-  mysql['cursor'].execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=%s", (item_id, item_type, app_id))
+  mysql['cursor'].execute("DELETE FROM biblio_position WHERE `id_item`=%s and `item_type`=%s and `id_app`=%s and `row`=%s", \
+    (item_id, item_type, app_id, numrow))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
+  #print(mysql['cursor']._last_executed)    
   return True
 
 ''' manage taxonomy '''

@@ -33,9 +33,9 @@ $(document).ready(function() {
 					ui.draggable.detach().css({top: 0,left: 0}).appendTo($(this));
 			 
 					//specific event after dropped item
-				    /*var elements = $(element).sortable('serialize');			    
+				    var elements = $(element).sortable('serialize');			    
 				    var row = element.split('_')[1];
-					ajax_postOrder(elements,row); //order new item*/
+					ajax_postOrder(elements,row); //order new item
 
 					ui.draggable.find('span').one('click', function() { //delete new item
 					   ajax_supprItem($( this ));

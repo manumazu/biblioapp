@@ -67,11 +67,14 @@ def editArduino(app_id):
       for numrow in data:
         positions = data[numrow]
         for i in range(len(positions)):
-          pos = i+1
+          pos = i+1        
           if mode == 'save': 
-            db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])
-          if mode == 'preview':
+            db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])            
+          if mode == 'preview': #set distant request for preview
             db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static')
+          #suppr static when position is reseted to 0
+          if int(positions[i]) == 0:
+            db.del_item_position(int(app_id), pos, 'static', numrow)            
   return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
 
 @app.route("/adminmodule/", methods=['GET', 'POST'])
@@ -263,7 +266,7 @@ def ajaxDelPosition():
       #clean all position for books
       position = db.get_position_for_book(session.get('app_id'), item_id)
       if position:
-        db.del_item_position(session.get('app_id'), item_id, item_type, globalVars['arduino_map']['user_id'])
+        db.del_item_position(session.get('app_id'), item_id, item_type, position['row'])
         has_request = db.get_request_for_position(session.get('app_id'), position['position'], position['row'])
         #remove request
         if has_request:
@@ -896,8 +899,8 @@ def ajaxPermutePosition():
     message = {'success':False, 'dest_range':pos_dest['range']}
   else:
     #clean old positions
-    db.del_item_position(session.get('app_id'), from_id, 'book', globalVars['arduino_map']['user_id'])
-    db.del_item_position(session.get('app_id'), dest_id, 'book', globalVars['arduino_map']['user_id'])
+    db.del_item_position(session.get('app_id'), from_id, 'book', pos_from['row'])
+    db.del_item_position(session.get('app_id'), dest_id, 'book', pos_dest['row'])
     #add new position for first book 
     led_column_1 = db.set_position(session.get('app_id'), from_id, pos_dest['position'], pos_dest['row'], \
       pos_dest['range'], 'book', pos_dest['led_column'])
