@@ -173,8 +173,8 @@ def myBookShelf():
       element = {}
       for row in books:     
         element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
-    'title':row['title'], 'author':row['author'], 'position':row['position'], 'borrowed':row['borrowed'], \
-    'url':'/book/'+str(row['id'])}
+    'title':row['title'], 'author':row['author'], 'position':row['position'], 'range':row['range'], \
+    'borrowed':row['borrowed'], 'url':'/book/'+str(row['id'])}
         requested = db.get_request_for_position(app_id, row['position'], shelf)
         if requested:
           element[row['led_column']]['requested']=True
