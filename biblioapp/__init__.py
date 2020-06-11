@@ -918,6 +918,22 @@ def ajaxPermutePosition():
 '''
 Authentication
 '''
+@app.route('/signup', methods=['GET', 'POST'])
+def signUp():
+  return render_template('signup.html')
+
+@app.route('/ajax_recaptcha/', methods=['GET', 'POST'])
+def verifRecaptcha():
+  import requests
+  recaptcha_response = request.form.get('token')
+  secretKey = "6Lc6WKMZAAAAAP-S1aHiuQzM_K3T8PGH5rMC_XZh"
+  r = requests.post("https://www.google.com/recaptcha/api/siteverify?secret="+secretKey+"&response="+recaptcha_response)
+  data = r.json()
+  if 'success' in data:
+    if data['score'] >= 0.5: 
+      return "ok"
+  return "ko"
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':

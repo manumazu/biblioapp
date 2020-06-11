@@ -11,16 +11,67 @@
 {% endblock %}
 
 {% block content %}
+<div class="container">
+	<h1 class="mt-5 text-white font-weight-light">Sign up ...</h1>
+	<h2>... and turn on your bookshlef !</h2>
 
-	<form action="{{ url_for('signup') }}" method="POST">
+	<form action="{{ url_for('signUp') }}" method="POST" class="form-horizontal" id="form-signUp">
 
-		<input type="text" name="name" id="name" placeholder="name"/>
+		<div class="form-group row">
+			<label for="ufirstname" class="col-sm-2 col-form-label">Firstname</label> 
+	   		<div class="col-sm-4">
+	   			<input type="text" name="ufirstname" id="ufirstname" placeholder="Firstname" class="form-control"/>
+	   		</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="ulastname" class="col-sm-2 col-form-label">Lastname</label> 
+	   		<div class="col-sm-4">
+	   			<input type="text" name="ulastname" id="ulastname" placeholder="Lastname" class="form-control"/>
+	   		</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="uemail" class="col-sm-2 col-form-label">Email</label> 
+			<div class="col-sm-4">
+	   			<input type="text" name="uemail" id="uemail" placeholder="Email" class="form-control"/>
+	   		</div>
+		</div>				
 		
-		<input type="text" name="email" id="email" placeholder="email"/>
-		<input type="password" name="password" id="password" placeholder="password"/>
-		<input type="submit" name="submit"/>
-	</form>
+		<div class="form-group row">
+			<label for="upassword" class="col-sm-2 col-form-label">Password</label> 
+	   		<div class="col-sm-4">
+	   			<input type="password" name="upassword" id="upassword" placeholder="password" class="form-control"/>
+	   		</div>
+		</div>	
 
+		<div class="form-group row">
+			<label for="pwdconfirm" class="col-sm-2 col-form-label">Password confirm</label> 	   		
+	   		<div class="col-sm-4">
+	   			<input type="password" name="pwdconfirm" id="pwdconfirm" placeholder="password confirm" class="form-control"/>
+	   		</div>
+		</div>
+
+	<script src="https://www.google.com/recaptcha/api.js?render=6Lc6WKMZAAAAACRIRR1m9NsbUgSDILhhKdKOfXrZ"></script>
+	<script>
+	   function onSubmit(token) {
+		    ajax_validRecaptcha(token).then(function(res, e){
+		    	if(res=='ok') {
+		    		$("#form-signUp").submit();
+		    	}
+			    else
+			    	alert('Are you a bot ?');
+		    });
+		}
+	 </script>
+
+	<button class="g-recaptcha btn btn-info" 
+        data-sitekey="6Lc6WKMZAAAAACRIRR1m9NsbUgSDILhhKdKOfXrZ" 
+        data-callback='onSubmit' 
+        data-action='submit'>Submit</button>
+
+	</form>
+</div>
 {% endblock %}
 
 {% block scripts %}

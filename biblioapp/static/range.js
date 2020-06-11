@@ -3,7 +3,7 @@ $(document).ready(function() {
 	$('#save-order').hide();
 
    	//set chosen shelf for session
-   	$('.nav-link').on('click', function() {
+   	$('.nav-pills .nav-link').on('click', function() {
 	   	var shelfnum = $(this).attr('href').split('_')[1];
 	   	console.log(shelfnum);
 		$.ajax({

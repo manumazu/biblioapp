@@ -30,6 +30,21 @@
       $('#draggable li').draggable({scope: "d1"}); //set list draggable again
   }
 
+  function ajax_validRecaptcha(token) {
+  	return new Promise(function(resolve, reject) {
+	    $.ajax({
+		    data: "token="+token,
+		    type: 'POST',
+		    url: '/ajax_recaptcha/',
+		    success: function(res){
+		    	console.log('validRecaptcha',res);
+		    	resolve(res);
+		    },
+		    error: reject
+	    });
+	});
+  }
+
 
 /* color editor methods */
 
