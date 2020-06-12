@@ -301,39 +301,41 @@ def ajaxDelPosition():
 @flask_login.login_required
 def listNodesForTag(tag_id):
   globalVars = initApp()
-  nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
-  tag = db.get_tag_by_id(tag_id)
-  data = {}
-  data['list_title'] = tag['tag']
-  if nodes:
-      books = []
-      #for node in nodes:
-      for i in range(len(nodes)):
-          book = db.get_book(nodes[i]['id_node'], globalVars['arduino_map']['user_id'])
-          books.append(book)
-          app_modules = db.get_arduino_for_user(flask_login.current_user.id)
-          for module in app_modules:
-            address = db.get_position_for_book(module['id'], book['id'])
-            if address:
-              hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
-              books[i]['address'] = address
-              books[i]['arduino_name'] = module['arduino_name']
-              books[i]['app_id'] = module['id']
-              books[i]['app_uuid'] = module['uuid']
-              books[i]['app_mac'] = module['mac']
-              books[i]['hasRequest'] = hasRequest
-              if tag['color'] is not None:
-                books[i]['color'] = tag['color']
-      data['items'] = books
-  #send json when token mode
-  if('token' in request.args):
-    response = app.response_class(
-      response=json.dumps(data),
-      mimetype='application/json'
-    )
-    return response     
-  return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
-    biblio_name=globalVars['arduino_map']['arduino_name'], tag=tag)
+  if globalVars['arduino_map'] != None:
+    nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
+    tag = db.get_tag_by_id(tag_id)
+    data = {}
+    data['list_title'] = tag['tag']
+    if nodes:
+        books = []
+        #for node in nodes:
+        for i in range(len(nodes)):
+            book = db.get_book(nodes[i]['id_node'], globalVars['arduino_map']['user_id'])
+            books.append(book)
+            app_modules = db.get_arduino_for_user(flask_login.current_user.id)
+            for module in app_modules:
+              address = db.get_position_for_book(module['id'], book['id'])
+              if address:
+                hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
+                books[i]['address'] = address
+                books[i]['arduino_name'] = module['arduino_name']
+                books[i]['app_id'] = module['id']
+                books[i]['app_uuid'] = module['uuid']
+                books[i]['app_mac'] = module['mac']
+                books[i]['hasRequest'] = hasRequest
+                if tag['color'] is not None:
+                  books[i]['color'] = tag['color']
+        data['items'] = books
+    #send json when token mode
+    if('token' in request.args):
+      response = app.response_class(
+        response=json.dumps(data),
+        mimetype='application/json'
+      )
+      return response     
+    return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
+      biblio_name=globalVars['arduino_map']['arduino_name'], tag=tag)
+  abort(404)
 
 @app.route('/ajax_tag_color/<tag_id>', methods=['POST'])
 @flask_login.login_required
