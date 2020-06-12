@@ -18,21 +18,24 @@ global arduino_name, user_login
 def initApp():
   user_login = False
   if(flask_login.current_user.is_authenticated):
-    #prevent empty session for module : select first one
-    if 'app_id' not in session:
-      modules = db.get_arduino_for_user(flask_login.current_user.id)
-      for module in modules:
-        session['app_id'] = module['id']
-        session['app_name'] = module['arduino_name']
-        flash('Bookshelf "{}"selected'.format(module['arduino_name']))
-        break
     user_login = flask_login.current_user.name  
-    arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
-    arduino_name = arduino_map['arduino_name']
+    #prevent empty session for module : select first one
+    modules = db.get_arduino_for_user(flask_login.current_user.id) 
+    if modules:   
+      if 'app_id' not in session:
+          for module in modules:
+            session['app_id'] = module['id']
+            session['app_name'] = module['arduino_name']
+            flash('Bookshelf "{}"selected'.format(module['arduino_name']))
+            break
+      arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
+      arduino_name = arduino_map['arduino_name']            
+    else:
+      arduino_map = None
+      arduino_name = None        
   else:
-    user_login = False
-    arduino_map = None
-    arduino_name = None
+      arduino_map = None
+      arduino_name = None  
   return {'user_login':user_login,'arduino_map':arduino_map,'arduino_name':arduino_name}
 
 @app.route("/", methods=['GET', 'POST'])
@@ -53,29 +56,31 @@ def selectArduino():
 @flask_login.login_required
 def editArduino(app_id):
   module = db.get_arduino_map(flask_login.current_user.id, app_id)
-  session['app_id'] = module['id']
-  session['app_name'] = module['arduino_name']
-  if request.method == 'POST':
-    if 'module_name' in request.form:
-      if db.set_module(request.form):
-        return redirect(url_for('editArduino', _scheme='https', _external=True, app_id=request.form.get('module_id')))
-    if request.is_json:
-      mode = request.args.get('mode')
-      if mode == 'preview':
-        db.clean_request(app_id) #clean request for preview
-      data = request.get_json()
-      for numrow in data:
-        positions = data[numrow]
-        for i in range(len(positions)):
-          pos = i+1        
-          if mode == 'save': 
-            db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])            
-          if mode == 'preview': #set distant request for preview
-            db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static')
-          #suppr static when position is reseted to 0
-          if int(positions[i]) == 0:
-            db.del_item_position(int(app_id), pos, 'static', numrow)            
-  return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
+  if module:
+    session['app_id'] = module['id']
+    session['app_name'] = module['arduino_name']
+    if request.method == 'POST':
+      if 'module_name' in request.form:
+        if db.set_module(request.form):
+          return redirect(url_for('editArduino', _scheme='https', _external=True, app_id=request.form.get('module_id')))
+      if request.is_json:
+        mode = request.args.get('mode')
+        if mode == 'preview':
+          db.clean_request(app_id) #clean request for preview
+        data = request.get_json()
+        for numrow in data:
+          positions = data[numrow]
+          for i in range(len(positions)):
+            pos = i+1        
+            if mode == 'save': 
+              db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])            
+            if mode == 'preview': #set distant request for preview
+              db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static')
+            #suppr static when position is reseted to 0
+            if int(positions[i]) == 0:
+              db.del_item_position(int(app_id), pos, 'static', numrow)            
+    return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
+  abort(404)
 
 @app.route("/adminmodule/", methods=['GET', 'POST'])
 @flask_login.login_required
@@ -111,21 +116,27 @@ def newArduino():
     if request.args.get('module_id'):
       module = db.get_module(request.args.get('module_id'))
     return render_template('module_admin.html', user_login=flask_login.current_user.name, module=module, biblio_name=session.get('app_name'))
+  abort(404)
 
 @app.route('/authors/')
 @flask_login.login_required
 def listAuthors():
   globalVars = initApp()
-  return render_template('authors.html', user_login=flask_login.current_user.name, db=db, user_id=globalVars['arduino_map']['user_id'], \
+  if globalVars['arduino_map'] != None:
+    return render_template('authors.html', user_login=flask_login.current_user.name, db=db, user_id=globalVars['arduino_map']['user_id'], \
     biblio_name=session.get('app_name'))
+  abort(404)
 
 @app.route('/categories/')
 @app.route('/categories/<uuid>/')
 def listCategories(uuid = None):
   if(flask_login.current_user.is_authenticated):
     globalVars = initApp()
-    user_id = globalVars['arduino_map']['user_id']
-    categories = db.get_categories_for_user(user_id)
+    if globalVars['arduino_map'] != None:
+      user_id = globalVars['arduino_map']['user_id']
+      categories = db.get_categories_for_user(user_id)
+    else:
+      abort(404)
   elif uuid is None:
       return redirect(url_for('login', _scheme='https', _external=True))
   if uuid is not None:
@@ -161,31 +172,33 @@ def listCategories(uuid = None):
 @flask_login.login_required
 def myBookShelf():
   globalVars = initApp()
-  app_id = globalVars['arduino_map']['id']
-  if 'app_numshelf' not in session:
-    session['app_numshelf'] = 1
-  shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
-  elements = {}
-  for shelf in shelfs:
-    books = db.get_books_for_row(app_id, shelf)
-    if books:
-      statics = db.get_static_positions(app_id, shelf)
-      element = {}
-      for row in books:     
-        element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
-    'title':row['title'], 'author':row['author'], 'position':row['position'], 'range':row['range'], \
-    'borrowed':row['borrowed'], 'url':'/book/'+str(row['id'])}
-        requested = db.get_request_for_position(app_id, row['position'], shelf)
-        if requested:
-          element[row['led_column']]['requested']=True
-      if statics:
-        for static in statics:
-          element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
-      elements[shelf] = sorted(element.items())
-  bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
-  return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
-      bookstorange=bookstorange, lines=shelfs, biblio_name=globalVars['arduino_map']['arduino_name'], \
-      nb_lines=globalVars['arduino_map']['nb_lines'], session=session)
+  if globalVars['arduino_map'] != None:
+    app_id = globalVars['arduino_map']['id']
+    if 'app_numshelf' not in session:
+      session['app_numshelf'] = 1
+    shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
+    elements = {}
+    for shelf in shelfs:
+      books = db.get_books_for_row(app_id, shelf)
+      if books:
+        statics = db.get_static_positions(app_id, shelf)
+        element = {}
+        for row in books:     
+          element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
+      'title':row['title'], 'author':row['author'], 'position':row['position'], 'range':row['range'], \
+      'borrowed':row['borrowed'], 'url':'/book/'+str(row['id'])}
+          requested = db.get_request_for_position(app_id, row['position'], shelf)
+          if requested:
+            element[row['led_column']]['requested']=True
+        if statics:
+          for static in statics:
+            element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
+        elements[shelf] = sorted(element.items())
+    bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
+    return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
+        bookstorange=bookstorange, lines=shelfs, biblio_name=globalVars['arduino_map']['arduino_name'], \
+        nb_lines=globalVars['arduino_map']['nb_lines'], session=session)
+  abort(404)
 
 @app.route("/ajax_set_bookshelf/", methods=['GET'])
 @flask_login.login_required
@@ -344,33 +357,34 @@ def ajaxTagColor(tag_id):
 @flask_login.login_required
 def getBook(book_id):
   globalVars = initApp()
-  book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
-  if book:
-    book['address']=None
-    book['hasRequest']=None
-    book['categories'] = []
-    tags = db.get_tag_for_node(book['id'], 1)#book tags for taxonomy categories
-    if tags:
-      for i in range(len(tags)):
-        book['categories'].append(tags[i]['tag'])
-    app_modules = db.get_arduino_for_user(flask_login.current_user.id)
-    for module in app_modules:
-      address = db.get_position_for_book(module['id'], book['id'])
-      if address:
-        hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
-        book['address'] = address
-        book['arduino_name'] = module['arduino_name']
-        book['app_id'] = module['id']
-        book['hasRequest'] = hasRequest
-    #send json when token mode
-    if('token' in request.args):
-      response = app.response_class(
-        response=json.dumps(book),
-        mimetype='application/json'
-      )
-      return response      
-    return render_template('book.html', user_login=globalVars['user_login'], book=book, \
-        biblio_name=globalVars['arduino_map']['arduino_name'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
+  if globalVars['arduino_map'] != None:
+    book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
+    if book:
+      book['address']=None
+      book['hasRequest']=None
+      book['categories'] = []
+      tags = db.get_tag_for_node(book['id'], 1)#book tags for taxonomy categories
+      if tags:
+        for i in range(len(tags)):
+          book['categories'].append(tags[i]['tag'])
+      app_modules = db.get_arduino_for_user(flask_login.current_user.id)
+      for module in app_modules:
+        address = db.get_position_for_book(module['id'], book['id'])
+        if address:
+          hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
+          book['address'] = address
+          book['arduino_name'] = module['arduino_name']
+          book['app_id'] = module['id']
+          book['hasRequest'] = hasRequest
+      #send json when token mode
+      if('token' in request.args):
+        response = app.response_class(
+          response=json.dumps(book),
+          mimetype='application/json'
+        )
+        return response      
+      return render_template('book.html', user_login=globalVars['user_login'], book=book, \
+          biblio_name=globalVars['arduino_map']['arduino_name'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
   abort(404)
 
 @app.route('/ajax_categories/')
@@ -623,69 +637,71 @@ def listAuthorsForModule(uuid):
 def searchBookReference():
   import requests
   globalVars = initApp()
-  data={}
+  if globalVars['arduino_map'] != None:
+    data={}
 
-  '''Search books with google api'''  
-  url = "https://www.googleapis.com/books/v1/volumes"
-  query = "?key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
-  '''search on api for form'''
-  if request.method == 'POST':
-    if 'isbn' in request.form and request.form['isbn']:
-      query += "ISBN:\""+request.form['isbn']+"\"&"
-    if 'inauthor' in request.form and request.form['inauthor']:
-      query += "inauthor:"+request.form['inauthor']+"+"
-    if 'intitle' in request.form and request.form['intitle']:
-      query += "intitle:"+request.form['intitle']
-    if 'query' in request.form:
-      query += request.form['query']
-    r = requests.get(url + query)
-    data = r.json()
-    return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
-      biblio_name=globalVars['arduino_map']['arduino_name'])
-
-  '''display classic form for edition'''
-  if request.method == 'GET' and request.args.get('ref'):
-    ref = request.args.get('ref')
-    book = {}
-    if ref != 'new':
-      r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
+    '''Search books with google api'''  
+    url = "https://www.googleapis.com/books/v1/volumes"
+    query = "?key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
+    '''search on api for form'''
+    if request.method == 'POST':
+      if 'isbn' in request.form and request.form['isbn']:
+        query += "ISBN:\""+request.form['isbn']+"\"&"
+      if 'inauthor' in request.form and request.form['inauthor']:
+        query += "inauthor:"+request.form['inauthor']+"+"
+      if 'intitle' in request.form and request.form['intitle']:
+        query += "intitle:"+request.form['intitle']
+      if 'query' in request.form:
+        query += request.form['query']
+      r = requests.get(url + query)
       data = r.json()
-      book = data['volumeInfo']    
-    return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
+      return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
         biblio_name=globalVars['arduino_map']['arduino_name'])
 
-  '''manage infos from mobile app'''
-  if request.method == 'GET' and request.args.get('token') and request.args.get('isbn'):
-    res = []
-    '''Search books with googleapis api'''
-    if request.args.get('search_api')=='googleapis':
-      query += "ISBN:\""+request.args.get('isbn')+"\""
-      print(url + query)
-      r = requests.get(url + query)
-      data = r.json() 
-      if 'items' in data:
-        for item in data['items']:
-          res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn')))
+    '''display classic form for edition'''
+    if request.method == 'GET' and request.args.get('ref'):
+      ref = request.args.get('ref')
+      book = {}
+      if ref != 'new':
+        r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
+        data = r.json()
+        book = data['volumeInfo']    
+      return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
+          biblio_name=globalVars['arduino_map']['arduino_name'])
 
-    '''Search books with openlibrary api'''
-    if request.args.get('search_api')=='openlibrary':
-      url = "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys="
-      query = "ISBN:"+request.args.get('isbn')
-      r = requests.get(url + query)
-      data = r.json()
-      #print(data)      
-      if query in data:
-        res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'))]  
+    '''manage infos from mobile app'''
+    if request.method == 'GET' and request.args.get('token') and request.args.get('isbn'):
+      res = []
+      '''Search books with googleapis api'''
+      if request.args.get('search_api')=='googleapis':
+        query += "ISBN:\""+request.args.get('isbn')+"\""
+        print(url + query)
+        r = requests.get(url + query)
+        data = r.json() 
+        if 'items' in data:
+          for item in data['items']:
+            res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn')))
 
-    #print(res)
-    response = app.response_class(
-        response=json.dumps(res),
-        mimetype='application/json'
-    )
-    return response           
-  else:
-    return render_template('booksearch.html', user_login=globalVars['user_login'], \
-      biblio_name=globalVars['arduino_map']['arduino_name']) 
+      '''Search books with openlibrary api'''
+      if request.args.get('search_api')=='openlibrary':
+        url = "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys="
+        query = "ISBN:"+request.args.get('isbn')
+        r = requests.get(url + query)
+        data = r.json()
+        #print(data)      
+        if query in data:
+          res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'))]  
+
+      #print(res)
+      response = app.response_class(
+          response=json.dumps(res),
+          mimetype='application/json'
+      )
+      return response           
+    else:
+      return render_template('booksearch.html', user_login=globalVars['user_login'], \
+        biblio_name=globalVars['arduino_map']['arduino_name']) 
+  abort(404)
 
 @app.route('/bookreferencer/', methods=['POST', 'GET'])
 @flask_login.login_required
@@ -774,76 +790,81 @@ def bookDelete():
 @flask_login.login_required
 def customCodes(uuid = None):
   globalVars = initApp()
-  #print(codes)
-  #send json when token mode
-  if('token' in request.args):
-    codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], True)
-    data = {}
-    data['list_title'] = 'Your codes for ' + session['app_name']
-    hashmail = tools.set_token(flask_login.current_user.id)
-    for i in range(len(codes)):
-      codes[i]['url'] = url_for('customCode',code_id=codes[i]['id'])
-      codes[i]['token'] = hashmail
-    data['elements']= codes
-    response = app.response_class(
-      response=json.dumps(data),
-      mimetype='application/json'
-    )
-    return response  
-  if request.args.get('saved'):
-    flash('Your code is saved')  
-  #manage post data from json request
-  if request.method == 'POST':
-    if request.is_json:
-        jsonr = request.get_json()
-        #print(json)
-        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
-          jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
-        #print(request.data.decode())
-  codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])        
-  return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json)
+  if globalVars['arduino_map'] != None:
+    #print(codes)
+    #send json when token mode
+    if('token' in request.args):
+      codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], True)
+      data = {}
+      data['list_title'] = 'Your codes for ' + session['app_name']
+      hashmail = tools.set_token(flask_login.current_user.id)
+      for i in range(len(codes)):
+        codes[i]['url'] = url_for('customCode',code_id=codes[i]['id'])
+        codes[i]['token'] = hashmail
+      data['elements']= codes
+      response = app.response_class(
+        response=json.dumps(data),
+        mimetype='application/json'
+      )
+      return response  
+    if request.args.get('saved'):
+      flash('Your code is saved')  
+    #manage post data from json request
+    if request.method == 'POST':
+      if request.is_json:
+          jsonr = request.get_json()
+          #print(json)
+          db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
+            jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
+          #print(request.data.decode())
+    codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])        
+    return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json)
+  abort(404)
 
 @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
 @flask_login.login_required
 def customCode(code_id):
   globalVars = initApp()
+  if globalVars['arduino_map'] != None:
+    #manage post data from json request
+    if request.method == 'POST':
+      if request.is_json:
+          jsonr = request.get_json()
+          db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], jsonr['description'], \
+           jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
 
-  #manage post data from json request
-  if request.method == 'POST':
-    if request.is_json:
-        jsonr = request.get_json()
-        db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], jsonr['description'], \
-         jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
-
-  data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
-  customvars = ''
-  if len(data['customvars'])>0:
-    customvars = json.loads(data['customvars'])
-  #send json when token mode
-  if('token' in request.args):
-    response = app.response_class(
-      response=json.dumps(data['customcode'].decode()),
-      mimetype='application/json'
-    )
-    return response
-  return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
-    customvars=customvars, data=data)
+    data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
+    customvars = ''
+    if len(data['customvars'])>0:
+      customvars = json.loads(data['customvars'])
+    #send json when token mode
+    if('token' in request.args):
+      response = app.response_class(
+        response=json.dumps(data['customcode'].decode()),
+        mimetype='application/json'
+      )
+      return response
+    return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
+      customvars=customvars, data=data)
+  abort(404)
 
 @app.route('/customeffects/<uuid>/')
 @flask_login.login_required
 def customEffects(uuid = None):
   globalVars = initApp()
-  if('token' in request.args):
-    effects = [ 'rainbow', 'rainbowWithGlitter', 'confetti', 'sinelon' , 'juggle', 'bpm' ]
-    data = {}
-    data['list_title'] = 'Effects for ' + session['app_name']
-    hashmail = tools.set_token(flask_login.current_user.id)
-    data['elements']= effects
-    response = app.response_class(
-      response=json.dumps(data),
-      mimetype='application/json'
-    )
-    return response    
+  if globalVars['arduino_map'] != None:
+    if('token' in request.args):
+      effects = [ 'rainbow', 'rainbowWithGlitter', 'confetti', 'sinelon' , 'juggle', 'bpm' ]
+      data = {}
+      data['list_title'] = 'Effects for ' + session['app_name']
+      hashmail = tools.set_token(flask_login.current_user.id)
+      data['elements']= effects
+      response = app.response_class(
+        response=json.dumps(data),
+        mimetype='application/json'
+      )
+      return response
+  abort(404) 
 
 @app.route('/ajax_search/')
 @flask_login.login_required
@@ -974,7 +995,7 @@ def login():
         flask_login.login_user(user)
         return redirect(url_for('selectArduino', _scheme='https', _external=True))
 
-      return 'Bad login'
+    return 'Bad login'
 
 @app.route('/logout')
 def logout():

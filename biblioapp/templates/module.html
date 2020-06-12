@@ -13,10 +13,6 @@
 
 {% block content %}
 
-	<script type="text/javascript">
-		var sliderList = new Array();
-	</script>
-
 	<div class="container">
 		
 	<h1 class="mt-5 text-white font-weight-light">Edit your bookshelf :</h1>
@@ -87,6 +83,7 @@
         <script type="text/javascript">
           var nb_cols = {{ module['nb_cols'] }};
           var leds_interval = {{ module['leds_interval']/100 }};
+          var sliderList = new Array();
         </script>
 
 				{% for line in range(module['nb_lines']) %}

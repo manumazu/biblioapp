@@ -29,13 +29,15 @@ function onSubmit(token) {
 
 		nameOk = checkName('#ufirstname');
 		emailOk = checkEmail('#uemail');
-		pwdOk = checkPwd('#upassword');
+		pwdOk = checkPwd('#passwordconfirm');
 
 		allowSubmit = validForm();
+
 
 		if(allowSubmit) { //start submit
 			var url = $("#form-signUp").attr('action');
 			submitForm(url);
+			//console.log('captchaOk', captchaOk, 'pwdOk', pwdOk);
 		}    	
 
     });
@@ -98,18 +100,20 @@ function checkName(elem) {
 }
 
 function checkPwd(elem) {
-	//check password
-	if(  $('#upassword').val().length < 4 || $('#upassword').val() != $(elem).val()) {
+	//check password  && 
+	if( $('#upassword').val().length < 4 || $('#upassword').val() != $(elem).val() ) {
 		$('#upassword').addClass('is-invalid').removeClass('is-valid');
 		$(elem).removeClass('is-valid');
 		$('label[for="upassword"]').addClass('text-danger').removeClass('text-success');
+		$('label[for="passwordconfirm"]').addClass('text-danger').removeClass('text-success');
 		$('#passwordHelp').show();
 		return false;
 	}
-	else if($('#upassword').val().length > 3 && $('#upassword').val() == $(elem).val()){
+	else if( $('#upassword').val().length >3 && $('#upassword').val() == $(elem).val() ){
 		$('#upassword').addClass('is-valid').removeClass('is-invalid');
 		$(elem).addClass('is-valid');
 		$('label[for="upassword"]').addClass('text-success').removeClass('text-danger');
+		$('label[for="passwordconfirm"]').addClass('text-success').removeClass('text-danger');
 		$('#passwordHelp').hide();
 		return true;
 	}
@@ -140,7 +144,7 @@ function ajax_validRecaptcha(token) {
 		    type: 'POST',
 		    url: '/ajax_recaptcha/',
 		    success: function(res){
-		    	console.log('validRecaptcha',res);
+		    	//console.log('validRecaptcha',res);
 		    	resolve(res);
 		    },
 		    error: reject
