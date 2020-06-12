@@ -36,6 +36,11 @@
 			<div class="col-sm-4">
 	   			<input type="text" name="uemail" id="uemail" placeholder="Email" class="form-control"/>
 	   		</div>
+	     	<div class="col-sm-4">
+		        <small id="uemailHelp" class="text-danger" style="display: none">
+		          Email doesn't seem to be valid.
+		        </small>
+      		</div>	
 		</div>				
 		
 		<div class="form-group row">
@@ -43,32 +48,31 @@
 	   		<div class="col-sm-4">
 	   			<input type="password" name="upassword" id="upassword" placeholder="password" class="form-control"/>
 	   		</div>
+	     	<div class="col-sm-4">
+		        <small id="passwordHelp" class="text-danger" style="display: none">
+		          Password is too short (at least 6 characters) or doesn't match with password confirmation.
+		        </small>
+      		</div>	   		
 		</div>	
 
 		<div class="form-group row">
-			<label for="pwdconfirm" class="col-sm-2 col-form-label">Password confirm</label> 	   		
+			<label for="passwordconfirm" class="col-sm-2 col-form-label">Password confirm</label> 	   		
 	   		<div class="col-sm-4">
-	   			<input type="password" name="pwdconfirm" id="pwdconfirm" placeholder="password confirm" class="form-control"/>
-	   		</div>
+	   			<input type="password" name="passwordconfirm" id="passwordconfirm" placeholder="password confirm" class="form-control"/>
+	   		</div>	   		
 		</div>
 
-	<script src="https://www.google.com/recaptcha/api.js?render=6Lc6WKMZAAAAACRIRR1m9NsbUgSDILhhKdKOfXrZ"></script>
-	<script>
-	   function onSubmit(token) {
-		    ajax_validRecaptcha(token).then(function(res, e){
-		    	if(res=='ok') {
-		    		$("#form-signUp").submit();
-		    	}
-			    else
-			    	alert('Are you a bot ?');
-		    });
-		}
-	 </script>
-
-	<button class="g-recaptcha btn btn-info" 
-        data-sitekey="6Lc6WKMZAAAAACRIRR1m9NsbUgSDILhhKdKOfXrZ" 
-        data-callback='onSubmit' 
-        data-action='submit'>Submit</button>
+		<div class="form-group row">
+			<button class="g-recaptcha btn btn-info" 
+		        data-sitekey="6Lc6WKMZAAAAACRIRR1m9NsbUgSDILhhKdKOfXrZ" 
+		        data-callback='onSubmit' 
+		        data-action='submit'>Submit</button>
+			<div class="col-sm-4">
+		        <small id="recaptchaHelp" class="text-danger" style="display: none">
+		          reCaptcha is not valid, try submit form again.
+		        </small>
+      		</div>	   		
+		</div>
 
 	</form>
 </div>
@@ -76,6 +80,8 @@
 
 {% block scripts %}
   {{super()}}
+  <script src="https://www.google.com/recaptcha/api.js"></script>  
+  <script src="{{url_for('static', filename='signup.js')}}"></script>
   <script src="{{url_for('static', filename='app.js')}}"></script>
 {% endblock %}
 

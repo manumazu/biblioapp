@@ -920,6 +920,27 @@ Authentication
 '''
 @app.route('/signup', methods=['GET', 'POST'])
 def signUp():
+  if request.method == 'POST':
+    firstname=request.form.get('ufirstname')
+    lastname=request.form.get('ulastname')
+    email=request.form.get('uemail')
+    password=request.form.get('upassword')
+    #manage save errors, check if email already exists
+    message={'success':False}
+    exist = db.get_user(email)
+    if exist is not None:
+      message = {'success':False, 'field':'uemail', 'message':'Email already exists'}
+    else:
+      #hash pwd and save user 
+      hashed = generate_password_hash(password)
+      test = db.set_user(email, firstname, lastname, hashed)
+      if test is not None:
+        message = {'success':True, 'redirect':url_for('login')}
+    response = app.response_class(
+      response=json.dumps(message),
+      mimetype='application/json'
+    )
+    return response
   return render_template('signup.html')
 
 @app.route('/ajax_recaptcha/', methods=['GET', 'POST'])
@@ -937,7 +958,9 @@ def verifRecaptcha():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+      if request.args.get('saved'):
+        flash('Congratulation, your account is saved! You can login now')  
+      return render_template('login.html')
 
     email = request.form['email']
     exists = db.get_user(email)
@@ -947,7 +970,7 @@ def login():
 
         user = models.User()
         user.id = email
-        user.name = exists['name'] 
+        user.name = exists['firstname'] 
         flask_login.login_user(user)
         return redirect(url_for('selectArduino', _scheme='https', _external=True))
 

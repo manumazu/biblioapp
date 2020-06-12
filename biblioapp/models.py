@@ -15,7 +15,7 @@ def user_loader(email):
 
     user = User()
     user.id = exist['email']
-    user.name = exist['name']
+    user.name = exist['firstname']
     return user
 
 
@@ -38,7 +38,7 @@ def request_loader(request):
                 session['app_name'] = exist['arduino_name']
                 user = User()
                 user.id = exist['email']
-                user.name = exist['name']
+                user.name = exist['firstname']
                 return user
     '''login via form wwith session'''
     if 'email' in request.form:

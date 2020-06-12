@@ -543,13 +543,26 @@ def set_tag_node(node, tagIds):
 
 def get_user(email):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, email, password, name FROM biblio_user WHERE email=%s", email)
+  mysql['cursor'].execute("SELECT id, email, password, firstname FROM biblio_user WHERE email=%s", email)
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
   if row:
     return row
   return None
+
+def set_user(email, firstname, lastname, password):
+  mysql = get_db()
+  mysql['cursor'].execute("INSERT INTO biblio_user (email, firstname, lastname, password) VALUES (%s, %s, %s, %s)", \
+    (email, firstname, lastname, password))
+  mysql['conn'].commit()
+  mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
+  user = mysql['cursor'].fetchone()   
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if user:
+    return user
+  return None  
 
 def set_customcode(user_id, app_id, code_id, title, description, published, customvars, customcode) :
   now = tools.getNow()
