@@ -300,7 +300,7 @@ def set_borrow_book(app_id, item_id, mode) :
   mysql['conn'].close()
   return True
 
-def sort_items(app_id, user_id, items, row) :
+def sort_items(app_id, user_id, items, row, leds_interval) :
   i=0
   sortable={} 
   for item in items :
@@ -314,7 +314,7 @@ def sort_items(app_id, user_id, items, row) :
         interval = position['range'] 
       else:
         book = get_book(item_id, user_id)
-        interval = tools.led_range(book['pages'])
+        interval = tools.led_range(book, leds_interval)
     i+=1
     set_position(app_id, item_id, i, row, interval, 'book')
     sortable[i]={'book':item_id,'position':i}

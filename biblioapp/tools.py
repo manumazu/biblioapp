@@ -46,16 +46,22 @@ def set_token(email):
 def set_id_ble(module):
   return "bibus"+"-"+str(module['id']).zfill(4)+"-"+str(module['nb_lines']).zfill(2)+""+str(module['nb_cols']).zfill(3)
 
-def led_range(nb_pages):
-        if nb_pages.strip() == '':
-          lrange = 1
-        elif int(nb_pages) < 200:
-          lrange = 1
-        elif int(nb_pages) > 1000:
-          lrange = round(int(nb_pages)/400)
-        else:
-          lrange = round(int(nb_pages)/200)
-        return lrange
+def led_range(book, leds_interval):
+  #compute interval with led strip spec
+  if book['width']!= None and book['width'] > 0:
+    lrange = round(book['width']/leds_interval)
+  #compute range with book nb of pages
+  else:
+    nb_pages = book['pages']
+    if nb_pages.strip() == '':
+      lrange = 1
+    elif int(nb_pages) < 200:
+      lrange = 1
+    elif int(nb_pages) > 1000:
+      lrange = round(int(nb_pages)/400)
+    else:
+      lrange = round(int(nb_pages)/200)
+  return lrange
 
 @app.context_processor
 def utility_processor():
