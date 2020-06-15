@@ -740,16 +740,27 @@ def bookReferencer():
 
     book_width = request.args.get('book_width')
     book['book_width'] = round(float(book_width))
+    book['width'] = book['book_width']
+    #print(book)
 
     #save process
     bookId = db.get_bookapi(isbn, globalVars['arduino_map']['user_id'])
     message = {}
 
+    forceRange = request.args.get('forceRange')
+    if forceRange == 'true':
+      lastPos = db.get_last_saved_position(session.get('app_id'))
+      interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
+      nextLedNum = lastPos['max_led']+lastPos['range']
+      #print(lastPos, nextLedNum)
+      print(session.get('app_id'), bookId['id'], lastPos['max_pos']+1, lastPos['row'], interval, 'book', nextLedNum)
+      #led_column = db.set_position(session.get('app_id'), bookId['id'], column, row, leds_range, 'book' )    
+
     if bookId:
       message = {'result':'error', 'message':'This book is already in your shelfs'}
     #add book
     else:
-      bookId = bookSave(book, globalVars['arduino_map']['user_id'])
+      bookId = 0#bookSave(book, globalVars['arduino_map']['user_id'])
       if bookId:
         message = {'result':'success', 'message':'Book added with id '+str(bookId['id'])}
       else:

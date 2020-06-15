@@ -54,7 +54,7 @@ def led_range(book, leds_interval):
     lrange = round(book_width/leds_interval)
   #compute range with book nb of pages
   else:
-    nb_pages = book['pages']
+    nb_pages =str(book['pages'])
     if nb_pages.strip() == '':
       lrange = 1
     elif int(nb_pages) < 200:
