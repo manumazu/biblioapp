@@ -71,28 +71,33 @@
 	 	</div>
     </div>	
 
-	 <div class="form-group form-inline"><label for="pages" class="col-lg-1 control-label">Pages</label> 
+	<div class="form-group row">
+
+		<label for="pages" class="col-lg-1 col-form-label">Pages</label> 
+	   	<div class="col-lg-2">
+			<input type="text" name="pages" id="pages" value="{{ pages }}" class="form-control">
+	   	</div>
+
+	   <label for="pages" class="col-lg-1 col-form-label">Width</label> 
 	   <div class="col-lg-2">
-		<input type="text" name="pages" id="pages" value="{{ pages }}" class="form-control">
-	    </div>
-         </div>
-	 <div class="form-group form-inline"><label for="year" class="col-lg-1 control-label">Year</label> 
+		<input type="text" name="book_width" id="width" value="{%if book['width'] != None %}{{ book['width']/10 }}{% else %}0.0{% endif %}" class="form-control">
+	   </div>
+
+    </div>
+	<div class="form-group form-inline"><label for="year" class="col-lg-1 control-label">Year</label> 
 	   <div class="col-lg-2">
 		<input type="text" name="year" id="year" value="{{ year }}" class="form-control">
 	    </div>
-         </div>
+    </div>
 
 	<div class="form-group form-inline"><label for="tags" class="col-lg-1 control-label">Categories</label> 
-	   <div class="col-lg-5"><textarea id="tags" name="tags"></textarea></div>
-    </div> 
+		   <div class="col-lg-5"><textarea id="tags" name="tags"></textarea></div>
+	</div> 
 
-	
-
-	    <script type="text/javascript">
+    <script type="text/javascript">
 	    	var bookCategories = {% if 'categories' in book %}{{book['categories']|safe}}{% else %}''{% endif %};
 	    	var urlAjaxCategories = '{{url_for('ajaxCategories', _scheme='https', _external=True)}}';
-		</script>
-
+	</script>
 
     {% if 'id' in book %}
         <input type="hidden" name="id" value="{{ book['id'] }}">

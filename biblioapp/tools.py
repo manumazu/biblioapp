@@ -48,8 +48,10 @@ def set_id_ble(module):
 
 def led_range(book, leds_interval):
   #compute interval with led strip spec
+  leds_interval = leds_interval / 100 #convert mm to cm
   if book['width']!= None and book['width'] > 0:
-    lrange = round(book['width']/leds_interval)
+    book_width = book['width'] / 10 #convert mm to cm
+    lrange = round(book_width/leds_interval)
   #compute range with book nb of pages
   else:
     nb_pages = book['pages']
@@ -155,6 +157,7 @@ def formatBookApi(api, data, isbn):
     bookapi['editor'] = data['editor']
     bookapi['pages'] = data['pages']
     bookapi['year'] = data['year']
+    bookapi['book_width'] = round(float(data['book_width'])*10)
 
   if api == 'openlibrary':
     authors = []
@@ -187,6 +190,6 @@ def formatBookApi(api, data, isbn):
     bookapi['editor'] = data['volumeInfo']['publisher'] if 'publisher' in data['volumeInfo'] else ""
     bookapi['description'] = data['volumeInfo']['description'] if 'description' in data['volumeInfo'] else ""
     bookapi['pages'] = data['volumeInfo']['pageCount'] if 'pageCount' in data['volumeInfo'] else 0
-    bookapi['year'] = getYear(data['volumeInfo']['publishedDate']) if 'publishedDate' in data['volumeInfo'] else ""    
+    bookapi['year'] = getYear(data['volumeInfo']['publishedDate']) if 'publishedDate' in data['volumeInfo'] else "" 
 
   return bookapi  

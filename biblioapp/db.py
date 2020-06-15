@@ -239,17 +239,18 @@ def set_book(bookapi, user_id) :
   if 'id' in bookapi:
     mysql = get_db()
     mysql['cursor'].execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, `reference`=%s, \
-    `description`=%s WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], \
-    bookapi['pages'], bookapi['reference'], bookapi['description'], bookapi['id']))
+    `description`=%s, `width`=%s  WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], \
+    bookapi['pages'], bookapi['reference'], bookapi['description'], bookapi['book_width'], bookapi['id']))
     mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
     hasBook['id'] = bookapi['id']    
   else:
     mysql = get_db()
-    mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, `reference`, `description`) \
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s )", (user_id, bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], \
-    bookapi['pages'], bookapi['reference'], bookapi['description']))
+    mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, \
+      `reference`, `description`, `width`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, bookapi['isbn'], \
+        bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], bookapi['pages'], bookapi['reference'], \
+        bookapi['description'], bookapi['book_width']))
     mysql['conn'].commit()
     mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
     hasBook = mysql['cursor'].fetchone()

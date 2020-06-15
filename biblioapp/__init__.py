@@ -738,6 +738,9 @@ def bookReferencer():
       data = r.json()
       book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn)
 
+    book_width = request.args.get('book_width')
+    book['book_width'] = round(float(book_width))
+
     #save process
     bookId = db.get_bookapi(isbn, globalVars['arduino_map']['user_id'])
     message = {}
