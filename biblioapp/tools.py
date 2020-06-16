@@ -157,7 +157,10 @@ def formatBookApi(api, data, isbn):
     bookapi['editor'] = data['editor']
     bookapi['pages'] = data['pages']
     bookapi['year'] = data['year']
-    bookapi['book_width'] = round(float(data['book_width'])*10)
+    if 'book_width' in data:
+      bookapi['width'] = data['book_width']#round(float(data['book_width'])*10)
+    else :
+      bookapi['width'] = None
 
   if api == 'openlibrary':
     authors = []

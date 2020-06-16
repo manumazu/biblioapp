@@ -257,7 +257,14 @@ def ajaxSetPosition():
   globalVars = initApp()
   if request.method == 'POST' and session.get('app_id'):
     book_id = request.form.get('book_id')
-    leds_range = request.form.get('range')
+    #leds_range = request.form.get('range')
+    #update book width
+    book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
+    book_width = request.form.get('new_book_width')
+    book['width'] = round(float(book_width))
+    db.set_book(book, globalVars['arduino_map']['user_id'])
+    leds_range = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
+    #update position
     column = request.form.get('column');
     row = request.form.get('row')
     led_column = db.set_position(session.get('app_id'), book_id, column, row, leds_range, 'book')
@@ -739,8 +746,7 @@ def bookReferencer():
       book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn)
 
     book_width = request.args.get('book_width')
-    book['book_width'] = round(float(book_width))
-    book['width'] = book['book_width']
+    book['width'] = round(float(book_width))
     #print(book)
 
     #save process

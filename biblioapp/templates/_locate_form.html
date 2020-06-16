@@ -3,36 +3,45 @@
   <form action="/locate/" method="post" class="form-horizontal">
   <fieldset>
     
-    <div class="form-group">
-      <div class="ui-widget">
+      <div class="ui-widget form-group row">
         <label for="keyword">Permute position with : </label>
-        <input id="keyword" placeholder="Search book">
+        <div class="col-lg-3">
+          <input id="keyword" placeholder="Search book" class="form-control">
+        </div>
+
+          <input type="hidden" name="permute_book_title" id="permute_book_title" value="">
+          <input type="hidden" name="permute_book_id" id="permute_book_id" value="">
+          <input type="hidden" name="range" id="range" value="{{ book['address']['range'] }}">
+          <input type="button" value="Permute position" class="btn btn-warning" name="permute" id="permute_action">
+
       </div>
 
-      <input type="hidden" name="permute_book_title" id="permute_book_title" value="">
-      <input type="hidden" name="permute_book_id" id="permute_book_id" value="">
-      <input type="button" value="Permute position" class="btn btn-warning" name="permute" id="permute_action">
+    <div class="form-group row">  
+      <label for="submit" class="col-form-label">Locate on bookshelf :</label>	
+      {%if book['hasRequest'] %}
+        <input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
+      {% else %}
+        <input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
+      {% endif %}
     </div>
 
-    <div class="form-group">  
-    <label for="submit" class="control-label">Locate on bookshelf :</label>	
-    {%if book['hasRequest'] %}
-      <input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
-    {% else %}
-      <input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
-    {% endif %}
-    </div>
-    <div class="form-group form-inline">
-    	<label for="range" class="control-label">Adjust book interval :</label>
-    	<div class="col-lg-3">
-      <select name="range" id="range-adjust">
-        <option>Adjust book interval</option>
-        {% for i in range(1,10) %}
-        <option value="{{i}}" {%if i==book['address']['range']%} selected="selected" {%endif%}>{{i}}</option>
-        {% endfor %}
-      </select>
+    <div class="form-group row">
+    	<label for="new_book_width" class="col-form-label">Adjust book interval :</label>
+      <div class="col-lg-1">
+        <input type="text" name="new_book_width" id="new_book_width" value="{%if 'width' in book and book['width'] != None %}{{ book['width']/10 }}{% else %}0.0{% endif %}" placeholder="set book width (cm)" class="form-control" aria-describedby="widthHelpBlock">
+      </div>
+      <label for="new_book_width" class="col-form-label col-lg-1"> cm </label>
+
+      <input type="button" value="Set interval" class="btn btn-info" name="adjust" id="range-adjust">
+
   	</div>
-    </div>	
+
+    <div class="form-group row">
+      <small id="widthHelpBlock" class="form-text text-muted" style="color: #fff !important;">
+        If the number of LEDs displayed is not good for this book, you can set the right number by given book width (centimeter). The current number of LEDs interval is : {{ book['address']['range'] }}</small>
+    </div>   
+
+  </div>	
   <input type="hidden" name="book_id" value="{{ book['id'] }}">
   <input type="hidden" name="column" value="{{ book['address']['position'] }}">
   <input type="hidden" name="led_column" value="{{ book['address']['led_column'] }}">

@@ -110,7 +110,7 @@ $(document).ready(function() {
                 alert("Error : book can not be permuted on itself");
               }
               else if(json.success == false && json.dest_range !== undefined) {
-                var range = $("#range-adjust option:selected").val();
+                var range = $("#range").val();// option:selected
                 alert("Error : destination book interval is " + json.dest_range + " and current is "+range);
               }
               else if(json.success == true) {
@@ -122,17 +122,24 @@ $(document).ready(function() {
     }
   });
 
-  $("#range-adjust").on('change', function() {
+  $("#range-adjust").on('click', function() {
 
     var book_id = $('input[name="book_id"]').val();
-    var range = $("#range-adjust option:selected").val();
+    var new_book_width = $('input[name="new_book_width"]').val();
+    var current_book_with = $('input[name="book_width"]').val();
     var column = $('input[name="column"]').val();
     var row = $('input[name="row"]').val();
+
+    new_book_width = (new_book_width*10)
+    if(new_book_width>100) {
+      alert('Book width can not exceed 10 cm');
+      return false;
+    }
     //set new position for given new range
     var r = confirm("This change will affect all positions in shelf number " + row);
-    if (r == true) {
+    if (r == true && new_book_width != current_book_with) {
         $.ajax({
-            data: 'book_id='+book_id+'&range='+range+'&column='+column+'&row='+row,
+            data: 'book_id='+book_id+'&new_book_width='+new_book_width+'&column='+column+'&row='+row,
             type: 'POST',
             url: '/ajax_set_position/',
         });

@@ -240,7 +240,7 @@ def set_book(bookapi, user_id) :
     mysql = get_db()
     mysql['cursor'].execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, `reference`=%s, \
     `description`=%s, `width`=%s  WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], \
-    bookapi['pages'], bookapi['reference'], bookapi['description'], bookapi['book_width'], bookapi['id']))
+    bookapi['pages'], bookapi['reference'], bookapi['description'], bookapi['width'], bookapi['id']))
     mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
@@ -250,7 +250,7 @@ def set_book(bookapi, user_id) :
     mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, \
       `reference`, `description`, `width`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, bookapi['isbn'], \
         bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], bookapi['pages'], bookapi['reference'], \
-        bookapi['description'], bookapi['book_width']))
+        bookapi['description'], bookapi['width']))
     mysql['conn'].commit()
     mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
     hasBook = mysql['cursor'].fetchone()
