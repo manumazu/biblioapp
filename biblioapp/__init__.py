@@ -745,24 +745,33 @@ def bookReferencer():
 
     #save process
     bookId = db.get_bookapi(isbn, globalVars['arduino_map']['user_id'])
-    message = {}
-
-    forceRange = request.args.get('forceRange')
-    if forceRange == 'true':
-      lastPos = db.get_last_saved_position(session.get('app_id'))
-      interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
-      nextLedNum = lastPos['max_led']+lastPos['range']
-      #print(lastPos, nextLedNum)
-      print(session.get('app_id'), bookId['id'], lastPos['max_pos']+1, lastPos['row'], interval, 'book', nextLedNum)
-      #led_column = db.set_position(session.get('app_id'), bookId['id'], column, row, leds_range, 'book' )    
+    message = {}  
 
     if bookId:
       message = {'result':'error', 'message':'This book is already in your shelfs'}
-    #add book
+    #add new book
     else:
-      bookId = 0#bookSave(book, globalVars['arduino_map']['user_id'])
+      bookId = bookSave(book, globalVars['arduino_map']['user_id'])
+      #force position in current app
+      forcePosition = request.args.get('forcePosition')
+      if forcePosition == 'true':
+        lastPos = db.get_last_saved_position(session.get('app_id'))
+        newInterval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
+        if lastPos:
+          newPos = lastPos['max_pos']+1
+          newRow = lastPos['row']
+          newLedNum = lastPos['max_led']+lastPos['range']
+        else:
+          newPos = 1
+          newRow = 1
+          newLedNum = 0        
+        led_column = db.set_position(session.get('app_id'), bookId['id'], newPos, newRow, newInterval, 'book', newLedNum)
+      #confirm message
       if bookId:
-        message = {'result':'success', 'message':'Book added with id '+str(bookId['id'])}
+        message['result'] = 'success'
+        message['message'] = 'Book added with id '+str(bookId['id'])
+        if forcePosition == 'true' and newLedNum != None:
+          message['message'] += ' at position n°' +str(newPos)+ ' and LED n° ' + str(int(newLedNum)+1) + ' in row n°'+str(newRow)
       else:
         message = {'result':'error', 'message':'Error saving book'}
 

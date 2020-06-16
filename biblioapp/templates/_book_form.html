@@ -80,7 +80,7 @@
 
 	   <label for="pages" class="col-lg-1 col-form-label">Width</label> 
 	   <div class="col-lg-2">
-		<input type="text" name="book_width" id="width" value="{%if book['width'] != None %}{{ book['width']/10 }}{% else %}0.0{% endif %}" class="form-control">
+		<input type="text" name="book_width" id="width" value="{%if 'width' in book and book['width'] != None %}{{ book['width']/10 }}{% else %}0.0{% endif %}" class="form-control">
 	   </div>
 
     </div>
