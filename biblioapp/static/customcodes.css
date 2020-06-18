@@ -1,10 +1,14 @@
 @media screen and (min-width: 640px) {
 
 	.customcode {
-		position:absolute;
-		float:left;
-		left:600px;
-		top:550px
+		position:relative;
+		float:right;
+		top: -650px;
+		left: 20px;
+		width: 610px;
 	}
 
+	#btn-customcode_publish {
+		z-index: 100;
+	}
 }

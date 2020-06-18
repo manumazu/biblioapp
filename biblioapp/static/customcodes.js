@@ -18,15 +18,15 @@ $(document).ready(function() {
 
 	//blink mode is available for incrementation only
 	if($('input[name="direction"]:checked').val()=='on2off') {
-		$('#blink-mode').hide();
+		$('#blink-mode *').prop('disabled',true);
 		$('#blinkled').text('');
 		$('#blinkstrip').text('');	
 	}
 	$('input[name="direction"]').on('change', function() {
 		if($('input[name="direction"]:checked').val()=='off2on')
-			$('#blink-mode').show();
+			$('#blink-mode *').prop('disabled',false);
 		else {
-			$('#blink-mode').hide();
+			$('#blink-mode *').prop('disabled',true);
 			$('#blinkled').text('');
 			$('#blinkstrip').text('');				
 		}
@@ -96,12 +96,18 @@ $(document).ready(function() {
 			$('#ledsfirst').hide();		
 		$('#'+loop_priority).show();
 
-		$('#customCodePreview').show();		
-
 		//hide old version
 		if(code_id != 0) {
 			$('#customCodeCurrent').hide();
 		}
+		else {
+			$('#customCodePreview').css('top','-580px');		
+		}		
+
+		$('#customCodePreview').show();		
+
+
+
 		//show save button		
 		$('#btn-customcode_draft').show();
 		$('#btn-customcode_publish').show();

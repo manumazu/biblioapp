@@ -1,6 +1,12 @@
-	  <h2>Example :</h2>
-	  <p class="lead">"Turn on [all] LEDs with an offset of [5], on [each] strip with [different] colors."</p>
-	  <p>In this phrase, we have defined 4 variables :</p>
+	  {% if data|length > 0 %}
+	  	  <h2 class="mb-3 text-white font-weight-light">"{{ data['title'] }}"</h2>
+	  {% else %}
+		  <h2 class="mb-3 text-white font-weight-light">Example :</h2>
+		  <p class="lead">"Turn on [all] LEDs with an offset of [5], on [each] strip with [different] colors."</p>
+		  <p>In this phrase, we have defined 4 variables :</p>
+	  {% endif %}
+
+<div id="code-form">
 
 	  <form class="form-horizontal">
 	  	<fieldset>
@@ -133,6 +139,8 @@
 	</script>
 	{% endif %}	  
 
+</div>
+
 
 	{% if data|length > 0 %}
 		{% set code_id = data['id'] %}
@@ -151,7 +159,7 @@
 	{% endwith %}	  
 
 <!-- code version from sample -->
-<pre id="customCodePreview" class="text-white-50 bg-dark p-3 mt-3 customcode">
+<pre id="customCodePreview" class="text-white-50 bg-dark p-3 mt-3 customcode" style="display: none;">
 <code id="customvars">app.forceExit = false;
 var nbLeds = <span id="nbLeds_val"></span>;
 var offset = <span id="offset_val"></span>;
@@ -164,7 +172,8 @@ var delay = <span id="delay_val"></span>;
 <code id="showAll" style="display: none;">//turn on all specified leds
 app.setBlockMessage(0, 1, nbLeds*nbStrips, color, rgb);
 await timer(delay);
-//loop for turning off leds</code><code id="stripfirst"><span id="forstrip"></span>{{" { //loop for leds
+//loop for turning off leds</code>
+<code id="stripfirst"><span id="forstrip"></span>{{" { //loop for leds
 	var strip = 1;
 	while(strip<=nbStrips) { // loop for strips
 		if(app.forceExit) break;"}}
