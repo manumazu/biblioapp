@@ -20,37 +20,92 @@
 	{% if customcodes %}
 		<h2>List of your codes</h2>
 
-		<table class="table table-hover">
-		<thead>
-		    <tr class="table-light">
-		      <th scope="col">Type</th>
-		      <th scope="col">Title</th>
-		      <th scope="col">Description</th>
-		      <th scope="col">Variables</th>
-		      <th scope="col">Updated</th>
-		    </tr>
-		</thead>
-		<tbody>
-		{% for customcode in customcodes %}
-		    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}">
-		      <th scope="row">#{{ customcode['id'] }}</th>
-		      <td><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
-		      <td>{{ customcode['description'] }}</td>
-		      <td>
-		      {% if customcode['customvars'] %}
-			      {% set customvars = json.loads(customcode['customvars']) %}
-			      <ul>
-			      {% for customvar in customvars %}
-			       <li>{{customvar}} : {{ customvars[customvar] }} </li>
-			      {% endfor %}
-			      </ul>
-		      {% endif %}
-		  	  </td>
-		  	  <td>{{ customcode['date_upd'].strftime('%Y-%m-%d') }}
-		    </tr>
-		{% endfor %}
-			</tbody> 
-		</table>
+	<ul class="nav nav-pills">
+	  <li class="nav-item">
+	    <a class="nav-link active" data-toggle="tab" href="#code-sortable">Published code</a>
+	  </li> 
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#code-draft">Code draft</a>
+	  </li> 	   
+	</ul>	
+
+	<div class="tab-content">		
+
+		<!-- Published code is sortable only -->
+			<table class="table table-hover tab-pane show active" id="code-sortable">
+			<thead>
+			    <tr class="table-light">
+			      <th scope="col">Type</th>
+			      <th scope="col">Title</th>
+			      <th scope="col">Description</th>
+			      <th scope="col">Variables</th>
+			      <th scope="col">Updated</th>
+			    </tr>
+			</thead>
+			<tbody>
+			{% for customcode in customcodes %}
+				{% if customcode['published'] %}
+			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}" id="{{ customcode['id'] }}">
+			      <th scope="row">#{{ customcode['id'] }}</th>
+			      <td><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
+			      <td>{{ customcode['description'] }}</td>
+			      <td>
+			      {% if customcode['customvars'] %}
+				      {% set customvars = json.loads(customcode['customvars']) %}
+				      
+				      {% for customvar in customvars %}
+				      <strong>{{customvar}} :</strong> {{ customvars[customvar] }} &nbsp;
+				      {% endfor %}
+				      
+			      {% endif %}
+			  	  </td>
+			  	  <td>{{ customcode['date_upd'].strftime('%Y-%m-%d') }}
+			    </tr>
+			    {% endif %}
+			{% endfor %}
+				</tbody> 
+			</table>
+
+		<!-- Draft code is not sortable -->
+			<table class="table table-hover tab-pane fade" id="code-draft">
+			<thead>
+			    <tr class="table-light">
+			      <th scope="col">Type</th>
+			      <th scope="col">Title</th>
+			      <th scope="col">Description</th>
+			      <th scope="col">Variables</th>
+			      <th scope="col">Updated</th>
+			    </tr>
+			</thead>
+			<tbody>
+			{% for customcode in customcodes %}
+				{% if customcode['published']==0 %}
+			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}" id="{{ customcode['id'] }}">
+			      <th scope="row">#{{ customcode['id'] }}</th>
+			      <td><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
+			      <td>{{ customcode['description'] }}</td>
+			      <td>
+			      {% if customcode['customvars'] %}
+				      {% set customvars = json.loads(customcode['customvars']) %}
+				      
+				      {% for customvar in customvars %}
+				      <strong>{{customvar}} :</strong> {{ customvars[customvar] }} &nbsp;
+				      {% endfor %}
+				      
+			      {% endif %}
+			  	  </td>
+			  	  <td>{{ customcode['date_upd'].strftime('%Y-%m-%d') }}
+			    </tr>
+			    {% endif %}
+			{% endfor %}
+				</tbody> 
+			</table>			
+
+	</div>
+
+
+	<button type="button" class="btn btn-primary m-3" id="save-order">Save changes</button>
+
 	{% endif %}
 
 	<div class="jumbotron">
@@ -66,6 +121,24 @@
 {% block scripts %}
   {{super()}}
    <script src="{{url_for('static', filename='customcodes.js')}}" async=""></script>
+   <script>
+	  $( function() {
+
+	  	$('#save-order').hide();
+	  	
+	    $( "#code-sortable tbody" ).sortable({
+	    	stop: function(e, ui) {
+	    		$('#save-order').show();
+	    	}
+	    })
+	  });
+
+	  $('#save-order').on('click', function() {
+	  	var elements = $( "#code-sortable tbody" ).sortable('toArray');
+	  	console.log(elements);
+	  });
+
+   </script>   
 {% endblock %}
 
 {% endblock %}
