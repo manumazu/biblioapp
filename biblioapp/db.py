@@ -609,6 +609,13 @@ def get_customcode(user_id, app_id, code_id) :
     return row
   return False
 
+def del_customcode(code_id, user_id):
+  mysql = get_db()
+  mysql['cursor'].execute("DELETE FROM biblio_customcode where id=%s and id_user=%s",(code_id, user_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+
 def get_customcodes(user_id, app_id, published_only = False) :
   mysql = get_db()
   if published_only == True :

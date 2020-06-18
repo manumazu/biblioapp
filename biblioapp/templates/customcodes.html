@@ -136,7 +136,7 @@
 	  });
 
 	  $('#save-order').on('click', function() {
-	  	var elements = $( "#code-sortable tbody" ).sortable('serialize');//toArray
+	  	var elements = $( "#code-sortable tbody" ).sortable('serialize');
 	  	//console.log(elements);
 	 	elements = elements+'&customcode=1';    
 		ajax_postOrder(elements, this);

@@ -887,6 +887,17 @@ def customCode(code_id):
       customvars=customvars, data=data)
   abort(404)
 
+@app.route('/customcodedelete/', methods=['POST'])
+@flask_login.login_required
+def customCodeDelete():
+  globalVars = initApp()
+  code_id = request.form['id']
+  customcode = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
+  if customcode: 
+    db.del_customcode(code_id, globalVars['arduino_map']['user_id'])
+    flash('Code "{}" is deleted'.format(customcode['title']))
+    return redirect(url_for('customCodes', _scheme='https', _external=True))  
+
 @app.route('/customeffects/<uuid>/')
 @flask_login.login_required
 def customEffects(uuid = None):

@@ -109,9 +109,30 @@
 
 	    <input type="button" name="customcode_preview" id="btn-customcode_preview" class="btn btn-primary" value="Code preview">
 	    <input type="button" name="customcode_update" id="btn-customcode_draft" class="btn btn-warning" value="Save code as draft">
-	    <input type="button" name="customcode_update" id="btn-customcode_publish" class="btn btn-success" value="Save and publish">	     
+	    <input type="button" name="customcode_update" id="btn-customcode_publish" class="btn btn-success" value="Save and publish">	    
 
 	  </form>
+
+	{% if data|length > 0 %}
+	<br />
+	<form method="post" action="/customcodedelete/" class="form-horizontal" id="del-customcode" onsubmit="return checkPublished();">
+		<input type="hidden" name="id" value="{{ data['id'] }}">
+		<input type="hidden" name="published" value="{{ data['published'] }}">
+		<input type="submit" value="Delete" class="btn btn-danger">
+	</form>
+	<script type="text/javascript">
+		function checkPublished() {
+			var published = $('input[name="published"]').val();
+			var str = "";
+			if(published==1)
+				str += "This code is published. ";
+			str += "Are you sure ?";
+			var r = confirm(str);	
+			return r;
+		}
+	</script>
+	{% endif %}	  
+
 
 	{% if data|length > 0 %}
 		{% set code_id = data['id'] %}
