@@ -580,9 +580,15 @@ def set_customcode(user_id, app_id, code_id, title, description, published, cust
   now = tools.getNow()
   mysql = get_db()
   if code_id is None :
+    #get last position
+    position = get_max_code_position(user_id, app_id)
+    if position and 'maxpos' in position:
+      position = position['maxpos']+1
+    else:
+      position = 0
     mysql['cursor'].execute("INSERT INTO biblio_customcode (`id_app`, `id_user`, `title`, `description`, `published`, \
-      `customvars`, `customcode`) VALUES (%s, %s, %s, %s, %s, %s, %s)", (app_id, user_id, title, description, published, \
-        customvars, customcode))
+      `customvars`, `customcode`, `position`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (app_id, user_id, title, description, \
+        published, customvars, customcode, position))
   else :
     mysql['cursor'].execute("UPDATE biblio_customcode SET `id_app`=%s, `title`=%s, `description`=%s, `published`=%s, \
       `customvars`=%s, `customcode`=%s, `date_upd`=%s WHERE id=%s", (app_id, title, description, published, customvars, customcode, \
@@ -607,16 +613,44 @@ def get_customcodes(user_id, app_id, published_only = False) :
   mysql = get_db()
   if published_only == True :
     mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd, published FROM biblio_customcode \
-    where id_user=%s and id_app=%s and published=1", (user_id, app_id))    
+    where id_user=%s and id_app=%s and published=1 order by `position`", (user_id, app_id))    
   else :
     mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd, published FROM biblio_customcode \
-    where id_user=%s and id_app=%s", (user_id, app_id))
+    where id_user=%s and id_app=%s order by `position`", (user_id, app_id))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
   if row:
     return row
   return False
+
+def get_max_code_position(user_id, app_id):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT max(position) as maxpos FROM `biblio_customcode` WHERE id_app=%s and published=1", (app_id))
+  res = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if res:
+    return res
+  return False
+
+def set_code_position(app_id, code_id, position):
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_customcode SET `position`=%s WHERE `id`=%s and `id_app`=%s", \
+    (position, code_id, app_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True  
+
+def sort_customcodes(user_id, app_id, codes) :
+  i=0
+  sortable={} 
+  for code in codes :
+    i+=1
+    set_code_position(app_id, code, i)
+    sortable[i]={'code':code,'position':i}
+  return sortable
 
 def search_book(app_id, keyword) :
   searchTerm = "%"+keyword+"%"

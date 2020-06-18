@@ -1,10 +1,11 @@
 /* save positions methods */
 
-   function ajax_postOrder(elements,row, button) {
+   function ajax_postOrder(elements, button) {
        /*row = element.split('_')[1];
        order = $(element).sortable('serialize');*/
+       console.log(elements);
        $.ajax({
-		    data: elements+'&row='+row,
+		    data: elements,
 		    type: 'POST',
 		    url: '/ajax_sort/',
 		    success: function(res){

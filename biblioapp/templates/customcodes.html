@@ -45,7 +45,7 @@
 			<tbody>
 			{% for customcode in customcodes %}
 				{% if customcode['published'] %}
-			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}" id="{{ customcode['id'] }}">
+			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}" id="code_{{ customcode['id'] }}">
 			      <th scope="row">#{{ customcode['id'] }}</th>
 			      <td><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
 			      <td>{{ customcode['description'] }}</td>
@@ -80,7 +80,7 @@
 			<tbody>
 			{% for customcode in customcodes %}
 				{% if customcode['published']==0 %}
-			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}" id="{{ customcode['id'] }}">
+			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}">
 			      <th scope="row">#{{ customcode['id'] }}</th>
 			      <td><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
 			      <td>{{ customcode['description'] }}</td>
@@ -125,17 +125,21 @@
 	  $( function() {
 
 	  	$('#save-order').hide();
-	  	
+
 	    $( "#code-sortable tbody" ).sortable({
 	    	stop: function(e, ui) {
+			    $('#save-order').removeClass('btn-success');
+			    $('#save-order').text('Save changes');	    		
 	    		$('#save-order').show();
 	    	}
 	    })
 	  });
 
 	  $('#save-order').on('click', function() {
-	  	var elements = $( "#code-sortable tbody" ).sortable('toArray');
-	  	console.log(elements);
+	  	var elements = $( "#code-sortable tbody" ).sortable('serialize');//toArray
+	  	//console.log(elements);
+	 	elements = elements+'&customcode=1';    
+		ajax_postOrder(elements, this);
 	  });
 
    </script>   

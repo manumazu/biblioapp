@@ -241,10 +241,16 @@ def jsonBookshelf():
 def ajaxSort():
   globalVars = initApp()
   if request.method == 'POST' and session.get('app_id'):
-    current_row = request.form['row'] 
-    book_ids = request.form.getlist('book[]')
-    sortable = db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], book_ids, current_row, \
-      globalVars['arduino_map']['leds_interval'])
+    #save order for bookshelf
+    if 'row' in request.form :
+      current_row = request.form['row'] 
+      book_ids = request.form.getlist('book[]')
+      sortable = db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], book_ids, current_row, \
+        globalVars['arduino_map']['leds_interval'])
+    #save arover for customcodes
+    if 'customcode' in request.form:
+      code_ids = request.form.getlist('code[]')
+      sortable = db.sort_customcodes(globalVars['arduino_map']['user_id'], session.get('app_id'), code_ids)
     response = app.response_class(
         response=json.dumps(sortable),
         mimetype='application/json'

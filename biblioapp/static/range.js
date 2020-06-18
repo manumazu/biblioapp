@@ -35,7 +35,8 @@ $(document).ready(function() {
 					//specific event after dropped item
 				    var elements = $(element).sortable('serialize');			    
 				    var row = element.split('_')[1];
-					ajax_postOrder(elements,row); //order new item
+				    elements = elements+'&row='+row;
+					ajax_postOrder(elements); //order new item
 
 					ui.draggable.find('span').one('click', function() { //delete new item
 					   ajax_supprItem($( this ));
@@ -73,8 +74,9 @@ $(document).ready(function() {
 				    var current_selector = '#'+$(element).attr('id'); 
 				    var elements = $(element).sortable('serialize');
 				    var row = current_selector.split('_')[1];	
-				    console.log(elements);		    	    
-				    ajax_postOrder(elements,row, this);
+				    //console.log(elements);
+				    elements = elements+'&row='+row;    
+				    ajax_postOrder(elements, this);
 				}
 			});
 
