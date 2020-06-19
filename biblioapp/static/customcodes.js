@@ -3,7 +3,9 @@ $(document).ready(function() {
 	$('#customCodePreview').hide();
 
 	$('#btn-customcode_draft').hide();	
-	$('#btn-customcode_publish').hide();	
+	$('#btn-customcode_publish').hide();
+
+	//manage form variables 
 	if($('input[name="colorCode_val"]').val() != 'color') 
 		$('#rgbCode').hide();
 
@@ -42,70 +44,37 @@ $(document).ready(function() {
 		var nbStrips_val = $('input[name="nbStrips_val"]').val();	
 		var colorCode_val = $('input[name="colorCode_val"]').val();	
 		var rgbCode_val = 0;
-		if($('input[name="rgbCode_val"]').val() != '')
+		if($('input[name="rgbCode_val"]').val() != '' && colorCode_val == 'color')
 			rgbCode_val = $('input[name="rgbCode_val"]').val();
-		var delay_val = $('input[name="delay_val"]').val();	
-
-		$('#nbLeds_val').html(nbLeds_val);
-		$('#offset_val').html(offset_val);
-		$('#start_val').html(start_val);
-		$('#nbStrips_val').html(nbStrips_val);
-		$('#colorCode_val').html("'"+colorCode_val+"'");
-		$('#rgbCode_val').html("'"+rgbCode_val+"'");
-		$('#delay_val').html(delay_val);
+		var delay_val = $('input[name="delay_val"]').val();
 
 		//manage loops : increment or decrement leds	
-		var off2on = "for(n=start; n<nbLeds; n+=offset)";
-		var on2off = "for(n=nbLeds; n>start; n-=offset)";
-		var msg2off = "app.setBlockMessage(n-offset, strip, offset, 'down', rgb);";
-		var msg2on = "app.setBlockMessage(n, strip, offset, color, rgb);";
-		var direction = $('input[name="direction"]:checked').val();			
-		$('#forleds').text(eval(direction));
-		$('#forstrip').text(eval(direction));
-		if(direction=='on2off') {
-			$('#showAll').show();
-			$('#msgstrip').text(msg2off);
-			$('#msgleds').text(msg2off);
-		}
-		else {
-			$('#showAll').hide();
-			$('#msgstrip').text(msg2on);
-			$('#msgleds').text(msg2on);			
-		}
-
-		//blink mode is available for incrementation only
-		if(direction=='off2on') {
-			var blink = $('input[name="blink"]:checked').val();
-			var blink_val = "app.setBlockMessage(n, strip, offset, 'down', rgb);\n\t\tawait timer(delay);"	
-			if(blink=='on') {
-				$('#blinkled').text(blink_val);
-				$('#blinkstrip').text(blink_val);
-			}
-			if(blink=='off') {
-				$('#blinkled').text('');
-				$('#blinkstrip').text('');
-			}
-
-		}
-
-		//show preview
+		var direction = $('input[name="direction"]:checked').val();		
+		var blink = $('input[name="blink"]:checked').val();		
 		var loop_priority = $('input[name="loop_priority"]:checked').val();
-		if(loop_priority=='ledsfirst')
-			$('#stripfirst').hide();
-		if(loop_priority=='stripfirst')
-			$('#ledsfirst').hide();		
-		$('#'+loop_priority).show();
+		//generate code with template object
+		const code = Object.create(codegen);
+		code.start = start_val; 
+		code.nbLeds = nbLeds_val; 
+		code.nbStrips = nbStrips_val;
+		code.delay = delay_val; 
+		code.offset = offset_val;
+		code.color = colorCode_val;
+		code.rgb = rgbCode_val;
+		code.blink = blink;
+		code.direction = direction;
+		code.set_blink();
+		code.print_code(loop_priority);
 
 		//hide old version
 		if(code_id != 0) {
 			$('#customCodeCurrent').hide();
 		}
 		else {
-			$('#customCodePreview').css('top','-580px');		
-		}		
-
+			$('#customCodePreview').css('bottom','460px');		
+		}
+		//display new version
 		$('#customCodePreview').show();		
-
 
 
 		//show save button		
@@ -134,19 +103,12 @@ $(document).ready(function() {
 function saveCustomCode(code_id, published) {
 
 	var elements = new Object();
-	var loop_priority = $('input[name="loop_priority"]:checked').val();
+	//var loop_priority = $('input[name="loop_priority"]:checked').val();
 
 	elements['title'] = $('input[name="code_title"]').val();
 	elements['description'] = $('textarea[name="description"]').val();
 	elements['published'] = published;
-	
-	//elements['customcode'] = "async function cc() {" + $('#customvars').text()+''+$('#'+loop_priority).text() + "} \ncc();";
-	elements['customcode'] = $('#customvars').text();
-	var direction = $('input[name="direction"]:checked').val();
-	if(direction=='on2off') {
-		elements['customcode'] += '\n'+$('#showAll').text();
-	}
-	elements['customcode'] += '\n'+$('#'+loop_priority).text();
+	elements['customcode'] = $('#customCodePreview').text();
 
 
 	//console.log(elements['customcode']);return;
@@ -161,7 +123,7 @@ function saveCustomCode(code_id, published) {
 	customvars['delay_val'] = $('input[name="delay_val"]').val();
 	customvars['blink'] = $('input[name="blink"]:checked').val();		
 	customvars['direction'] = $('input[name="direction"]:checked').val();		
-	customvars['loop_priority'] = loop_priority;
+	customvars['loop_priority'] =  $('input[name="loop_priority"]:checked').val();
 	elements['customvars'] = customvars;
 
 	dest_url = '/customcodes/'; // new object

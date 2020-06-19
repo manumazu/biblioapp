@@ -158,42 +158,107 @@
 		{% include '_color_editor.html' %}
 	{% endwith %}	  
 
+
 <!-- code version from sample -->
-<pre id="customCodePreview" class="text-white-50 bg-dark p-3 mt-3 customcode" style="display: none;">
-<code id="customvars">app.forceExit = false;
-var nbLeds = <span id="nbLeds_val"></span>;
-var offset = <span id="offset_val"></span>;
-var start = <span id="start_val"></span>;
-var nbStrips = <span id="nbStrips_val"></span>;
-var color = <span id="colorCode_val"></span>;
-var rgb = <span id="rgbCode_val"></span>;
-var delay = <span id="delay_val"></span>;
-</code>
-<code id="showAll" style="display: none;">//turn on all specified leds
-app.setBlockMessage(0, 1, nbLeds*nbStrips, color, rgb);
-await timer(delay);
-//loop for turning off leds</code>
-<code id="stripfirst"><span id="forstrip"></span>{{" { //loop for leds
+<script type="text/javascript">
+/**
+* Code generator for templating loops
+* Manage direction mode : 
+* - leds OFF to ON (incrementation) 
+* - leds ON to OFF (derementation) 
+*/
+const codegen = {
+
+  _code_blink:'',
+
+  set_blink: function() {
+   if(this.blink=='on')
+    	this._code_blink =`//blinking effect\n\t\tapp.setBlockMessage(n, strip, ${this.offset}, 'down', null);\n\t\tawait timer(${this.delay});`
+  },
+  print_code: function(param) {
+
+  	//code template priority to strips
+  	if(param == 'stripfirst') {
+
+  		//code template for turning on then iterative off
+		if (this.direction=='on2off') {	
+var code = `/***\n* Turn on all specified strips\n* Then turn off strips in iterative mode\n***/
+app.forceExit = false;
+app.setBlockMessage(0, 1, ${(this.nbLeds*this.nbStrips)}, '${this.color}', '${this.rgb}');
+await timer(100);
+for(n=${this.nbLeds}; n>${(this.start-this.offset)}; n-=${this.offset}) { //loop for leds
 	var strip = 1;
-	while(strip<=nbStrips) { // loop for strips
-		if(app.forceExit) break;"}}
-		<span id="msgstrip"></span>
-{{"		await timer(delay);"}}
-		<span id="blinkstrip"></span>{{"
+	while(strip<=${this.nbStrips}) { // loop for strips
+		if(app.forceExit) break; // mandatory
+		//send turn off instructions
+		app.setBlockMessage(n, strip, ${this.offset}, 'down', null);
+		await timer(${this.delay});
 		strip++;
 	}
-}
-"}}
-</code><code id="ledsfirst">{{"var strip = 1;
-while(strip<=nbStrips) { // loop for strips"}}
-	<span id="forleds"></span>{{" { //loop for leds
-		if(app.forceExit) break;"}}
-		<span id="msgleds"></span>
-{{"		await timer(delay);"}}
-		<span id="blinkled"></span>{{"
+}`;
+		}
+		//code template for turning on iterative
+		else {	  			  		
+var code = `/***\n* Turn on all specified strips in iterative mode\n***/
+app.forceExit = false;
+for(n=${this.start}; n<${this.nbLeds}; n+=${this.offset}) { //loop for leds
+	var strip = 1;
+	while(strip<=${this.nbStrips}) { // loop for strips
+		if(app.forceExit) break; // mandatory
+		//set lighting instructions to Bibus
+		app.setBlockMessage(n, strip, ${this.offset}, '${this.color}', '${this.rgb}');
+		await timer(${this.delay});
+		${this._code_blink}
+		strip++;
 	}
-	strip++;	
-}
-"}}
-</code>
-</pre>
+}`;
+
+		}
+	}
+
+	//code template priority to leds for all strips
+	if(param == 'ledsfirst') {
+
+		if (this.direction=='on2off') {
+//loop for turning off all leds 		
+var code = `/***\n* Turn on all specified leds\n* Then turn off leds in iterative mode\n***/
+app.forceExit = false;
+app.setBlockMessage(0, 1, ${(this.nbLeds*this.nbStrips)}, '${this.color}', '${this.rgb}');
+var strip = 1;
+while(strip<=${this.nbStrips}) { // loop for strips
+	for(n=${this.nbLeds}; n>${(this.start-this.offset)}; n-=${this.offset}) { //loop for leds
+		if(app.forceExit) break; // mandatory
+		//send turn off instructions
+		app.setBlockMessage(n, strip, ${this.offset}, 'down', null);
+		await timer(${this.delay});
+	}
+	strip++;
+}`;
+		}
+
+		else {
+//loop for lighting all leds 
+var code =  `/***\n* Turn on all specified leds in iterative mode\n***/
+app.forceExit = false;
+var strip = 1;
+while(strip<=${this.nbStrips}) { // loop for strips
+	for(n=${this.start}; n<${this.nbLeds}; n+=${this.offset}) { //loop for leds
+		if(app.forceExit) break; // mandatory
+		//set lighting instructions to Bibus
+		app.setBlockMessage(n, strip, ${this.offset}, '${this.color}', '${this.rgb}');
+		await timer(${this.delay});
+		${this._code_blink}
+	}
+	strip++;
+}`;
+		}		
+
+
+	}
+
+    $('#customCodePreview').text(code);
+  }
+
+};
+</script>
+<pre id="customCodePreview" class="text-white-50 bg-dark p-3 mt-3 customcode" style="display: none;"></pre>

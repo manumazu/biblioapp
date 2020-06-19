@@ -3,7 +3,8 @@
 	.customcode {
 		position:relative;
 		float:right;
-		top: -650px;
+		/*top: -650px;*/
+		bottom: 540px;
 		left: 20px;
 		width: 610px;
 	}

@@ -582,7 +582,7 @@ def set_customcode(user_id, app_id, code_id, title, description, published, cust
   if code_id is None :
     #get last position
     position = get_max_code_position(user_id, app_id)
-    if position and 'maxpos' in position:
+    if position['maxpos'] is not None and position['maxpos']>0:
       position = position['maxpos']+1
     else:
       position = 0
