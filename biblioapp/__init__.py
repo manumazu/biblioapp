@@ -898,6 +898,16 @@ def customCodeDelete():
     flash('Code "{}" is deleted'.format(customcode['title']))
     return redirect(url_for('customCodes', _scheme='https', _external=True))  
 
+@app.route('/ajax_customcodetemplate/<template>')
+@flask_login.login_required
+def customCodeTemplate(template):
+  globalVars = initApp()
+  if template=='timer':
+    return render_template('_customcode_timer.html')
+  if template=='sample':
+    return render_template('_customcode_sample.html')
+  abort(404)
+
 @app.route('/customeffects/<uuid>/')
 @flask_login.login_required
 def customEffects(uuid = None):

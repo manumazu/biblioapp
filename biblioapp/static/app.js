@@ -35,7 +35,7 @@
 
   function getColor() {
     // returns a string of red, green, blue values
-    var color = [];
+    var color = [];       
     color.push($('#red').val());
     color.push($('#green').val());
     color.push($('#blue').val());
@@ -50,11 +50,8 @@
 
 	function colorEditor() {
 	    $("#colorEditor").modal();
-	}
-
-	$(document).ready(function() {
 	    updatePreview();
 	    $('input[type=range]').on('input', function () {
 	        updatePreview();
-	    });
-	});
+	    });	    
+	}

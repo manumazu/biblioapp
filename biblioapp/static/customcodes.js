@@ -1,5 +1,58 @@
 $(document).ready(function() {
 
+	//for new code
+	var selected_template = '';
+	$('#code-type .jumbotron').each(function() {
+		//console.log($(this));
+		if($(this).hasClass('active')) {
+			selected_template = $(this).attr('id');
+		}
+	});
+
+	//check if code already exists
+	var code_id = $('input[name="code_id"]').val(); // key for update object
+	if(code_id === undefined) {
+		code_id = 0;
+	}
+	else { //for existing code 
+		selected_template = $('input[name="template"]').val();
+	}
+
+	updateActiveCode(selected_template, code_id);
+
+});
+
+//choose template for new code
+$('#code-selector .nav-item a').on('click', function() {
+	var selected_template = $(this).attr('href').substring(1);
+	updateActiveCode(selected_template, 0);
+});
+
+function updateActiveCode(selected_template, code_id) {
+
+	//for new code load selected template
+	if(code_id === 0) {
+
+		//clean html template
+		$('#code-type .jumbotron').each(function() {
+			$(this).html('');
+		});
+
+		$.get( '/ajax_customcodetemplate/'+selected_template, function( data ) {
+		  	$('#'+selected_template).html( data );
+		  	editCodeForm(selected_template, 0);
+		});
+	}
+	else { //for existing code, template is already loaded
+		editCodeForm(selected_template, code_id);
+	}
+}
+
+//manage form elements from templates
+function editCodeForm(selected_template, code_id) {
+
+	//console.log(selected_template);
+
 	$('#customCodePreview').hide();
 
 	$('#btn-customcode_draft').hide();	
@@ -9,8 +62,6 @@ $(document).ready(function() {
 	if($('input[name="colorCode_val"]').val() != 'color') 
 		$('#rgbCode').hide();
 
-	var code_id = $('input[name="code_id"]').val(); // key for update object	
-
 	$('input[name="colorCode_val"]').on('change', function() {
 		if($('input[name="colorCode_val"]').val() == 'color') 
 			$('#rgbCode').show();
@@ -18,23 +69,8 @@ $(document).ready(function() {
 			$('#rgbCode').hide();
 	});
 
-	//blink mode is available for incrementation only
-	if($('input[name="direction"]:checked').val()=='on2off') {
-		$('#blink-mode *').prop('disabled',true);
-		$('#blinkled').text('');
-		$('#blinkstrip').text('');	
-	}
-	$('input[name="direction"]').on('change', function() {
-		if($('input[name="direction"]:checked').val()=='off2on')
-			$('#blink-mode *').prop('disabled',false);
-		else {
-			$('#blink-mode *').prop('disabled',true);
-			$('#blinkled').text('');
-			$('#blinkstrip').text('');				
-		}
-	});
-
-	//preview code
+	//preview code before saving
+	var customvars = new Object();
 	$('#btn-customcode_preview').on('click', function() {
 
 		//customvars
@@ -48,9 +84,14 @@ $(document).ready(function() {
 			rgbCode_val = $('input[name="rgbCode_val"]').val();
 		var delay_val = $('input[name="delay_val"]').val();
 
-		//manage loops : increment or decrement leds	
-		var direction = $('input[name="direction"]:checked').val();		
-		var blink = $('input[name="blink"]:checked').val();		
+		//manage loops : increment or decrement leds
+		if(selected_template=='timer') {
+			var blink = $('input[name="blink"]').val();	
+		}			
+		else{
+			var blink = $('input[name="blink"]:checked').val();
+		}
+
 		var loop_priority = $('input[name="loop_priority"]:checked').val();
 		//generate code with template object
 		const code = Object.create(codegen);
@@ -62,9 +103,19 @@ $(document).ready(function() {
 		code.color = colorCode_val;
 		code.rgb = rgbCode_val;
 		code.blink = blink;
-		code.direction = direction;
 		code.set_blink();
 		code.print_code(loop_priority);
+
+		customvars['template'] = selected_template;
+		customvars['nbLeds_val'] = nbLeds_val;
+		customvars['offset_val'] = offset_val;
+		customvars['start_val'] = start_val;
+		customvars['nbStrips_val'] = nbStrips_val;
+		customvars['colorCode_val'] = colorCode_val;
+		customvars['rgbCode_val'] = rgbCode_val;
+		customvars['delay_val'] = delay_val;
+		customvars['blink'] = blink;			
+		customvars['loop_priority'] =  loop_priority;		
 
 		//hide old version
 		if(code_id != 0) {
@@ -84,11 +135,11 @@ $(document).ready(function() {
 
 
 	$('#btn-customcode_draft').on('click', function() {
-		saveCustomCode(code_id, false);
+		saveCustomCode(code_id, customvars, false);
 	});
 
 	$('#btn-customcode_publish').on('click', function() {
-		saveCustomCode(code_id, true);
+		saveCustomCode(code_id, customvars, true);
 	});
 
 
@@ -98,9 +149,9 @@ $(document).ready(function() {
 		$('#rgbText').text("RGB code update");
 	});
 
-});
+}
 
-function saveCustomCode(code_id, published) {
+function saveCustomCode(code_id, customvars, published) {
 
 	var elements = new Object();
 	//var loop_priority = $('input[name="loop_priority"]:checked').val();
@@ -109,22 +160,9 @@ function saveCustomCode(code_id, published) {
 	elements['description'] = $('textarea[name="description"]').val();
 	elements['published'] = published;
 	elements['customcode'] = $('#customCodePreview').text();
-
-
-	//console.log(elements['customcode']);return;
-
-	var customvars = new Object();
-	customvars['nbLeds_val'] = $('input[name="nbLeds_val"]').val();
-	customvars['offset_val'] = $('input[name="offset_val"]').val();
-	customvars['start_val'] = $('input[name="start_val"]').val();
-	customvars['nbStrips_val'] = $('input[name="nbStrips_val"]').val();
-	customvars['colorCode_val'] = $('input[name="colorCode_val"]').val();
-	customvars['rgbCode_val'] = $('input[name="rgbCode_val"]').val();
-	customvars['delay_val'] = $('input[name="delay_val"]').val();
-	customvars['blink'] = $('input[name="blink"]:checked').val();		
-	customvars['direction'] = $('input[name="direction"]:checked').val();		
-	customvars['loop_priority'] =  $('input[name="loop_priority"]:checked').val();
 	elements['customvars'] = customvars;
+
+	//console.log(elements['customvars']);	
 
 	dest_url = '/customcodes/'; // new object
 	if(code_id != 0) {

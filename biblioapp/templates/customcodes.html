@@ -109,10 +109,21 @@
 
 	{% endif %}
 
-	<div class="jumbotron">
+	<ul class="nav nav-pills" id="code-selector">
+	  <li class="nav-item">
+	    <a class="nav-link active" data-toggle="tab" href="#sample">Sample code</a>
+	  </li> 
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#timer">Code Timer</a>
+	  </li> 	   
+	</ul>	
 
-	  	{% include '_customcode_sample.html' %}	
-	  
+	<div class="tab-content" id="code-type">	
+
+		<div class="jumbotron tab-pane show active" id="sample"></div>
+
+		<div class="jumbotron tab-pane" id="timer"></div>		
+
 	</div>
 
 	{{ super() }}

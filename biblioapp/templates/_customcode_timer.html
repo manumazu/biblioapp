@@ -1,15 +1,15 @@
 	  {% if data|length > 0 %}
 	  	  <h2 class="mb-3 text-white font-weight-light">"{{ data['title'] }}"</h2>
 	  {% else %}
-		  <h2 class="mb-3 text-white font-weight-light">Example :</h2>
-		  <p class="lead">"Turn on [all] LEDs with an offset of [5], on [each] strip with [different] colors."</p>
-		  <p>In this phrase, we have defined 4 variables :</p>
+		  <h2 class="mb-3 text-white font-weight-light">Timer :</h2>
+		  <p class="lead">"Turn on [x] leds and turn off [x] after an other at [x] second"</p>
+		  <p>Example : 1 minute (60 sec) <pre><code>delay = 60 : (nbLeds:offset)*1000</code></pre></p>
 	  {% endif %}
 
 <div id="code-form">
 
 	  <form class="form-horizontal">
-	  	<input type="hidden" name="template" value="sample">
+	  	<input type="hidden" name="template" value="timer">
 
 	  	<fieldset>
 
@@ -38,10 +38,11 @@
 	      <label for="start_val" class="col-lg-2 control-label">start = starting position</label>
 	    </div>	    	
 
-	  	<div class="form-group form-inline">
+	  	<!--div class="form-group form-inline">
 		  <input type="text" class="col-sm-1 form-control" name="nbStrips_val" placeholder="nbStrips" {% if customvars|length > 0 %}value="{{ customvars['nbStrips_val'] }}"{% endif %}>	  		
 	      <label for="nbStrips_val" class="col-lg-3 control-label">nbStrips = number of strips to display</label>
-	    </div>	
+	    </div-->
+	    <input type="hidden" name="nbStrips_val" placeholder="nbStrips" value="1">	
 
 	  	<div class="form-group form-inline">
 	      <input type="text" class="col-sm-2 form-control" name="colorCode_val" placeholder="colorCode" {% if customvars|length > 0 %}value="{{ customvars['colorCode_val'] }}"{% endif %}>
@@ -56,46 +57,14 @@
 	  	<div class="form-group form-inline">
 	      <input type="text" class="col-sm-2 form-control" name="delay_val" placeholder="delay" value="{% if 'delay_val' in customvars %}{{ customvars['delay_val'] }}{% else %}50{% endif %}">
 	      <label for="delay_val" class="col-lg-3 control-label">delay = wait interval between each instruction (milli second, 50 ms min) </label>
-	    </div>	       	
-
-		<div class="form-group form-inline" id="blink-mode">
-			Blink mode (only for turning on leds) :
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="blink" value="on" {% if customvars|length > 0 and customvars['blink']=='on' %}checked=""{% endif %}>
-				  Enable
-				</label>
-			</div>
-
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="blink" value="off" {% if customvars|length > 0 and customvars['blink']=='off' %}checked=""{% endif %}>
-				  Disable
-				</label>
-			</div>	
-		</div>  
-
-		<div class="form-group form-inline">
-			Define loop priority :
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="loop_priority" value="stripfirst" {% if customvars|length > 0 and customvars['loop_priority']=='stripfirst' %}checked=""{% endif %}>
-				  Strip first
-				</label>
-			</div>
-
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="loop_priority" value="ledsfirst" {% if customvars|length > 0 and customvars['loop_priority']=='ledsfirst' %}checked=""{% endif %}>
-				  Leds first
-				</label>
-			</div>	
-		</div>    		  
+	    </div>    	 		  
 
 	    </fieldset>	 
 	    {% if data|length > 0 %}
 	    	<input type="hidden" name="code_id" value="{{ data['id'] }}">
 	    {% endif %}
+
+	    <input type="hidden" name="loop_priority" value="ledsfirst">
 
 	    <input type="button" name="customcode_preview" id="btn-customcode_preview" class="btn btn-primary" value="Code preview">
 	    <input type="button" name="customcode_update" id="btn-customcode_draft" class="btn btn-warning" value="Save code as draft">
@@ -159,45 +128,18 @@ var codegen = {
   },
   print_code: function(param) {
 
-  	//code template priority to strips
-  	if(param == 'stripfirst') {
-
-		//code template for turning on iterative  			  		
-var code = `/***\n* Turn on all specified strips in iterative mode\n***/
-app.forceExit = false;
-for(n=${this.start}; n<${this.nbLeds}; n+=${this.offset}) { //loop for leds
-	var strip = 1;
-	while(strip<=${this.nbStrips}) { // loop for strips
-		if(app.forceExit) break; // mandatory
-		//set lighting instructions to Bibus
-		app.setBlockMessage(n, strip, ${this.offset}, '${this.color}', '${this.rgb}');
-		await timer(${this.delay});
-		${this._code_blink}
-		strip++;
-	}
-}`;
-
-	}
-
-	//code template priority to leds for all strips
-	if(param == 'ledsfirst') {
-
-//loop for lighting all leds 
-var code =  `/***\n* Turn on all specified leds in iterative mode\n***/
+//loop for turning off all leds 		
+var code = `/***\n* Turn on all specified leds\n* Then turn off leds in iterative mode\n***/
 app.forceExit = false;
 var strip = 1;
-while(strip<=${this.nbStrips}) { // loop for strips
-	for(n=${this.start}; n<${this.nbLeds}; n+=${this.offset}) { //loop for leds
-		if(app.forceExit) break; // mandatory
-		//set lighting instructions to Bibus
-		app.setBlockMessage(n, strip, ${this.offset}, '${this.color}', '${this.rgb}');
-		await timer(${this.delay});
-		${this._code_blink}
-	}
-	strip++;
-}`;	
-
-	}
+app.setBlockMessage(${this.start}, 1, ${parseInt(this.nbLeds)-parseInt(this.offset)}, '${this.color}', '${this.rgb}');
+await timer(200);
+for(n=${parseInt(this.nbLeds)+parseInt(this.offset)}; n>=${this.start}; n-=${this.offset}) { //loop for leds
+	if(app.forceExit) break; // mandatory
+	//send turn off instructions
+	app.setBlockMessage(n, strip, ${this.offset}, 'down', null);
+	await timer(${this.delay});
+}`;
 
     $('#customCodePreview').text(code);
   }
