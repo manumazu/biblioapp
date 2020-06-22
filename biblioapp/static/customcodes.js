@@ -127,7 +127,7 @@ function editCodeForm(selected_template, code_id) {
 			if(code_id != 0) {
 				$('#customCodeCurrent').hide();
 			}
-			else {
+			else if(selected_template != 'wait') {
 				$('#customCodePreview').css('top','-420px');		
 			}
 			//display new version
@@ -189,31 +189,34 @@ function saveCustomCode(code_id, customvars, published) {
 function validForm(customvars) {
 	var totalLeds = parseInt(customvars['nbLeds_val'])*parseInt(customvars['nbStrips_val']);
 
-	if(customvars['loop_priority']===undefined) {
-		alert("Your must choose a priority for loops (leds or strips first)");
-		return false;
-	}
+	if(customvars['template']!='wait') 
+	{
+		if(customvars['loop_priority']===undefined) {
+			alert("Your must choose a priority for loops (leds or strips first)");
+			return false;
+		}
 
-	//alert(totalLeds);
-	if(isNaN(totalLeds)) {
-		alert("Give a LEDs value");
-		return false;
-	}
+		//alert(totalLeds);
+		if(isNaN(totalLeds)) {
+			alert("Give a LEDs value");
+			return false;
+		}
 
-	if(isNaN(parseInt(customvars['offset_val']))) {
-		alert("Give an offset value");
-		return false;
-	}
+		if(isNaN(parseInt(customvars['offset_val']))) {
+			alert("Give an offset value");
+			return false;
+		}
 
-	if(totalLeds > max_leds) {
-		alert("The total of " + totalLeds + " LEDs in your code is greater than the " + max_leds + " LEDs available in your strips.");
-		return false;
-	}
+		if(totalLeds > max_leds) {
+			alert("The total of " + totalLeds + " LEDs in your code is greater than the " + max_leds + " LEDs available in your strips.");
+			return false;
+		}
 
-	var startLeds = totalLeds+parseInt(customvars['start_val']);
-	if(startLeds > max_leds) {
-		alert("Your script is starting after the " + max_leds + " LEDs available in your strips.");
-		return false;	
+		var startLeds = totalLeds+parseInt(customvars['start_val']);
+		if(startLeds > max_leds) {
+			alert("Your script is starting after the " + max_leds + " LEDs available in your strips.");
+			return false;	
+		}
 	}
 
 	return true;

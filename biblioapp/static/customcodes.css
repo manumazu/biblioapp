@@ -12,11 +12,20 @@
 	.customcode-timer {
 		position:relative;
 		float:right;
-		top: -480px;
+		top: -440px;
 		/*bottom: 540px;*/
 		left: 20px;
 		width: 610px;
 	}	
+
+	.customcode-wait {
+		position:relative;
+		float:right;
+		top: -230px;
+		/*bottom: 540px;*/
+		left: 20px;
+		width: 610px;
+	}		
 
 	#btn-customcode_publish {
 		z-index: 100;

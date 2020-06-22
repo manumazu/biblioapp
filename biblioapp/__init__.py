@@ -908,6 +908,8 @@ def customCodeTemplate(template):
     return render_template('_customcode_timer.html')
   if template=='sample':
     return render_template('_customcode_sample.html')
+  if template=='wait':
+    return render_template('_customcode_wait.html')    
   abort(404)
 
 @app.route('/customeffects/<uuid>/')
