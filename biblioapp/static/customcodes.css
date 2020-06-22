@@ -1,13 +1,22 @@
 @media screen and (min-width: 640px) {
 
-	.customcode {
+	.customcode-sample {
 		position:relative;
 		float:right;
-		/*top: -650px;*/
-		bottom: 540px;
+		top: -670px;
+		/*bottom: 540px;*/
 		left: 20px;
 		width: 610px;
 	}
+
+	.customcode-timer {
+		position:relative;
+		float:right;
+		top: -480px;
+		/*bottom: 540px;*/
+		left: 20px;
+		width: 610px;
+	}	
 
 	#btn-customcode_publish {
 		z-index: 100;

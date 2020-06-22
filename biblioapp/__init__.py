@@ -856,8 +856,9 @@ def customCodes(uuid = None):
           db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
             jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
           #print(request.data.decode())
-    codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])        
-    return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json)
+    codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])
+    maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']      
+    return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json, max_leds=maxLeds)
   abort(404)
 
 @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
@@ -883,8 +884,9 @@ def customCode(code_id):
         mimetype='application/json'
       )
       return response
+    maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']
     return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
-      customvars=customvars, data=data)
+      customvars=customvars, data=data, max_leds=maxLeds)
   abort(404)
 
 @app.route('/customcodedelete/', methods=['POST'])

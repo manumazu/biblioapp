@@ -13,69 +13,17 @@
 
 	  	<fieldset>
 
-	  	<div class="form-group form-inline">
-	      <label for="code_title" class="col-lg-1 control-label">Title </label>
+	  	<div class="form-group row">
+	      <label for="code_title" class="col-lg-2 col-form-label">Title </label>
 	      <input type="text" class="col-sm-5 form-control" name="code_title" id="code_title" placeholder="code Title" {% if data|length > 0 and data['title'] != None %}value="{{ data['title'] }}"{% endif %}>
 	    </div>	
 
-	    <div class="form-group form-inline">
-	      <label for="description" class="col-lg-1 control-label">Description</label>
+	    <div class="form-group row">
+	      <label for="description" class="col-lg-2 col-form-label">Description</label>
 	      <textarea class="col-sm-5 form-control" id="description" name="description" rows="3">{% if data|length > 0 and data['description'] != None %}{{ data['description'] }}{% endif %}</textarea>
 	    </div>	 
 
-	  	<div class="form-group form-inline">
-	  	  <input type="text" class="col-sm-1 form-control" name="nbLeds_val" placeholder="nbLeds" {% if customvars|length > 0 %}value="{{ customvars['nbLeds_val'] }}"{% endif %}>	
-	      <label for="nbLeds_val" class="col-lg-3 control-label">nbLeds = number of leds to display </label>
-	    </div>
-
-	  	<div class="form-group form-inline">
-		  <input type="text" class="col-sm-1 form-control" name="offset_val" placeholder="offset" {% if customvars|length > 0 %}value="{{ customvars['offset_val'] }}"{% endif %}>	  		
-	      <label for="offset_val" class="col-lg-2 control-label">offset = number of the offset</label>
-	    </div>
-
-	  	<div class="form-group form-inline">
-		  <input type="text" class="col-sm-1 form-control" name="start_val" placeholder="start" value="{% if customvars|length > 0 %}{{ customvars['start_val'] }}{% else %}0{% endif %}">	  		
-	      <label for="start_val" class="col-lg-2 control-label">start = starting position</label>
-	    </div>	    	
-
-	  	<div class="form-group form-inline">
-		  <input type="text" class="col-sm-1 form-control" name="nbStrips_val" placeholder="nbStrips" {% if customvars|length > 0 %}value="{{ customvars['nbStrips_val'] }}"{% endif %}>	  		
-	      <label for="nbStrips_val" class="col-lg-3 control-label">nbStrips = number of strips to display</label>
-	    </div>	
-
-	  	<div class="form-group form-inline">
-	      <input type="text" class="col-sm-2 form-control" name="colorCode_val" placeholder="colorCode" {% if customvars|length > 0 %}value="{{ customvars['colorCode_val'] }}"{% endif %}>
-	      <label for="colorCode_val" class="col-lg-3 control-label">color = code or mode of the colors to be shown </label>
-	    </div>
-
-	  	<div class="form-group form-inline" id="rgbCode">
-	      <input type="text" class="col-sm-2 form-control" name="rgbCode_val" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if customvars|length > 0 %}value="{{ customvars['rgbCode_val'] }}"{% endif %}>
-	      <label for="rgbCode_val" class="col-lg-3 control-label">rgb = code of the color to be shown ("color" mode) </label>
-	    </div>
-
-	  	<div class="form-group form-inline">
-	      <input type="text" class="col-sm-2 form-control" name="delay_val" placeholder="delay" value="{% if 'delay_val' in customvars %}{{ customvars['delay_val'] }}{% else %}50{% endif %}">
-	      <label for="delay_val" class="col-lg-3 control-label">delay = wait interval between each instruction (milli second, 50 ms min) </label>
-	    </div>	       	
-
-		<div class="form-group form-inline" id="blink-mode">
-			Blink mode (only for turning on leds) :
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="blink" value="on" {% if customvars|length > 0 and customvars['blink']=='on' %}checked=""{% endif %}>
-				  Enable
-				</label>
-			</div>
-
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="blink" value="off" {% if customvars|length > 0 and customvars['blink']=='off' %}checked=""{% endif %}>
-				  Disable
-				</label>
-			</div>	
-		</div>  
-
-		<div class="form-group form-inline">
+		<div class="form-group row">
 			Define loop priority :
 			<div class="form-check ml-2">
 				<label class="form-check-label">
@@ -88,6 +36,58 @@
 				<label class="form-check-label">
 				  <input type="radio" class="form-check-input" name="loop_priority" value="ledsfirst" {% if customvars|length > 0 and customvars['loop_priority']=='ledsfirst' %}checked=""{% endif %}>
 				  Leds first
+				</label>
+			</div>	
+		</div>  	    
+
+	  	<div class="form-group row">
+	  	  <label for="nbLeds_val" class="col-lg-3 col-form-label">nbLeds = number of leds to display </label>
+	  	  <input type="text" class="col-sm-1 form-control" name="nbLeds_val" placeholder="nbLeds" {% if customvars|length > 0 %}value="{{ customvars['nbLeds_val'] }}"{% endif %}>
+	    </div>
+
+	  	<div class="form-group row">
+		  <label for="offset_val" class="col-lg-3 col-form-label">offset = number of the offset</label>	  		
+		  <input type="text" class="col-sm-1 form-control" name="offset_val" placeholder="offset" {% if customvars|length > 0 %}value="{{ customvars['offset_val'] }}"{% endif %}>	  		
+	    </div>
+
+	  	<div class="form-group row">
+	      <label for="start_val" class="col-lg-3 col-form-label">start = starting position</label>	  		
+		  <input type="text" class="col-sm-1 form-control" name="start_val" placeholder="start" value="{% if customvars|length > 0 %}{{ customvars['start_val'] }}{% else %}0{% endif %}">	  		
+	    </div>	    	
+
+	  	<div class="form-group row">
+	      <label for="nbStrips_val" class="col-lg-3 col-form-label">nbStrips = number of strips to display</label>	  		
+		  <input type="text" class="col-sm-1 form-control" name="nbStrips_val" placeholder="nbStrips" {% if customvars|length > 0 %}value="{{ customvars['nbStrips_val'] }}"{% endif %}>	  		
+	    </div>	
+
+	  	<div class="form-group row">
+	      <label for="colorCode_val" class="col-lg-3 col-form-label">color = code or mode of the colors to be shown </label>
+	      <input type="text" class="col-sm-2 form-control" name="colorCode_val" placeholder="colorCode" {% if customvars|length > 0 %}value="{{ customvars['colorCode_val'] }}"{% endif %}>
+	    </div>
+
+	  	<div class="form-group row" id="rgbCode">
+	      <label for="rgbCode_val" class="col-lg-3 col-form-label">rgb = code of the color to be shown ("color" mode) </label>
+	      <input type="text" class="col-sm-2 form-control" name="rgbCode_val" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if customvars|length > 0 %}value="{{ customvars['rgbCode_val'] }}"{% endif %}>
+	    </div>
+
+	  	<div class="form-group row">
+	      <label for="delay_val" class="col-lg-3 col-form-label">delay = wait interval between each instruction (milli second, 50 ms min) </label>	  		
+	      <input type="text" class="col-sm-2 form-control" name="delay_val" placeholder="delay" value="{% if 'delay_val' in customvars %}{{ customvars['delay_val'] }}{% else %}50{% endif %}">
+	    </div>	       	
+
+		<div class="form-group row" id="blink-mode">
+			Blink mode (only for turning on leds) :
+			<div class="form-check ml-2">
+				<label class="form-check-label">
+				  <input type="radio" class="form-check-input" name="blink" value="on" {% if customvars|length > 0 and customvars['blink']=='on' %}checked=""{% endif %}>
+				  Enable
+				</label>
+			</div>
+
+			<div class="form-check ml-2">
+				<label class="form-check-label">
+				  <input type="radio" class="form-check-input" name="blink" value="off" {% if customvars|length > 0 and customvars['blink']=='off' %}checked=""{% endif %}>
+				  Disable
 				</label>
 			</div>	
 		</div>    		  
@@ -122,6 +122,8 @@
 		}
 	</script>
 	{% endif %}	  
+
+	<pre id="customCodePreview" class="text-white bg-dark p-3 mt-3 customcode-sample" style="display: none;"></pre>
 
 </div>
 
@@ -165,7 +167,7 @@ var codegen = {
 		//code template for turning on iterative  			  		
 var code = `/***\n* Turn on all specified strips in iterative mode\n***/
 app.forceExit = false;
-for(n=${this.start}; n<${this.nbLeds}; n+=${this.offset}) { //loop for leds
+for(n=${this.start}; n<${parseInt(this.start)+parseInt(this.nbLeds)}; n+=${this.offset}) { //loop for leds
 	var strip = 1;
 	while(strip<=${this.nbStrips}) { // loop for strips
 		if(app.forceExit) break; // mandatory
@@ -187,7 +189,7 @@ var code =  `/***\n* Turn on all specified leds in iterative mode\n***/
 app.forceExit = false;
 var strip = 1;
 while(strip<=${this.nbStrips}) { // loop for strips
-	for(n=${this.start}; n<${this.nbLeds}; n+=${this.offset}) { //loop for leds
+	for(n=${this.start}; n<${parseInt(this.start)+parseInt(this.nbLeds)}; n+=${this.offset}) { //loop for leds
 		if(app.forceExit) break; // mandatory
 		//set lighting instructions to Bibus
 		app.setBlockMessage(n, strip, ${this.offset}, '${this.color}', '${this.rgb}');
@@ -204,4 +206,3 @@ while(strip<=${this.nbStrips}) { // loop for strips
 
 };
 </script>
-<pre id="customCodePreview" class="text-white bg-dark p-3 mt-3 customcode" style="display: none;"></pre>

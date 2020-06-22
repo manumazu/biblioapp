@@ -1,5 +1,7 @@
 $(document).ready(function() {
 
+	$('[data-toggle="tooltip"]').tooltip();
+
 	//for new code
 	var selected_template = '';
 	$('#code-type .jumbotron').each(function() {
@@ -122,7 +124,7 @@ function editCodeForm(selected_template, code_id) {
 			$('#customCodeCurrent').hide();
 		}
 		else {
-			$('#customCodePreview').css('bottom','460px');		
+			$('#customCodePreview').css('top','-420px');		
 		}
 		//display new version
 		$('#customCodePreview').show();		

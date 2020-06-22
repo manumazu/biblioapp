@@ -32,7 +32,7 @@
 	
 
 	<!-- version currently saved -->
-	<pre id="customCodeCurrent" class="text-white-50 bg-dark p-3 mt-3 customcode">
+	<pre id="customCodeCurrent" class="text-white-50 bg-dark p-3 mt-3 customcode-{{ customvars['template'] }}">
 {{ customcode }}
 	</pre>
 
@@ -44,6 +44,7 @@
 
 {% block scripts %}
   {{super()}}
+   <script type="text/javascript">var max_leds = '{{ max_leds }}';</script>
    <script src="{{url_for('static', filename='customcodes.js')}}" async=""></script>
 {% endblock %}
 
