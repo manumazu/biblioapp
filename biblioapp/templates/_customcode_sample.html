@@ -24,73 +24,66 @@
 	    </div>	 
 
 		<div class="form-group row">
-			Define loop priority :
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="loop_priority" value="stripfirst" {% if customvars|length > 0 and customvars['loop_priority']=='stripfirst' %}checked=""{% endif %}>
-				  Strip first
-				</label>
+			<label class="col-lg-2 col-form-label">Define loop priority :</label>
+
+			<div class="form-check pl-1">
+			  <input type="radio" id="loop_priority_1" name="loop_priority" value="stripfirst" {% if customvars|length > 0 and customvars['loop_priority']=='stripfirst' %}checked=""{% endif %}>
+			  <label class="col-form-label" for="loop_priority_1">Strip first</label>
+			</div>
+			<div class="form-check">
+			  <input type="radio" id="loop_priority_2" name="loop_priority" value="ledsfirst" {% if customvars|length > 0 and customvars['loop_priority']=='ledsfirst' %}checked=""{% endif %}>
+			  <label class="col-form-label" for="loop_priority_2">Leds first</label>
 			</div>
 
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="loop_priority" value="ledsfirst" {% if customvars|length > 0 and customvars['loop_priority']=='ledsfirst' %}checked=""{% endif %}>
-				  Leds first
-				</label>
-			</div>	
-		</div>  	    
+		</div>  
 
 	  	<div class="form-group row">
-	  	  <label for="nbLeds_val" class="col-lg-3 col-form-label">nbLeds = number of leds to display </label>
+	      <label for="start_val" class="col-lg-3 col-form-label">Starting position</label>	  		
+		  <input type="text" class="col-sm-1 form-control" name="start_val" placeholder="start" value="{% if customvars|length > 0 %}{{ customvars['start_val'] }}{% else %}0{% endif %}">	  		
+	    </div>	 			    
+
+	  	<div class="form-group row">
+	  	  <label for="nbLeds_val" class="col-lg-3 col-form-label">Number of LEDs to display </label>
 	  	  <input type="text" class="col-sm-1 form-control" name="nbLeds_val" placeholder="nbLeds" {% if customvars|length > 0 %}value="{{ customvars['nbLeds_val'] }}"{% endif %}>
 	    </div>
 
 	  	<div class="form-group row">
-		  <label for="offset_val" class="col-lg-3 col-form-label">offset = number of the offset</label>	  		
+		  <label for="offset_val" class="col-lg-3 col-form-label">Offset for LEDs interval</label>
 		  <input type="text" class="col-sm-1 form-control" name="offset_val" placeholder="offset" {% if customvars|length > 0 %}value="{{ customvars['offset_val'] }}"{% endif %}>	  		
-	    </div>
+	    </div>   	
 
 	  	<div class="form-group row">
-	      <label for="start_val" class="col-lg-3 col-form-label">start = starting position</label>	  		
-		  <input type="text" class="col-sm-1 form-control" name="start_val" placeholder="start" value="{% if customvars|length > 0 %}{{ customvars['start_val'] }}{% else %}0{% endif %}">	  		
-	    </div>	    	
-
-	  	<div class="form-group row">
-	      <label for="nbStrips_val" class="col-lg-3 col-form-label">nbStrips = number of strips to display</label>	  		
+	      <label for="nbStrips_val" class="col-lg-3 col-form-label">Number of strips to display</label>	  		
 		  <input type="text" class="col-sm-1 form-control" name="nbStrips_val" placeholder="nbStrips" {% if customvars|length > 0 %}value="{{ customvars['nbStrips_val'] }}"{% endif %}>	  		
 	    </div>	
 
+		<div class="form-group row" id="blink-mode">
+			<label class="col-lg-2 col-form-label">Blink mode :</label>
+			<div class="form-check pl-1">
+				<input type="radio" class="form-control-input" name="blink" value="on" {% if customvars|length > 0 and customvars['blink']=='on' %}checked=""{% endif %}>
+				<label class="col-form-label">Enable</label>
+			</div>
+
+			<div class="form-check">
+				<input type="radio" class="form-control-input" name="blink" value="off" {% if customvars|length > 0 and customvars['blink']=='off' %}checked=""{% endif %}>
+				<label class="col-form-label">Disable</label>
+			</div>	
+		</div>   	    
+
 	  	<div class="form-group row">
-	      <label for="colorCode_val" class="col-lg-3 col-form-label">color = code or mode of the colors to be shown </label>
-	      <input type="text" class="col-sm-2 form-control" name="colorCode_val" placeholder="colorCode" {% if customvars|length > 0 %}value="{{ customvars['colorCode_val'] }}"{% endif %}>
+	      <label for="colorCode_val" class="col-lg-3 col-form-label">Color mode ('color' = for RGB code, 'random' = color is taken in andom mode, 'down' = turn of leds)</label>
+	      <input type="text" class="col-sm-2 form-control" name="colorCode_val" placeholder="colorCode" value="{% if customvars|length > 0 %}{{ customvars['colorCode_val'] }}{% else %}random{% endif %}">
 	    </div>
 
 	  	<div class="form-group row" id="rgbCode">
-	      <label for="rgbCode_val" class="col-lg-3 col-form-label">rgb = code of the color to be shown ("color" mode) </label>
+	      <label for="rgbCode_val" class="col-lg-3 col-form-label">RGB code of the color (for "color" mode) </label>
 	      <input type="text" class="col-sm-2 form-control" name="rgbCode_val" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if customvars|length > 0 %}value="{{ customvars['rgbCode_val'] }}"{% endif %}>
 	    </div>
 
 	  	<div class="form-group row">
-	      <label for="delay_val" class="col-lg-3 col-form-label">delay = wait interval between each instruction (milli second, 50 ms min) </label>	  		
+	      <label for="delay_val" class="col-lg-3 col-form-label">Wait interval between each instruction (milli second, 50 ms min) </label>	  		
 	      <input type="text" class="col-sm-2 form-control" name="delay_val" placeholder="delay" value="{% if 'delay_val' in customvars %}{{ customvars['delay_val'] }}{% else %}50{% endif %}">
-	    </div>	       	
-
-		<div class="form-group row" id="blink-mode">
-			Blink mode (only for turning on leds) :
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="blink" value="on" {% if customvars|length > 0 and customvars['blink']=='on' %}checked=""{% endif %}>
-				  Enable
-				</label>
-			</div>
-
-			<div class="form-check ml-2">
-				<label class="form-check-label">
-				  <input type="radio" class="form-check-input" name="blink" value="off" {% if customvars|length > 0 and customvars['blink']=='off' %}checked=""{% endif %}>
-				  Disable
-				</label>
-			</div>	
-		</div>    		  
+	    </div>	       	 		  
 
 	    </fieldset>	 
 	    {% if data|length > 0 %}

@@ -24,36 +24,36 @@
 	    </div>	
 
 	  	<div class="form-group row">
-	  	  <label for="nbLeds_val" class="col-lg-3 col-form-label">nbLeds = number of leds to display </label>
+	      <label for="start_val" class="col-lg-3 col-form-label">Starting position</label>	  		
+		  <input type="text" class="col-sm-1 form-control" name="start_val" placeholder="start" value="{% if customvars|length > 0 %}{{ customvars['start_val'] }}{% else %}0{% endif %}">	  		
+	    </div>	 			    
+
+	  	<div class="form-group row">
+	  	  <label for="nbLeds_val" class="col-lg-3 col-form-label">Number of LEDs to display </label>
 	  	  <input type="text" class="col-sm-1 form-control" name="nbLeds_val" placeholder="nbLeds" {% if customvars|length > 0 %}value="{{ customvars['nbLeds_val'] }}"{% endif %}>
 	    </div>
 
 	  	<div class="form-group row">
-		  <label for="offset_val" class="col-lg-3 col-form-label">offset = number of the offset</label>	  		
+		  <label for="offset_val" class="col-lg-3 col-form-label">Offset for LEDs interval</label>	  		
 		  <input type="text" class="col-sm-1 form-control" name="offset_val" placeholder="offset" {% if customvars|length > 0 %}value="{{ customvars['offset_val'] }}"{% endif %}>	  		
-	    </div>
-
-	  	<div class="form-group row">
-	      <label for="start_val" class="col-lg-3 col-form-label">start = starting position</label>	  		
-		  <input type="text" class="col-sm-1 form-control" name="start_val" placeholder="start" value="{% if customvars|length > 0 %}{{ customvars['start_val'] }}{% else %}0{% endif %}">	  		
-	    </div>	        	
+	    </div>        
 
 	    <input type="hidden" name="nbStrips_val" placeholder="nbStrips" value="1">	
 
-	  	<div class="form-group row" data-toggle="tooltip" data-placement="bottom" title="Accepted values : color, random, down">
-	      <label for="colorCode_val" class="col-lg-3 col-form-label">color = code or mode of the colors to be shown</label>
-	      <input type="text" class="col-sm-2 form-control" name="colorCode_val" placeholder="colorCode" {% if customvars|length > 0 %}value="{{ customvars['colorCode_val'] }}"{% endif %}>
+	  	<div class="form-group row">
+	      <label for="colorCode_val" class="col-lg-3 col-form-label">Color mode ('color' = for RGB code, 'random' = color is taken in andom mode, 'down' = turn of leds)</label>
+	      <input type="text" class="col-sm-2 form-control" name="colorCode_val" placeholder="colorCode" value="{% if customvars|length > 0 %}{{ customvars['colorCode_val'] }}{% else %}random{% endif %}">
 	    </div>
 
 	  	<div class="form-group row" id="rgbCode">
-	      <label for="rgbCode_val" class="col-lg-3 col-form-label">rgb = code of the color to be shown ("color" mode) </label>
+	      <label for="rgbCode_val" class="col-lg-3 col-form-label">RGB code of the color (for "color" mode) </label>
 	      <input type="text" class="col-sm-2 form-control" name="rgbCode_val" placeholder="rgb code" onfocus="javascript:colorEditor();" {% if customvars|length > 0 %}value="{{ customvars['rgbCode_val'] }}"{% endif %}>
 	    </div>
 
 	  	<div class="form-group row">
-	      <label for="delay_val" class="col-lg-3 col-form-label">delay = wait interval between each instruction (milli second, 50 ms min) </label>	  		
-	      <input type="text" class="col-sm-1 form-control" name="delay_val" placeholder="delay" value="{% if 'delay_val' in customvars %}{{ customvars['delay_val'] }}{% else %}50{% endif %}">
-	    </div>	   	 		  
+	      <label for="delay_val" class="col-lg-3 col-form-label">Wait interval between each instruction (milli second, 50 ms min) </label>	  		
+	      <input type="text" class="col-sm-2 form-control" name="delay_val" placeholder="delay" value="{% if 'delay_val' in customvars %}{{ customvars['delay_val'] }}{% else %}50{% endif %}">
+	    </div>	  	 		  
 
 	    </fieldset>	 
 	    {% if data|length > 0 %}

@@ -89,24 +89,12 @@ function editCodeForm(selected_template, code_id) {
 		//manage loops : increment or decrement leds
 		if(selected_template=='timer') {
 			var blink = $('input[name="blink"]').val();	
+			var loop_priority = $('input[name="loop_priority"]').val();
 		}			
 		else{
 			var blink = $('input[name="blink"]:checked').val();
+			var loop_priority = $('input[name="loop_priority"]:checked').val();
 		}
-
-		var loop_priority = $('input[name="loop_priority"]:checked').val();
-		//generate code with template object
-		const code = Object.create(codegen);
-		code.start = start_val; 
-		code.nbLeds = nbLeds_val; 
-		code.nbStrips = nbStrips_val;
-		code.delay = delay_val; 
-		code.offset = offset_val;
-		code.color = colorCode_val;
-		code.rgb = rgbCode_val;
-		code.blink = blink;
-		code.set_blink();
-		code.print_code(loop_priority);
 
 		customvars['template'] = selected_template;
 		customvars['nbLeds_val'] = nbLeds_val;
@@ -117,22 +105,40 @@ function editCodeForm(selected_template, code_id) {
 		customvars['rgbCode_val'] = rgbCode_val;
 		customvars['delay_val'] = delay_val;
 		customvars['blink'] = blink;			
-		customvars['loop_priority'] =  loop_priority;		
+		customvars['loop_priority'] =  loop_priority;	
 
-		//hide old version
-		if(code_id != 0) {
-			$('#customCodeCurrent').hide();
+		var validation = validForm(customvars);
+
+		if (validation) {
+			//generate code with template object
+			const code = Object.create(codegen);
+			code.start = start_val; 
+			code.nbLeds = nbLeds_val; 
+			code.nbStrips = nbStrips_val;
+			code.delay = delay_val; 
+			code.offset = offset_val;
+			code.color = colorCode_val;
+			code.rgb = rgbCode_val;
+			code.blink = blink;
+			code.set_blink();
+			code.print_code(loop_priority);	
+
+			//hide old version
+			if(code_id != 0) {
+				$('#customCodeCurrent').hide();
+			}
+			else {
+				$('#customCodePreview').css('top','-420px');		
+			}
+			//display new version
+			$('#customCodePreview').show();		
+
+
+			//show save button		
+			$('#btn-customcode_draft').show();
+			$('#btn-customcode_publish').show();
 		}
-		else {
-			$('#customCodePreview').css('top','-420px');		
-		}
-		//display new version
-		$('#customCodePreview').show();		
 
-
-		//show save button		
-		$('#btn-customcode_draft').show();
-		$('#btn-customcode_publish').show();
 	});
 
 
@@ -156,7 +162,6 @@ function editCodeForm(selected_template, code_id) {
 function saveCustomCode(code_id, customvars, published) {
 
 	var elements = new Object();
-	//var loop_priority = $('input[name="loop_priority"]:checked').val();
 
 	elements['title'] = $('input[name="code_title"]').val();
 	elements['description'] = $('textarea[name="description"]').val();
@@ -179,4 +184,37 @@ function saveCustomCode(code_id, customvars, published) {
   	      dataType: 'json',
   	      complete: function(res){ window.location='/customcodes/?saved='+code_id; }
       });
+}
+
+function validForm(customvars) {
+	var totalLeds = parseInt(customvars['nbLeds_val'])*parseInt(customvars['nbStrips_val']);
+
+	if(customvars['loop_priority']===undefined) {
+		alert("Your must choose a priority for loops (leds or strips first)");
+		return false;
+	}
+
+	//alert(totalLeds);
+	if(isNaN(totalLeds)) {
+		alert("Give a LEDs value");
+		return false;
+	}
+
+	if(isNaN(parseInt(customvars['offset_val']))) {
+		alert("Give an offset value");
+		return false;
+	}
+
+	if(totalLeds > max_leds) {
+		alert("The total of " + totalLeds + " LEDs in your code is greater than the " + max_leds + " LEDs available in your strips.");
+		return false;
+	}
+
+	var startLeds = totalLeds+parseInt(customvars['start_val']);
+	if(startLeds > max_leds) {
+		alert("Your script is starting after the " + max_leds + " LEDs available in your strips.");
+		return false;	
+	}
+
+	return true;
 }
