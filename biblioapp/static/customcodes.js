@@ -81,9 +81,9 @@ function editCodeForm(selected_template, code_id) {
 		var start_val = $('input[name="start_val"]').val();	
 		var nbStrips_val = $('input[name="nbStrips_val"]').val();	
 		var colorCode_val = $('input[name="colorCode_val"]').val();	
-		var rgbCode_val = 0;
-		if($('input[name="rgbCode_val"]').val() != '' && colorCode_val == 'color')
-			rgbCode_val = $('input[name="rgbCode_val"]').val();
+		//var rgbCode_val = 0;
+		//if($('input[name="rgbCode_val"]').val() != '' && colorCode_val == 'color')
+		var rgbCode_val = $('input[name="rgbCode_val"]').val();
 		var delay_val = $('input[name="delay_val"]').val();
 
 		//manage loops : increment or decrement leds
@@ -96,6 +96,10 @@ function editCodeForm(selected_template, code_id) {
 			var loop_priority = $('input[name="loop_priority"]:checked').val();
 		}
 
+		var effect_val = $('input[name="effect"]:checked').val(); 
+		if(effect_val==7) //force delay val for effect fadeout 
+			delay_val = 1350;
+
 		customvars['template'] = selected_template;
 		customvars['nbLeds_val'] = nbLeds_val;
 		customvars['offset_val'] = offset_val;
@@ -106,10 +110,12 @@ function editCodeForm(selected_template, code_id) {
 		customvars['delay_val'] = delay_val;
 		customvars['blink'] = blink;			
 		customvars['loop_priority'] =  loop_priority;	
+		customvars['effect'] =  effect_val;	
 
 		var validation = validForm(customvars);
 
 		if (validation) {
+
 			//generate code with template object
 			const code = Object.create(codegen);
 			code.start = start_val; 
@@ -120,6 +126,7 @@ function editCodeForm(selected_template, code_id) {
 			code.color = colorCode_val;
 			code.rgb = rgbCode_val;
 			code.blink = blink;
+			code.effect = effect_val;
 			code.set_blink();
 			code.print_code(loop_priority);	
 
@@ -189,7 +196,7 @@ function saveCustomCode(code_id, customvars, published) {
 function validForm(customvars) {
 	var totalLeds = parseInt(customvars['nbLeds_val'])*parseInt(customvars['nbStrips_val']);
 
-	if(customvars['template']!='wait') 
+	if(customvars['template']!='wait' && customvars['template']!='effect') 
 	{
 		if(customvars['loop_priority']===undefined) {
 			alert("Your must choose a priority for loops (leds or strips first)");

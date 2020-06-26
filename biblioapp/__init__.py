@@ -886,7 +886,7 @@ def customCode(code_id):
       return response
     maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']
     return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
-      customvars=customvars, data=data, max_leds=maxLeds)
+      customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects())
   abort(404)
 
 @app.route('/customcodedelete/', methods=['POST'])
@@ -909,7 +909,10 @@ def customCodeTemplate(template):
   if template=='sample':
     return render_template('_customcode_sample.html')
   if template=='wait':
-    return render_template('_customcode_wait.html')    
+    return render_template('_customcode_wait.html') 
+  if template=='effect':
+    effects = tools.get_leds_effects()
+    return render_template('_customcode_effect.html', effects=effects)        
   abort(404)
 
 @app.route('/customeffects/<uuid>/')
@@ -918,7 +921,7 @@ def customEffects(uuid = None):
   globalVars = initApp()
   if globalVars['arduino_map'] != None:
     if('token' in request.args):
-      effects = [ 'rainbow', 'rainbowWithGlitter', 'confetti', 'sinelon' , 'juggle', 'bpm' ]
+      effects = tools.get_leds_effects()
       data = {}
       data['list_title'] = 'Effects for ' + session['app_name']
       hashmail = tools.set_token(flask_login.current_user.id)

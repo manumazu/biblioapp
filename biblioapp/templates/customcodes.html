@@ -47,7 +47,7 @@
 			{% for customcode in customcodes %}
 				{% if customcode['published'] %}
 			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}" id="code_{{ customcode['id'] }}">
-			      <th scope="row">#{{ customcode['id'] }}</th>
+			      <th scope="row"><a href="{{ url_for('customCode', code_id=customcode['id']) }}">#{{ customcode['id'] }}</a></th>
 			      <td><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
 			      <td>{{ customcode['description'] }}</td>
 			      <td>
@@ -82,7 +82,7 @@
 			{% for customcode in customcodes %}
 				{% if customcode['published']==0 %}
 			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}">
-			      <th scope="row">#{{ customcode['id'] }}</th>
+			      <th scope="row"><a href="{{ url_for('customCode', code_id=customcode['id']) }}">#{{ customcode['id'] }}</a></th>
 			      <td><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
 			      <td>{{ customcode['description'] }}</td>
 			      <td>
@@ -118,7 +118,10 @@
 	  </li>
 	  <li class="nav-item">
 	    <a class="nav-link" data-toggle="tab" href="#wait">Code Wait</a>
-	  </li>	   	   
+	  </li>	
+	  <li class="nav-item">
+	    <a class="nav-link" data-toggle="tab" href="#effect">Effects call</a>
+	  </li>		     	   
 	</ul>	
 
 	<div class="tab-content" id="code-type">	
@@ -127,7 +130,9 @@
 
 		<div class="jumbotron tab-pane" id="timer"></div>
 
-		<div class="jumbotron tab-pane" id="wait"></div>				
+		<div class="jumbotron tab-pane" id="wait"></div>	
+
+		<div class="jumbotron tab-pane" id="effect"></div>				
 
 	</div>
 

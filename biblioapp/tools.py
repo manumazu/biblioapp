@@ -196,3 +196,6 @@ def formatBookApi(api, data, isbn):
     bookapi['year'] = getYear(data['volumeInfo']['publishedDate']) if 'publishedDate' in data['volumeInfo'] else "" 
 
   return bookapi  
+
+def get_leds_effects():
+  return [ 'rainbow', 'rainbowWithGlitter', 'confetti', 'sinelon' , 'juggle', 'bpm', 'snowSparkle', 'fadeOut' ]
