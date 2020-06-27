@@ -97,7 +97,7 @@ function editCodeForm(selected_template, code_id) {
 		}
 
 		var effect_val = $('input[name="effect"]:checked').val(); 
-		if(effect_val==7) //force delay val for effect fadeout 
+		if(effect_val==7 && delay_val < 1350) //force delay val for effect fadeout 
 			delay_val = 1350;
 
 		customvars['template'] = selected_template;
