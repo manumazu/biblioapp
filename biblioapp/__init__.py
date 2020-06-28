@@ -203,11 +203,10 @@ def myBookShelf():
             element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
         elements[shelf] = sorted(element.items())
     bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
-
     return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
         bookstorange=bookstorange, lines=shelfs, biblio_name=globalVars['arduino_map']['arduino_name'], \
         nb_lines=globalVars['arduino_map']['nb_lines'], max_cols=globalVars['arduino_map']['nb_cols'], \
-        session=session, stats=stats)
+        session=session, stats=stats, json_statics = statics)
   abort(404)
 
 @app.route("/ajax_set_bookshelf/", methods=['GET'])

@@ -308,6 +308,7 @@ def stats_positions(app_id, rownum):
   inner join biblio_position bp on bp.id_item=bb.id \
   inner join biblio_app app on bp.id_app=app.id \
   where app.id=%s and bp.`row`=%s", (app_id, rownum))
+  #print(mysql['cursor']._last_executed)
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()

@@ -32,6 +32,7 @@
 	<script type="text/javascript">
   var droppableElements = [{% for line in lines %}'#droppable_{{(line)}}',{% endfor %}];
   var maxColsShelf = {{max_cols}};
+  var json_statics = '{{json_statics|tojson|safe}}';
   </script>	
 
 {% for line in lines %}
