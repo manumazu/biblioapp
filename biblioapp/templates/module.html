@@ -95,13 +95,24 @@
 							{% endfor %}
 						{% endif %}						
 						</ul>
-						<span>Row {{ line+1 }}</span>
+
+            {% set statBooks = db.stats_books(module['id'], line+1) %}
+						<span>Shelf {{ line+1 }} ({{ statBooks['nbbooks'] }} books)</span>      
+
             <div id="slider_{{ line+1 }}"></div>
 						<script type="text/javascript">
 							sliderList.push("static_{{ line+1 }}");
 						</script>
-
 					<div id="add_{{ line+1 }}" class="text-primary">+add separator</div>
+
+            {% set statPositions = db.stats_positions(module['id'], line+1) %}
+            {% if statPositions['totpos'] != None %}
+              {% set positionRate = ((statPositions['totpos']/module['nb_cols'])*100)|round %}
+              <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: {{positionRate}}%;" aria-valuenow="{{positionRate}}" aria-valuemin="0" aria-valuemax="100">{{positionRate}}%</div>
+              </div>
+            {% endif %}                
+
 				{% endfor %}
 
 				</div>

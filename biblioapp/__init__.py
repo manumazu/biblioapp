@@ -178,8 +178,16 @@ def myBookShelf():
       session['app_numshelf'] = 1
     shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
     elements = {}
+    stats = {}
     for shelf in shelfs:
-      books = db.get_books_for_row(app_id, shelf)
+      statBooks = db.stats_books(app_id, shelf)
+      statPositions = db.stats_positions(app_id, shelf)
+      positionRate = 0
+      if statPositions['totpos'] != None:
+        positionRate = round((statPositions['totpos']/globalVars['arduino_map']['nb_cols'])*100)
+      stats[shelf] = {'nbbooks':statBooks['nbbooks'], 'positionRate':positionRate}
+
+      books = db.get_books_for_row(app_id, shelf)      
       if books:
         statics = db.get_static_positions(app_id, shelf)
         element = {}
@@ -195,9 +203,11 @@ def myBookShelf():
             element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
         elements[shelf] = sorted(element.items())
     bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
+
     return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
         bookstorange=bookstorange, lines=shelfs, biblio_name=globalVars['arduino_map']['arduino_name'], \
-        nb_lines=globalVars['arduino_map']['nb_lines'], session=session)
+        nb_lines=globalVars['arduino_map']['nb_lines'], max_cols=globalVars['arduino_map']['nb_cols'], \
+        session=session, stats=stats)
   abort(404)
 
 @app.route("/ajax_set_bookshelf/", methods=['GET'])
@@ -247,7 +257,7 @@ def ajaxSort():
       book_ids = request.form.getlist('book[]')
       sortable = db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], book_ids, current_row, \
         globalVars['arduino_map']['leds_interval'])
-    #save arover for customcodes
+    #save order for customcodes
     if 'customcode' in request.form:
       code_ids = request.form.getlist('code[]')
       sortable = db.sort_customcodes(globalVars['arduino_map']['user_id'], session.get('app_id'), code_ids)
@@ -292,6 +302,7 @@ def ajaxDelPosition():
       item_type = book[0]
       #clean all position for books
       position = db.get_position_for_book(session.get('app_id'), item_id)
+      sortable = []
       if position:
         db.del_item_position(session.get('app_id'), item_id, item_type, position['row'])
         has_request = db.get_request_for_position(session.get('app_id'), position['position'], position['row'])
@@ -301,13 +312,10 @@ def ajaxDelPosition():
         #get list for remaining items and sort them again
         items = db.get_positions_for_row(session.get('app_id'), position['row'])
         if items:
-          db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], items, position['row'], \
+          sortable = db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], items, position['row'], \
             globalVars['arduino_map']['leds_interval'])
-        ret={'success':True}
-      else:
-        ret={'success':False}
   response = app.response_class(
-        response=json.dumps(ret),
+        response=json.dumps(sortable),
         mimetype='application/json'
   )
   return response

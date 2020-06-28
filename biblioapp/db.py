@@ -159,6 +159,18 @@ def get_books_to_range(user_id) :
   if rows:
     return rows
 
+#qty books by row for module
+def stats_books(app_id, rownum):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT bp.`row`, count(bb.`id`) as nbbooks FROM biblio_book bb \
+  inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book' \
+  inner join biblio_app app on bp.id_app=app.id where app.id=%s and bp.`row`=%s", (app_id, rownum))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row  
+
 def get_book(book_id, user_id) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT * FROM biblio_book where id=%s and id_user=%s",(book_id, user_id))
@@ -289,6 +301,19 @@ def get_positions_for_row(app_id, row) :
     return row
   return False
 
+#positions taken by row for module
+def stats_positions(app_id, rownum):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT bp.`row`, sum(bp.range) as totpos FROM biblio_book bb \
+  inner join biblio_position bp on bp.id_item=bb.id \
+  inner join biblio_app app on bp.id_app=app.id \
+  where app.id=%s and bp.`row`=%s", (app_id, rownum))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row 
+
 def set_borrow_book(app_id, item_id, mode) :
   if mode == 'add':
     borrowed = 1
@@ -303,7 +328,7 @@ def set_borrow_book(app_id, item_id, mode) :
 
 def sort_items(app_id, user_id, items, row, leds_interval) :
   i=0
-  sortable={} 
+  sortable=[] 
   for item in items :
     if 'id_item' in item:
       item_id=item['id_item']
@@ -317,8 +342,8 @@ def sort_items(app_id, user_id, items, row, leds_interval) :
         book = get_book(item_id, user_id)
         interval = tools.led_range(book, leds_interval)
     i+=1
-    set_position(app_id, item_id, i, row, interval, 'book')
-    sortable[i]={'book':item_id,'position':i}
+    led_column = set_position(app_id, item_id, i, row, interval, 'book')
+    sortable.append({'book':item_id, 'position':i, 'fulfillment':int(led_column+interval), 'shelf':row})
   return sortable
 
 def set_position(app_id, item_id, position, row, interval, item_type, led_column = None) :

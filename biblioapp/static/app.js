@@ -9,14 +9,16 @@
 		    type: 'POST',
 		    url: '/ajax_sort/',
 		    success: function(res){
-		      //json=JSON.parse(res.responseText);
-		      console.log(res);
+		      //for bookshelf : check if capacity is exceeded
+		      if(maxColsShelf !== undefined && maxColsShelf > 0) {
+		      	updateBookshelf(res);
+		      }
 		      //window.location='/app/';
 		      $(button).text("Changes saved");
 		      $(button).addClass('btn-success');
 		    },
 		    complete: function() {
-		    	window.setTimeout(function() {$(button).hide()}, 1000);	
+		    	window.setTimeout(function() {$(button).hide()}, 1000);
 		    }
 	    });
    }
@@ -27,9 +29,16 @@
 	    data: elem.parent().attr('id'),
 	    type: 'POST',
 	    url: '/ajax_del_position/',
+	    success: function(res){
+	      //for bookshelf : update values
+	      if(maxColsShelf !== undefined && maxColsShelf > 0) {
+	      	updateBookshelf(res);
+	      }
+		}
       });
       $('#draggable li').draggable({scope: "d1"}); //set list draggable again
   }
+
 
 /* color editor methods */
 

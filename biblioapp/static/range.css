@@ -1,9 +1,11 @@
 .biblio {
   border:1px solid #fff;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;     
   /*background:#A57A5A;*/
-  padding: 0px;
+  padding: 5px;
   width:100%;
-  margin-left:0px;
+  margin-bottom: 5px !important;
   /*border-radius: .7em;*/
 }
 

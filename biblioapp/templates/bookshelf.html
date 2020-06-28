@@ -22,33 +22,48 @@
 <ul class="nav nav-pills">
 {% for line in range(nb_lines) %}
   <li class="nav-item">
-    <a class="nav-link {% if session['app_numshelf']==line+1 %}active{% endif %}" data-toggle="tab" href="#droppable_{{(line+1)}}">Edit shelf {{(line+1)}}</a>
+    <a class="nav-link {% if session['app_numshelf']==line+1 %}active{% endif %}" data-toggle="tab" href="#shelf_{{(line+1)}}">Edit shelf {{(line+1)}} ({{ stats[line+1]['nbbooks'] }} books)</a>
   </li>  
 {% endfor %}
 </ul>	
 
-<div class="biblio tab-content">
+<div class="tab-content">
 
-	<script>var droppableElements = [{% for line in lines %}'#droppable_{{(line)}}',{% endfor %}];</script>	
+	<script type="text/javascript">
+  var droppableElements = [{% for line in lines %}'#droppable_{{(line)}}',{% endfor %}];
+  var maxColsShelf = {{max_cols}};
+  </script>	
 
-	{% for line in lines %}
-	<ul id="droppable_{{(line)}}" class="droppable success tab-pane fade {% if line==session['app_numshelf'] %}show active{% endif %}">
-	{% if tidybooks != None %}
-	  {% for position,book in tidybooks[line] %}
-	  	{%if book['item_type']=='book' %}
-	     <li id="book_{{book['id']}}" class="ui-state-default coverbook">
-               {% if book['requested'] %}<span class="badge badge-success badge-pill requested">R</span>{% endif %}
-               {% if book['borrowed'] %}<span class="badge badge-info badge-pill borrowed">B</span>{% endif %}
-               <span class="badge badge-dark badge-pill del">X</span>
-               <p><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} <br /> <strong>{{ book['title'] }}</strong></a></p>
-         </li>
-        {%else%}
-        	<li class="non-draggable">&nbsp;</li>
-        {%endif%}
-	  {% endfor %}
-	{% endif %}
-	</ul>
-	{% endfor %}
+{% for line in lines %}
+
+  <div id="shelf_{{line}}" class="success tab-pane fade {% if line==session['app_numshelf'] %}show active{% endif %}">
+
+  	<ul id="droppable_{{line}}" class="biblio droppable">
+  	{% if tidybooks != None %}
+  	  {% for position,book in tidybooks[line] %}
+  	  	{%if book['item_type']=='book' %}
+  	     <li id="book_{{book['id']}}" class="ui-state-default coverbook">
+                 {% if book['requested'] %}<span class="badge badge-success badge-pill requested">R</span>{% endif %}
+                 {% if book['borrowed'] %}<span class="badge badge-info badge-pill borrowed">B</span>{% endif %}
+                 <span class="badge badge-dark badge-pill del">X</span>
+                 <p><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} <br /> <strong>{{ book['title'] }}</strong></a></p>
+           </li>
+          {%else%}
+          	<li class="non-draggable">&nbsp;</li>
+          {%endif%}
+  	  {% endfor %}
+  	{% endif %}
+  	</ul>
+
+    {% if stats[line]['positionRate'] > 0 %}
+      <div class="progress">
+        <div id="shelf_progress_{{line}}" class="progress-bar progress-bar-striped" role="progressbar" style="width: {{stats[line]['positionRate']}}%;" aria-valuenow="{{stats[line]['positionRate']}}" aria-valuemin="0" aria-valuemax="100">Fulfillment {{stats[line]['positionRate']}}%</div>
+      </div>
+    {% endif %}  
+
+  </div>
+
+{% endfor %}
 
 </div>
 

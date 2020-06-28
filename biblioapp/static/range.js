@@ -102,3 +102,23 @@ $(document).ready(function() {
    	});
 
 });
+
+//update values for bookshelf + capacity alert 
+function updateBookshelf(res) {
+  	var lastBookFulfillment = 0;
+    var currentShelf = 0;
+  	for(var i=0; i<res.length;i++) {
+	  	lastBookFulfillment = res[i]['fulfillment'];
+	  	currentShelf = res[i]['shelf'];
+	}
+	
+	if(lastBookFulfillment > maxColsShelf) {
+	  	alert('Shelf capacity is exceeded !');
+	}
+	//update fulfillment progress bar
+	var new_progress_value = Math.round((lastBookFulfillment/maxColsShelf)*100);
+	//console.log(new_progress_value);
+	$('#shelf_progress_'+currentShelf).attr('aria-valuenow', new_progress_value);
+	$('#shelf_progress_'+currentShelf).css('width', new_progress_value + '%');
+	$('#shelf_progress_'+currentShelf).text('Fulfillment ' + new_progress_value + '%');
+}
