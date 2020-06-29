@@ -112,16 +112,17 @@ function updateBookshelf(res) {
 	  	currentShelf = res[i]['shelf'];
 	}
 	
+	//check shelf capacity
 	if(lastBookFulfillment > maxColsShelf) {
 	  	alert('Shelf capacity is exceeded !');
 	}
-	//update fulfillment progress bar	
+
+	//adjust progress with static position for current shelf
 	var statics = JSON.parse(json_statics);
-	//adjust progress with static position
-	for(var i=0; i<statics.length;i++) {
-		if(lastBookFulfillment < statics[i]['led_column'])
-			lastBookFulfillment+=statics[i]['range'];
-	}
+	if(lastBookFulfillment < statics[(currentShelf-1)]['led_column'])
+		lastBookFulfillment+=statics[(currentShelf-1)]['range'];
+	
+	//update fulfillment progress bar	
 	var new_progress_value = Math.round((lastBookFulfillment/maxColsShelf)*100);
 	console.log(new_progress_value);
 	$('#shelf_progress_'+currentShelf).attr('aria-valuenow', new_progress_value);
