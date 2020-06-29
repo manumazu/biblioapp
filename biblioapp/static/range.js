@@ -1,5 +1,7 @@
 $(document).ready(function() {
 
+	$('#save-order').hide();
+
 	//get selected shelf onload 
 	var selectedShelf = getSelectedShelf();
 	//update progress bar
