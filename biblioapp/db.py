@@ -304,10 +304,9 @@ def get_positions_for_row(app_id, row) :
 #positions taken by row for module
 def stats_positions(app_id, rownum):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT bp.`row`, sum(bp.range) as totpos FROM biblio_book bb \
-  inner join biblio_position bp on bp.id_item=bb.id \
+  mysql['cursor'].execute("SELECT bp.`row`, sum(bp.range) as totpos FROM biblio_position bp \
   inner join biblio_app app on bp.id_app=app.id \
-  where app.id=%s and bp.`row`=%s", (app_id, rownum))
+  where app.id=%s and bp.`row`=%s", (app_id, rownum))#item_type='book' and inner join biblio_book bb on bb.id=bp.id_item \ 
   #print(mysql['cursor']._last_executed)
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()

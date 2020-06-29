@@ -22,7 +22,7 @@
 <ul class="nav nav-pills">
 {% for line in range(nb_lines) %}
   <li class="nav-item">
-    <a class="nav-link {% if session['app_numshelf']==line+1 %}active{% endif %}" data-toggle="tab" href="#shelf_{{(line+1)}}">Edit shelf {{(line+1)}} ({{ stats[line+1]['nbbooks'] }} books)</a>
+    <a class="nav-link {% if session['app_numshelf']==line+1 %}active{% endif %}" data-toggle="tab" href="#shelf_{{(line+1)}}">Edit shelf {{(line+1)}} ({% if (line+1) in stats %}{{ stats[line+1]['nbbooks'] }}{% else %}0{% endif %} books)</a>
   </li>  
 {% endfor %}
 </ul>	
@@ -56,11 +56,14 @@
   	{% endif %}
   	</ul>
 
-    {% if stats[line]['positionRate'] > 0 %}
-      <div class="progress">
-        <div id="shelf_progress_{{line}}" class="progress-bar progress-bar-striped" role="progressbar" style="width: {{stats[line]['positionRate']}}%;" aria-valuenow="{{stats[line]['positionRate']}}" aria-valuemin="0" aria-valuemax="100">Fulfillment {{stats[line]['positionRate']}}%</div>
+      <div class="progress" style="display: none;">
+        {% if line in stats %}
+          {% set rate = stats[line]['positionRate'] %}
+        {% else %}
+          {% set rate = 0 %}
+        {% endif %}
+        <div id="shelf_progress_{{line}}" class="progress-bar progress-bar-striped" role="progressbar" style="width: {{rate}}%;" aria-valuenow="{{rate}}" aria-valuemin="0" aria-valuemax="100">Fulfillment {{rate}}%</div>
       </div>
-    {% endif %}  
 
   </div>
 

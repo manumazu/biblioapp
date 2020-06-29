@@ -179,17 +179,17 @@ def myBookShelf():
     shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
     elements = {}
     stats = {}
+    statics = {}
     for shelf in shelfs:
-      statBooks = db.stats_books(app_id, shelf)
-      statPositions = db.stats_positions(app_id, shelf)
-      positionRate = 0
-      if statPositions['totpos'] != None:
-        positionRate = round((statPositions['totpos']/globalVars['arduino_map']['nb_cols'])*100)
-      stats[shelf] = {'nbbooks':statBooks['nbbooks'], 'positionRate':positionRate}
-
-      books = db.get_books_for_row(app_id, shelf)      
+      books = db.get_books_for_row(app_id, shelf) 
+      statics[shelf] = db.get_static_positions(app_id, shelf)     
       if books:
-        statics = db.get_static_positions(app_id, shelf)
+        statBooks = db.stats_books(app_id, shelf)
+        statPositions = db.stats_positions(app_id, shelf)
+        positionRate = 0
+        if statPositions['totpos'] != None:
+          positionRate = round((statPositions['totpos']/globalVars['arduino_map']['nb_cols'])*100)
+        stats[shelf] = {'nbbooks':statBooks['nbbooks'], 'positionRate':positionRate}        
         element = {}
         for row in books:     
           element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
@@ -198,8 +198,8 @@ def myBookShelf():
           requested = db.get_request_for_position(app_id, row['position'], shelf)
           if requested:
             element[row['led_column']]['requested']=True
-        if statics:
-          for static in statics:
+        if statics[shelf]:
+          for static in statics[shelf]:
             element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
         elements[shelf] = sorted(element.items())
     bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position

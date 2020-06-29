@@ -1,13 +1,17 @@
 $(document).ready(function() {
 
-	$('#save-order').hide();
+	//get selected shelf onload 
+	var selectedShelf = getSelectedShelf();
+	//update progress bar
+	setProgressValue(selectedShelf);		
 
    	//set chosen shelf for session
    	$('.nav-pills .nav-link').on('click', function() {
-	   	var shelfnum = $(this).attr('href').split('_')[1];
-	   	console.log(shelfnum);
+	   	var selectedShelf = $(this).attr('href').split('_')[1];
+	   	//update progress bar
+	   	setProgressValue(selectedShelf);
 		$.ajax({
-	  	      data: 'rownum='+shelfnum,
+	  	      data: 'rownum='+selectedShelf,
 	  	      type: 'GET',
 	  	      url: '/ajax_set_bookshelf/', //get items by position for given shelf
 		});
@@ -103,6 +107,17 @@ $(document).ready(function() {
 
 });
 
+//get selected shelf 
+function getSelectedShelf() {
+	var str = 0;
+	$('.tab-pane').each(function() {
+		if($(this).hasClass('active')) {
+			str = $(this).attr('id').split('_')[1];
+		}
+	});
+	return str;
+}
+
 //update values for bookshelf + capacity alert 
 function updateBookshelf(res) {
   	var lastBookFulfillment = 0;
@@ -117,15 +132,46 @@ function updateBookshelf(res) {
 	  	alert('Shelf capacity is exceeded !');
 	}
 
-	//adjust progress with static position for current shelf
-	var statics = JSON.parse(json_statics);
-	if(lastBookFulfillment < statics[(currentShelf-1)]['led_column'])
-		lastBookFulfillment+=statics[(currentShelf-1)]['range'];
-	
 	//update fulfillment progress bar	
 	var new_progress_value = Math.round((lastBookFulfillment/maxColsShelf)*100);
-	console.log(new_progress_value);
+	//console.log('add',new_progress_value);
+
+	//adjust progress rate with statics element positions
+	var statics = JSON.parse(json_statics);
+	if(statics[currentShelf] !== undefined) {
+		var staticsRange = 0;
+		for(var i=0; i < statics[currentShelf].length; i++){
+			if(lastBookFulfillment < statics[currentShelf][i]['led_column'])
+				staticsRange += statics[currentShelf][i]['range'];
+		}
+		var staticsElementRate =  Math.round((staticsRange/maxColsShelf)*100);
+		new_progress_value += staticsElementRate;
+	}
+	//console.log('adjust',new_progress_value);
+	
+	setProgressValue(currentShelf, new_progress_value);
+}
+
+function setProgressValue(currentShelf, init_progress_value = 0) {
+
+	
+	if(init_progress_value == 0) { // init value with current progress
+		init_progress_value = parseInt($('#shelf_progress_'+currentShelf).attr('aria-valuenow'));
+	}
+	var new_progress_value = init_progress_value;
+
+	//console.log('new', new_progress_value);
 	$('#shelf_progress_'+currentShelf).attr('aria-valuenow', new_progress_value);
 	$('#shelf_progress_'+currentShelf).css('width', new_progress_value + '%');
-	$('#shelf_progress_'+currentShelf).text('Fulfillment ' + new_progress_value + '%');
+	$('#shelf_progress_'+currentShelf).text('Fulfillment ' + new_progress_value + '%');	
+
+	//display progress bar
+	if(parseInt(init_progress_value) > 0) {
+		$('#shelf_progress_'+currentShelf).parent().css('display','block');
+	}
+	//when no book left	
+	if(isNaN(new_progress_value)) { 
+		var currentShelf = getSelectedShelf();
+		$('#shelf_progress_'+currentShelf).parent().css('display','none');
+	}
 }
