@@ -59,7 +59,8 @@ $(document).ready(function() {
     var current_selector = '#'+$(drop_selector).attr('id'); 
     var elements = $(current_selector).sortable('serialize');
     var row = current_selector.split('_')[1];
-    ajax_postOrder(elements,row, this);
+    elements = elements+'&row='+row;
+    ajax_postOrder(elements, this);
   });
 
   $('#tags').tagEditor({
@@ -157,6 +158,7 @@ $(document).ready(function() {
                   elements.push('book[]='+elem[1]['id']);
                 });
                 params = elements.join('&');
+                params = params+'&row='+row;
                 //sort list again
                 ajax_postOrder(params,row);
               }

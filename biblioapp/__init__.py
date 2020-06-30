@@ -82,12 +82,17 @@ def editArduino(app_id):
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
   abort(404)
 
-@app.route("/adminmodule/", methods=['GET', 'POST'])
+@app.route("/adminmodule/", defaults={'app_id': None})
+@app.route("/adminmodule/<app_id>/")
 @flask_login.login_required
-def newArduino():
+def newArduino(app_id = None):
   globalVars = initApp()
   if flask_login.current_user.id == 'emmanuel.mazurier@gmail.com':
-    module = {}
+    if app_id is not None:
+      module = db.get_arduino_map(flask_login.current_user.id, app_id)
+    else:
+      module = {}
+    print(module)
     user_id = globalVars['arduino_map']['user_id']
     if request.method == 'POST':
       data = {}
@@ -98,7 +103,7 @@ def newArduino():
       ledspermeter = request.form.get('ledspermeter')
       leds_interval = (100/int(ledspermeter)) 
       nb_cols = round((float(striplength)/leds_interval)+0.5) # nb_leds per strip
-      data['leds_interval'] = math.floor(leds_interval*100) # interval btw leds in mm
+      data['leds_interval'] = math.floor(leds_interval) # interval btw leds in mm
       data['nb_cols'] = nb_cols
       data['id_ble'] = "xxxx" #set empty id_ble
       if request.form.get('module_id'):

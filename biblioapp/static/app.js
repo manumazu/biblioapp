@@ -10,7 +10,7 @@
 		    url: '/ajax_sort/',
 		    success: function(res){
 		      //for bookshelf : check if capacity is exceeded
-		      if(maxColsShelf !== undefined && maxColsShelf > 0) {
+		      if(typeof maxColsShelf !== 'undefined') {
 		      	updateBookshelf(res);
 		      }
 		      //window.location='/app/';
