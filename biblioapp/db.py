@@ -76,16 +76,17 @@ def set_module(data) :
     #admin mode
     if 'action' in data and data['action']=='admin':
       mysql['cursor'].execute("UPDATE biblio_app SET arduino_name=%s, `id_ble`=%s, `nb_lines`=%s, `nb_cols`=%s, \
-        `leds_interval`=%s  WHERE id=%s", (data['module_name'], data['id_ble'], data['nb_lines'], data['nb_cols'], \
-          data['leds_interval'], data['module_id']))
+        `leds_interval`=%s, `strip_length`=%s WHERE id=%s", (data['module_name'], data['id_ble'], data['nb_lines'], data['nb_cols'], \
+          data['leds_interval'], data['strip_length'], data['module_id']))
     mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
     module['id'] = data['module_id']
   else:
     mysql = get_db()
-    mysql['cursor'].execute("INSERT INTO biblio_app (`arduino_name`, `id_ble`, `nb_lines`, `nb_cols`, `leds_interval`) \
-    VALUES (%s, %s, %s, %s, %s)", (data['module_name'], data['id_ble'], data['nb_lines'], data['nb_cols'], data['leds_interval']))
+    mysql['cursor'].execute("INSERT INTO biblio_app (`arduino_name`, `id_ble`, `nb_lines`, `nb_cols`, `leds_interval`, \
+      `strip_length`) VALUES (%s, %s, %s, %s, %s, %s)", (data['module_name'], data['id_ble'], data['nb_lines'], \
+      data['nb_cols'], data['leds_interval'], data['strip_length']))
     mysql['conn'].commit()
     mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
     module = mysql['cursor'].fetchone()

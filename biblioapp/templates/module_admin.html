@@ -29,11 +29,17 @@
     				<li>Nb rows : {{ module['nb_lines'] }}</li>
     				<li>Nb leds / row : {{ module['nb_cols'] }}</li>
             <li>leds interval : {{ module['leds_interval'] }} cm</li>
+            <li>Strip length : {{ module['strip_length'] }} cm</li>
     			</ul>
       {% endif %}
 
   			<h4>Edit module properties :</h4>
-  			<form method="POST" action="{{ url_for('newArduino') }}" id="formAdminArduino">
+        {% if 'id' in module %}
+          {% set formUrl =  url_for('newArduino', app_id=module['id']) %}
+        {% else %}
+          {% set formUrl =  url_for('newArduino') %}
+        {% endif %}
+  			<form method="POST" action="{{ formUrl }}" id="formAdminArduino">
 
           <fieldset>
             <div class="form-group form-inline">
@@ -51,19 +57,25 @@
             </div>
 
             <div class="form-group form-inline">
-              <label for="mood_color" class="col-lg-2 control-label">Strip length</label> 
+              <label for="mood_color" class="col-lg-2 control-label">Strip length (cm)</label> 
               <div class="col-lg-3">             
-               <input type="text" class="form-control" name="striplength" placeholder="length (cm)" value="">
+               <input type="text" class="form-control" name="striplength" placeholder="length (cm)" value="{% if 'strip_length' in module %}{{ module['strip_length'] }}{% endif %}">
               </div>
             </div>            
+
+            {%if 'strip_length' in module and module['strip_length'] > 0 %}
+              {% set lpm = (module['nb_cols']*100/module['strip_length'])|round|int %}
+            {% else %}
+              {% set lpm = 0 %}
+            {% endif %}
 
             <div class="form-group form-inline">
                 <label for="ledspermeter" class="col-lg-2 control-label">Nb Leds per meter</label>
                 <div class="col-lg-3">
                 <select id="ledspermeter" name="ledspermeter">
                   <option>Nb Leds</option>
-                  <option value="60">60</option>
-                  <option value="144">144</option>
+                  <option value="60" {% if lpm == 60 %}selected="selected"{% endif %}>60</option>
+                  <option value="144" {% if lpm == 144 %}selected="selected"{% endif %}>144</option>
                 </select>
               </div>
             </div> 

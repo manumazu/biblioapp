@@ -82,8 +82,8 @@ def editArduino(app_id):
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
   abort(404)
 
-@app.route("/adminmodule/", defaults={'app_id': None})
-@app.route("/adminmodule/<app_id>/")
+@app.route("/adminmodule/", defaults={'app_id': None}, methods=['GET', 'POST'])
+@app.route("/adminmodule/<app_id>/", methods=['GET', 'POST'])
 @flask_login.login_required
 def newArduino(app_id = None):
   globalVars = initApp()
@@ -92,23 +92,25 @@ def newArduino(app_id = None):
       module = db.get_arduino_map(flask_login.current_user.id, app_id)
     else:
       module = {}
-    print(module)
     user_id = globalVars['arduino_map']['user_id']
     if request.method == 'POST':
+      #print(request.form)
       data = {}
       data['action'] = request.form.get('action')
       data['module_name'] = request.form.get('module_name')
       data['nb_lines'] = request.form.get('nb_lines')
-      striplength = request.form.get('striplength')
+      data['strip_length'] = request.form.get('striplength')
       ledspermeter = request.form.get('ledspermeter')
       leds_interval = (100/int(ledspermeter)) 
-      nb_cols = round((float(striplength)/leds_interval)+0.5) # nb_leds per strip
-      data['leds_interval'] = math.floor(leds_interval) # interval btw leds in mm
+      nb_cols = round((float(data['strip_length'])/leds_interval)+0.5) # nb_leds per strip
+      data['leds_interval'] = math.floor(leds_interval*100)/100 # interval btw leds in mm
       data['nb_cols'] = nb_cols
-      data['id_ble'] = "xxxx" #set empty id_ble
+      #don't erease current BLE gatt 
       if request.form.get('module_id'):
         data['module_id'] = request.form.get('module_id')
-      #print(data)
+        data['id_ble'] = module['id_ble']
+      else:
+        data['id_ble'] = "xxxx" #set empty id_ble
       #save module, set user_app, and set id_ble
       module = db.set_module(data)
       if 'id' in module:
@@ -117,7 +119,7 @@ def newArduino(app_id = None):
           if module['id_ble']=='xxxx':
             id_ble = tools.set_id_ble(module)
             db.update_id_ble(module['id'], id_ble)
-          return redirect(url_for('newArduino', _scheme='https', _external=True, module_id=module['id']))
+          return redirect(url_for('newArduino', _scheme='https', _external=True, app_id=module['id']))
     if request.args.get('module_id'):
       module = db.get_module(request.args.get('module_id'))
     return render_template('module_admin.html', user_login=flask_login.current_user.name, module=module, biblio_name=session.get('app_name'))
