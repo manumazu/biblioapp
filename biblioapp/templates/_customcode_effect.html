@@ -2,7 +2,7 @@
 	  	  <h2 class="mb-3 text-white font-weight-light">"{{ data['title'] }}"</h2>
 	  {% else %}
 		  <h2 class="mb-3 text-white font-weight-light">Wait :</h2>
-		  <p class="lead">"Sleep during [x] second"</p>
+		  <p class="lead">"Play effect number [x] during [x] second"</p>
 	  {% endif %}
 
 <div id="code-form">
@@ -22,7 +22,7 @@
 	      <textarea class="col-sm-5 form-control" id="description" name="description" rows="3">{% if data|length > 0 and data['description'] != None %}{{ data['description'] }}{% endif %}</textarea>
 	    </div>	
 
-		<div class="form-group">
+		<div class="form-group row">
 			<label class="col-lg-2 col-form-label">Choose effect :</label>
 
 			{% for i in range(effects|length) %}
@@ -72,7 +72,7 @@
 	</script>
 	{% endif %}	 
 
-	<pre id="customCodePreview" class="text-white bg-dark p-3 mt-3 customcode-wait" style="display: none;"></pre> 
+	<pre id="customCodePreview" class="text-white bg-dark p-3 mt-3 customcode-effect" style="display: none;"></pre> 
 
 </div>
 

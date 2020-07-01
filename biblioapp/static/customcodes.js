@@ -134,7 +134,7 @@ function editCodeForm(selected_template, code_id) {
 			if(code_id != 0) {
 				$('#customCodeCurrent').hide();
 			}
-			else if(selected_template != 'wait') {
+			else if(selected_template != 'wait' && selected_template != 'effect') {
 				$('#customCodePreview').css('top','-420px');		
 			}
 			//display new version
