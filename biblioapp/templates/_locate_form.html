@@ -1,53 +1,71 @@
-<div class="jumbotron">
-  <h3>Manage position </h3>
+{% if 'tag' in request.path %}
+  <!-- for tag list tpl-->
   <form action="/locate/" method="post" class="form-horizontal">
-  <fieldset>
-    
-      <div class="ui-widget form-group row">
-        <label for="keyword">Permute position with : </label>
-        <div class="col-lg-3">
-          <input id="keyword" placeholder="Search book" class="form-control">
+    <input type="hidden" name="range" id="range" value="{{ book['address']['range'] }}">
+    <input type="hidden" name="row" value="{{ book['address']['row'] }}">
+    <input type="hidden" name="app_id" value="{{ book['app_id'] }}"> 
+    <input type="hidden" name="book_id" value="{{ book['id'] }}">
+    <input type="hidden" name="column" value="{{ book['address']['position'] }}">
+    <input type="hidden" name="row" value="{{ book['address']['row'] }}">   
+  {%if book['hasRequest'] %}
+    <input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
+  {% else %}
+    <input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
+  {% endif %}  
+  </form>
+{% else %}
+<!-- for book tpl-->
+  <div class="jumbotron">
+    <h3>Manage position </h3>
+    <form action="/locate/" method="post" class="form-horizontal">
+    <fieldset>
+      
+        <div class="ui-widget form-group row">
+          <label for="keyword">Permute position with : </label>
+          <div class="col-lg-3">
+            <input id="keyword" placeholder="Search book" class="form-control">
+          </div>
+
+            <input type="hidden" name="permute_book_title" id="permute_book_title" value="">
+            <input type="hidden" name="permute_book_id" id="permute_book_id" value="">
+            <input type="hidden" name="range" id="range" value="{{ book['address']['range'] }}">
+            <input type="button" value="Permute position" class="btn btn-warning" name="permute" id="permute_action">
+
         </div>
 
-          <input type="hidden" name="permute_book_title" id="permute_book_title" value="">
-          <input type="hidden" name="permute_book_id" id="permute_book_id" value="">
-          <input type="hidden" name="range" id="range" value="{{ book['address']['range'] }}">
-          <input type="button" value="Permute position" class="btn btn-warning" name="permute" id="permute_action">
-
+      <div class="form-group row">  
+        <label for="submit" class="col-form-label">Locate on bookshelf :</label>	
+        {%if book['hasRequest'] %}
+          <input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
+        {% else %}
+          <input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
+        {% endif %}
       </div>
 
-    <div class="form-group row">  
-      <label for="submit" class="col-form-label">Locate on bookshelf :</label>	
-      {%if book['hasRequest'] %}
-        <input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
-      {% else %}
-        <input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
-      {% endif %}
-    </div>
+      <div class="form-group row">
+      	<label for="new_book_width" class="col-form-label">Adjust book interval :</label>
+        <div class="col-lg-1">
+          <input type="text" name="new_book_width" id="new_book_width" value="{%if 'width' in book and book['width'] != None %}{{ book['width']/10 }}{% else %}0.0{% endif %}" placeholder="set book width (cm)" class="form-control" aria-describedby="widthHelpBlock">
+        </div>
+        <label for="new_book_width" class="col-form-label col-lg-1"> cm </label>
 
-    <div class="form-group row">
-    	<label for="new_book_width" class="col-form-label">Adjust book interval :</label>
-      <div class="col-lg-1">
-        <input type="text" name="new_book_width" id="new_book_width" value="{%if 'width' in book and book['width'] != None %}{{ book['width']/10 }}{% else %}0.0{% endif %}" placeholder="set book width (cm)" class="form-control" aria-describedby="widthHelpBlock">
-      </div>
-      <label for="new_book_width" class="col-form-label col-lg-1"> cm </label>
+        <input type="button" value="Set interval" class="btn btn-info" name="adjust" id="range-adjust">
 
-      <input type="button" value="Set interval" class="btn btn-info" name="adjust" id="range-adjust">
+    	</div>
 
-  	</div>
+      <div class="form-group row">
+        <small id="widthHelpBlock" class="form-text text-muted" style="color: #fff !important;">
+          If the number of LEDs displayed is not good for this book, you can set the right number by given book width (centimeter). The current number of LEDs interval is : {{ book['address']['range'] }}</small>
+      </div>   
 
-    <div class="form-group row">
-      <small id="widthHelpBlock" class="form-text text-muted" style="color: #fff !important;">
-        If the number of LEDs displayed is not good for this book, you can set the right number by given book width (centimeter). The current number of LEDs interval is : {{ book['address']['range'] }}</small>
-    </div>   
+    </div>	
+    <input type="hidden" name="book_id" value="{{ book['id'] }}">
+    <input type="hidden" name="column" value="{{ book['address']['position'] }}">
+    <input type="hidden" name="led_column" value="{{ book['address']['led_column'] }}">
+    <input type="hidden" name="row" value="{{ book['address']['row'] }}">
+    <input type="hidden" name="app_id" value="{{ book['app_id'] }}">
+    </fieldset>
 
-  </div>	
-  <input type="hidden" name="book_id" value="{{ book['id'] }}">
-  <input type="hidden" name="column" value="{{ book['address']['position'] }}">
-  <input type="hidden" name="led_column" value="{{ book['address']['led_column'] }}">
-  <input type="hidden" name="row" value="{{ book['address']['row'] }}">
-  <input type="hidden" name="app_id" value="{{ book['app_id'] }}">
-  </fieldset>
-
-  </form>
-</div>
+    </form>
+  </div>
+{% endif %}
