@@ -50,12 +50,13 @@ def selectArduino():
         session['app_numshelf'] = int(request.form.get('numshelf'))
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
-  return render_template('index.html', user_login=flask_login.current_user.name, modules=modules, biblio_name=session.get('app_name'))
+  return render_template('index.html', user_login=flask_login.current_user.name, modules=modules)
 
 @app.route("/module/<app_id>", methods=['GET', 'POST'])
 @flask_login.login_required
 def editArduino(app_id):
-  module = db.get_arduino_map(flask_login.current_user.id, app_id)
+  globalVars = initApp()
+  module = globalVars['arduino_map']
   if module:
     session['app_id'] = module['id']
     session['app_name'] = module['arduino_name']
@@ -79,7 +80,7 @@ def editArduino(app_id):
             #suppr static when position is reseted to 0
             if int(positions[i]) == 0:
               db.del_item_position(int(app_id), pos, 'static', numrow)            
-    return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, biblio_name=session.get('app_name'))
+    return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, shelf_infos=globalVars['arduino_map'])
   abort(404)
 
 @app.route("/adminmodule/", defaults={'app_id': None}, methods=['GET', 'POST'])
@@ -122,7 +123,8 @@ def newArduino(app_id = None):
           return redirect(url_for('newArduino', _scheme='https', _external=True, app_id=module['id']))
     if request.args.get('module_id'):
       module = db.get_module(request.args.get('module_id'))
-    return render_template('module_admin.html', user_login=flask_login.current_user.name, module=module, biblio_name=session.get('app_name'))
+    return render_template('module_admin.html', user_login=flask_login.current_user.name, module=module, \
+      shelf_infos=globalVars['arduino_map'])
   abort(404)
 
 @app.route('/authors/')
@@ -130,8 +132,9 @@ def newArduino(app_id = None):
 def listAuthors():
   globalVars = initApp()
   if globalVars['arduino_map'] != None:
-    return render_template('authors.html', user_login=flask_login.current_user.name, db=db, user_id=globalVars['arduino_map']['user_id'], \
-    biblio_name=session.get('app_name'))
+    return render_template('authors.html', user_login=flask_login.current_user.name, db=db, \
+      user_id=globalVars['arduino_map']['user_id'], \
+    shelf_infos=globalVars['arduino_map'])
   abort(404)
 
 @app.route('/categories/')
@@ -172,7 +175,7 @@ def listCategories(uuid = None):
       return response
   else:
     return render_template('categories.html', user_login=globalVars['user_login'], categories=categories, \
-    biblio_name=globalVars['arduino_map']['arduino_name'])
+    shelf_infos=globalVars['arduino_map'])
 
 
 @app.route("/app/")
@@ -211,7 +214,7 @@ def myBookShelf():
         elements[shelf] = sorted(element.items())
     bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
     return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
-        bookstorange=bookstorange, lines=shelfs, biblio_name=globalVars['arduino_map']['arduino_name'], \
+        bookstorange=bookstorange, lines=shelfs, shelf_infos=globalVars['arduino_map'], \
         nb_lines=globalVars['arduino_map']['nb_lines'], max_cols=globalVars['arduino_map']['nb_cols'], \
         session=session, stats=stats, json_statics = statics)
   abort(404)
@@ -363,7 +366,7 @@ def listNodesForTag(tag_id):
       )
       return response     
     return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
-      biblio_name=globalVars['arduino_map']['arduino_name'], tag=tag)
+      shelf_infos=globalVars['arduino_map'], tag=tag)
   abort(404)
 
 @app.route('/ajax_tag_color/<tag_id>', methods=['POST'])
@@ -415,7 +418,7 @@ def getBook(book_id):
         )
         return response      
       return render_template('book.html', user_login=globalVars['user_login'], book=book, \
-          biblio_name=globalVars['arduino_map']['arduino_name'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
+          shelf_infos=globalVars['arduino_map'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
   abort(404)
 
 @app.route('/ajax_categories/')
@@ -687,7 +690,7 @@ def searchBookReference():
       r = requests.get(url + query)
       data = r.json()
       return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
-        biblio_name=globalVars['arduino_map']['arduino_name'])
+        shelf_infos=globalVars['arduino_map'])
 
     '''display classic form for edition'''
     if request.method == 'GET' and request.args.get('ref'):
@@ -698,7 +701,7 @@ def searchBookReference():
         data = r.json()
         book = data['volumeInfo']    
       return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
-          biblio_name=globalVars['arduino_map']['arduino_name'])
+          shelf_infos=globalVars['arduino_map'])
 
     '''manage infos from mobile app'''
     if request.method == 'GET' and request.args.get('token') and request.args.get('isbn'):
@@ -731,7 +734,7 @@ def searchBookReference():
       return response           
     else:
       return render_template('booksearch.html', user_login=globalVars['user_login'], \
-        biblio_name=globalVars['arduino_map']['arduino_name']) 
+        shelf_infos=globalVars['arduino_map']) 
   abort(404)
 
 @app.route('/bookreferencer/', methods=['POST', 'GET'])
@@ -872,7 +875,8 @@ def customCodes(uuid = None):
           #print(request.data.decode())
     codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])
     maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']      
-    return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json, max_leds=maxLeds)
+    return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json, \
+      max_leds=maxLeds, shelf_infos=globalVars['arduino_map'])
   abort(404)
 
 @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
@@ -900,7 +904,8 @@ def customCode(code_id):
       return response
     maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']
     return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
-      customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects())
+      customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects(), \
+      shelf_infos=globalVars['arduino_map'])
   abort(404)
 
 @app.route('/customcodedelete/', methods=['POST'])

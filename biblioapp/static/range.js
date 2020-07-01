@@ -76,7 +76,7 @@ $(document).ready(function() {
 
 			//save order for current shelf active
 			$('#save-order').on('click', function() {
-				if($(element).hasClass('active')) {
+				if($(element).parent().hasClass('active')) {
 				    var current_selector = '#'+$(element).attr('id'); 
 				    var elements = $(element).sortable('serialize');
 				    var row = current_selector.split('_')[1];	

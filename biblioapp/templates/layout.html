@@ -18,7 +18,9 @@
   {{ super() }}
 
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-	     <a class="navbar-brand" href="/">Biblio App</a>
+	     <a class="navbar-brand" href="/">
+	     <img src="/static/img/three-books_white.svg" width="45" height="45" class="d-inline-block align-middle" alt="Bibliobus">
+	     Biblio App</a>
 	     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
     		<span class="navbar-toggler-icon"></span>
   		</button>
@@ -27,14 +29,21 @@
 		{% if user_login %}	    	
 		    <ul class="navbar-nav mr-auto">	      	
 			<li class="nav-item active"><a class="nav-link" href="#">Welcome {{ user_login }}<span class="sr-only">(current)</span> !!</a></li>
-			<li><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
-			{% if biblio_name != None and biblio_name|length > 0 %}
-				<li class="nav-item"><a class="nav-link" href="{{ url_for('searchBookReference') }}">Add new reference</a></li>
-				<li class="nav-item"><a class="nav-link" href="{{ url_for('myBookShelf') }}">My "{{ biblio_name }}" Book Shelf</a></li>
-			    <li class="nav-item"><a class="nav-link" href="{{ url_for('listAuthors') }}">Authors</a></li>
+			<li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+			{% if shelf_infos is defined %}
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Bookshelf "{{ shelf_infos['arduino_name'] }}"</a>
+					<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<a class="dropdown-item" href="{{ url_for('myBookShelf') }}">Manage books</a>
+						<a class="dropdown-item" href="{{ url_for('searchBookReference') }}">Add new book</a>
+						<a class="dropdown-item" href="{{ url_for('editArduino', app_id=shelf_infos['id']) }}">Edit bookshelf</a>
+						<a class="dropdown-item" href="/">Change bookshelf</a>	
+					</div>
+				</li>
+			{% endif %}
+				<li class="nav-item"><a class="nav-link" href="{{ url_for('listAuthors') }}">Authors</a></li>
 			    <li class="nav-item"><a class="nav-link" href="{{ url_for('listCategories') }}">Categories</a></li>
-			{% endif %}				    
-			    <li class="nav-item"><a class="nav-link" href="{{ url_for('customCodes') }}">Code</a></li>		
+			    <li class="nav-item"><a class="nav-link" href="{{ url_for('customCodes') }}">Code</a></li>
 	      </ul>
 	      <form class="form-inline my-2 my-lg-0" role="search" action="{{ url_for('searchBookReference') }}" method="POST">
 			<div class="form-group">
