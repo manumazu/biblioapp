@@ -1023,7 +1023,17 @@ def ajaxPermutePosition():
     response=json.dumps(message),
     mimetype='application/json'
   )
-  return response    
+  return response
+
+'''
+Email Notifications
+'''
+@app.route("/reset_password")
+def resetPassword():
+  msg = Message('Hello', recipients = ['emmanuel.mazurier@gmail.com'])
+  msg.body = "This is the email body"
+  mail.send(msg)
+  return "Sent"  
 
 '''
 Authentication
