@@ -7,8 +7,9 @@ setup(
     install_requires=[
         'flask',
         'requests',
-	'bootstrap-flask',
+	    'bootstrap-flask',
         'flask-mysql',
-        'flask-login'
+        'flask-login',
+        'flask-mail'
     ],
 )

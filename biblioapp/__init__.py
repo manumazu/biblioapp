@@ -2,9 +2,11 @@ from flask import Flask, render_template, request, abort, flash, redirect, json,
 from flask_bootstrap import Bootstrap
 import flask_login, hashlib, base64, math
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
 app.config.from_object("config")
+mail = Mail(app)
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
@@ -333,6 +335,7 @@ def ajaxDelPosition():
 @flask_login.login_required
 def listNodesForTag(tag_id):
   globalVars = initApp()
+  print(request.args)
   if globalVars['arduino_map'] != None:
     nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
     tag = db.get_tag_by_id(tag_id)
