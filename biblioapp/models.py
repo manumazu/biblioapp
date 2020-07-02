@@ -27,7 +27,7 @@ def request_loader(request):
     if 'token' in request.args:
         token = request.args.get('token')
         exist = verify_token(token)
-        print(exist)         
+        #print(exist)         
         if exist is None:
             return 
         #open session for mobile app request
@@ -45,7 +45,7 @@ def request_loader(request):
             session['app_name'] = module['arduino_name']           
         user = User()
         user.id = exist['email']
-        user.name = exist['firstname']      
+        user.name = exist['firstname']     
         return user
     '''login via form wwith session'''
     if 'email' in request.form:

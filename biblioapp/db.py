@@ -602,6 +602,13 @@ def set_user(email, firstname, lastname, password):
     return user
   return None  
 
+def set_user_pwd(email, password):
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_user SET password = %s WHERE email = %s", (password, email))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+
 def set_customcode(user_id, app_id, code_id, title, description, published, customvars, customcode) :
   now = tools.getNow()
   mysql = get_db()

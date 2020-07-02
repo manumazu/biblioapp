@@ -1031,11 +1031,12 @@ Reset Password
 @app.route("/forgot_password", methods=['GET', 'POST'])
 def forgotPassword():
   hasRequest = False
+  if flask_login.current_user.is_authenticated:
+    return redirect(url_for('selectArduino', _scheme='https', _external=True))
   if request.method == 'POST':
     hasRequest = True
     email=request.form.get('uemail')
     exist = db.get_user(email)
-    print(exist)
     if exist != None:
       token = models.get_token(exist['email'])
       msg = Message('[Biblioapp] Reset Your Password', recipients = [exist['email']])
@@ -1047,7 +1048,27 @@ def forgotPassword():
 
 @app.route("/reset_password", methods=['GET', 'POST'])
 def resetPassword():
-  return render_template('reset_password.html')
+  #verify token and display form
+  if 'token' in request.args:
+    token = request.args.get('token')
+    #token was verified by request_loader
+    if flask_login.current_user.is_authenticated:
+      email = flask_login.current_user.id
+    else:
+      abort(403)
+  if request.method == 'POST':
+    password = request.form.get('upassword')
+    cpassword = request.form.get('cpassword')
+    token = request.args.get('token')
+    if password == cpassword and email != None:
+      hashed = generate_password_hash(password)
+      db.set_user_pwd(email, hashed)
+      flash('Your password has been reset.')
+      return redirect(url_for('login', _scheme='https', _external=True))
+    else:
+      flash('Password confirm is different.')
+      return redirect(url_for('resetPassword', _scheme='https', _external=True, token=token))
+  return render_template('reset_password.html', token=token)      
 
 '''
 Authentication
