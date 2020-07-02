@@ -40,8 +40,8 @@ def uuid_decode(encode):
   except ValueError:
     return False
 
-def set_token(email):
-  return hashlib.md5(email.encode('utf-8')).hexdigest()
+#def set_token(email):
+#  return hashlib.md5(email.encode('utf-8')).hexdigest()
 
 def set_id_ble(module):
   return "bibus"+"-"+str(module['id']).zfill(4)+"-"+str(module['nb_lines']).zfill(2)+""+str(module['nb_cols']).zfill(3)

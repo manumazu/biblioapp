@@ -10,6 +10,7 @@ setup(
 	    'bootstrap-flask',
         'flask-mysql',
         'flask-login',
-        'flask-mail'
+        'flask-mail',
+        'pyjwt'
     ],
 )

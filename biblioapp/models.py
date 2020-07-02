@@ -1,8 +1,10 @@
 from biblioapp import app, db, tools, flask_login, login_manager, session, hashlib, redirect, url_for
+from time import time
+import jwt
 
 
-users = {'foo@bar.tld': {'password': 'secret'}}
-
+#users = {'foo@bar.tld': {'password': 'secret'}}
+#mandatory for flask_login 
 class User(flask_login.UserMixin):
     pass
 
@@ -23,29 +25,34 @@ def user_loader(email):
 def request_loader(request):
     '''login via token for uuid'''
     if 'token' in request.args:
+        token = request.args.get('token')
+        exist = verify_token(token)
+        print(exist)         
+        if exist is None:
+            return 
+        #open session for mobile app request
         if 'uuid' in request.view_args or 'uuid' in request.args :
             if 'uuid' in request.view_args:
                 uuid = request.view_args.get('uuid')
             if 'uuid' in request.args:
                 uuid = request.args.get('uuid')
             uuid = tools.uuid_decode(uuid)
-            exist = db.get_user_for_uuid(uuid)
-            if exist is None:
-                return
-            hashmail = hashlib.md5(exist['email'].encode('utf-8')).hexdigest()
-            if request.args.get('token')==hashmail:
-                session['app_id'] = exist['id_app']
-                session['app_name'] = exist['arduino_name']
-                user = User()
-                user.id = exist['email']
-                user.name = exist['firstname']
-                return user
+            #check arduino module for given user
+            module = db.get_user_for_uuid(uuid)
+            if module is None:
+                return 
+            session['app_id'] = module['id_app']
+            session['app_name'] = module['arduino_name']           
+        user = User()
+        user.id = exist['email']
+        user.name = exist['firstname']      
+        return user
     '''login via form wwith session'''
     if 'email' in request.form:
         email = request.form.get('email')
         exist = db.get_user(email)
         if exist is None:
-            return
+            return 
 
         user = User()
         user.id = email
@@ -54,9 +61,23 @@ def request_loader(request):
         # hashes using constant-time comparison!
         user.is_authenticated = request.form['password'] == exist['password']
         return user
-    return
+    return 
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     #return 'Unauthorized'
-    return redirect(url_for('login', _scheme='https', _external=True))  
+    return redirect(url_for('login', _scheme='https', _external=True))
+
+#generate generic token 
+def get_token(email, expires_in=600):
+    return jwt.encode({'generic': email, 'exp': time() + expires_in}, \
+        app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+#verify token
+def verify_token(token):
+    try:
+        id = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])['generic']
+    except:
+        return
+    return db.get_user(id)
+

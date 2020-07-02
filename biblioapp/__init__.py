@@ -160,10 +160,10 @@ def listCategories(uuid = None):
       categories = db.get_categories_for_app(user_app['id'])
       data = {}
       data['list_title'] = user_app['arduino_name']
-      hashmail = tools.set_token(user['email'])
+      token = models.get_token(user['email'])
       for i in range(len(categories)):
         categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
-        categories[i]['token'] = hashmail
+        categories[i]['token'] = token
         if categories[i]['color'] is not None:
           colors = categories[i]['color'].split(",")
           categories[i]['red'] = colors[0]
@@ -628,7 +628,7 @@ def getModule(uuid):
       data = {}
       data = user_app
       data['total_leds'] = user_app['nb_lines']*user_app['nb_cols']
-      data['token'] = tools.set_token(user['email'])
+      data['token'] = models.get_token(user['email'])
       response = app.response_class(
             response=json.dumps(data),
             mimetype='application/json'
@@ -656,9 +656,9 @@ def listAuthorsForModule(uuid):
         if items:
           '''set url for authenticate requesting location from app'''
           for i in range(len(items)):
-            hashmail = tools.set_token(user['email'])
+            token = models.get_token(user['email'])
             items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
-            items[i]['token'] = hashmail
+            items[i]['token'] = token
           #data['elements'][j]['items'] = items
         data['elements'].append({'initial':alphabet[j],'items':items})
 
@@ -856,10 +856,10 @@ def customCodes(uuid = None):
       codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], True)
       data = {}
       data['list_title'] = 'Your codes for ' + session['app_name']
-      hashmail = tools.set_token(flask_login.current_user.id)
+      token = models.get_token(flask_login.current_user.id)
       for i in range(len(codes)):
         codes[i]['url'] = url_for('customCode',code_id=codes[i]['id'])
-        codes[i]['token'] = hashmail
+        codes[i]['token'] = token
       data['elements']= codes
       response = app.response_class(
         response=json.dumps(data),
@@ -946,7 +946,7 @@ def customEffects(uuid = None):
       effects = tools.get_leds_effects()
       data = {}
       data['list_title'] = 'Effects for ' + session['app_name']
-      hashmail = tools.set_token(flask_login.current_user.id)
+      token = models.get_token(flask_login.current_user.id)
       data['elements']= effects
       response = app.response_class(
         response=json.dumps(data),
@@ -1026,14 +1026,28 @@ def ajaxPermutePosition():
   return response
 
 '''
-Email Notifications
+Reset Password
 '''
-@app.route("/reset_password")
+@app.route("/forgot_password", methods=['GET', 'POST'])
+def forgotPassword():
+  hasRequest = False
+  if request.method == 'POST':
+    hasRequest = True
+    email=request.form.get('uemail')
+    exist = db.get_user(email)
+    print(exist)
+    if exist != None:
+      token = models.get_token(exist['email'])
+      msg = Message('[Biblioapp] Reset Your Password', recipients = [exist['email']])
+      msg.body=render_template('email/reset_password.txt', user=exist, token=token)
+      msg.html=render_template('email/reset_password.html',user=exist, token=token)
+      mail.send(msg)
+      #return "Sent"  
+  return render_template('forgot_password.html', hasRequest=hasRequest)
+
+@app.route("/reset_password", methods=['GET', 'POST'])
 def resetPassword():
-  msg = Message('Hello', recipients = ['emmanuel.mazurier@gmail.com'])
-  msg.body = "This is the email body"
-  mail.send(msg)
-  return "Sent"  
+  return render_template('reset_password.html')
 
 '''
 Authentication
