@@ -11,6 +11,7 @@ setup(
         'flask-mysql',
         'flask-login',
         'flask-mail',
-        'pyjwt'
+        'pyjwt',
+        'flask-session'
     ],
 )
