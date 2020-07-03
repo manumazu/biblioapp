@@ -335,7 +335,6 @@ def ajaxDelPosition():
 @flask_login.login_required
 def listNodesForTag(tag_id):
   globalVars = initApp()
-  print(request.args)
   if globalVars['arduino_map'] != None:
     nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
     tag = db.get_tag_by_id(tag_id)
@@ -645,6 +644,7 @@ def listAuthorsForModule(uuid):
     user = db.get_user_for_uuid(uuid)
     data = {}
     if(user_app):
+      token = models.get_token(user['email'])
       data['list_title'] = user_app['arduino_name']
       data['elements']=[]
       alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
@@ -656,7 +656,6 @@ def listAuthorsForModule(uuid):
         if items:
           '''set url for authenticate requesting location from app'''
           for i in range(len(items)):
-            token = models.get_token(user['email'])
             items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
             items[i]['token'] = token
           #data['elements'][j]['items'] = items

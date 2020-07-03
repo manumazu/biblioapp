@@ -1,4 +1,4 @@
-from biblioapp import app, db, tools, flask_login, login_manager, session, hashlib, redirect, url_for
+from biblioapp import app, db, tools, flask_login, login_manager, session, hashlib, redirect, url_for, request, jsonify
 from time import time
 import jwt
 
@@ -27,7 +27,6 @@ def request_loader(request):
     if 'token' in request.args:
         token = request.args.get('token')
         exist = verify_token(token)
-        #print(exist)         
         if exist is None:
             return 
         #open session for mobile app request
@@ -42,15 +41,17 @@ def request_loader(request):
             if module is None:
                 return 
             session['app_id'] = module['id_app']
-            session['app_name'] = module['arduino_name']           
+            session['app_name'] = module['arduino_name']   
+            session['email'] = exist['email']
+            session['firstname'] = exist['firstname']
         user = User()
         user.id = exist['email']
         user.name = exist['firstname']     
         return user
     '''login via form wwith session'''
-    if 'email' in request.form:
+    if 'email' in request.form: 
         email = request.form.get('email')
-        exist = db.get_user(email)
+        exist = db.get_user(email)  
         if exist is None:
             return 
 
@@ -66,7 +67,12 @@ def request_loader(request):
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     #return 'Unauthorized'
-    return redirect(url_for('login', _scheme='https', _external=True))
+    if 'token' in request.args:
+        return jsonify(success=False,
+                       data={'token_required': True},
+                       message='Authorize please to access this page.'), 401
+    else:
+        return redirect(url_for('login', _scheme='https', _external=True))
 
 #generate generic token 
 def get_token(email, expires_in=600):
@@ -79,5 +85,9 @@ def verify_token(token):
         id = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])['generic']
     except:
         return
+    #when a session is open return it
+    if 'email' in session and id == session['email']:
+        print(id)
+        return session
     return db.get_user(id)
 
