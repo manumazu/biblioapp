@@ -8,7 +8,8 @@ from flask_session import Session
 app = Flask(__name__)
 app.config.from_object("config")
 mail = Mail(app)
-Session(app)
+sess = Session()
+sess.init_app(app)
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
