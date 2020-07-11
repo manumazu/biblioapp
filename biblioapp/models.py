@@ -26,11 +26,7 @@ def request_loader(request):
     '''login via token for uuid'''
     if 'token' in request.args:
         token = request.args.get('token')
-        #verify auth token or guest token from mobile app
-        if 'reset_password' in request.path:
-            exist = verify_token('auth',token)
-        else:
-            exist = verify_token('guest',token)
+        exist = verify_token(token)
         if exist is None:
             return 
         #open session for mobile app request
@@ -48,12 +44,9 @@ def request_loader(request):
             session['app_name'] = module['arduino_name']   
             session['email'] = exist['email']
             session['firstname'] = exist['firstname']
-            session['user_id'] = module['id']
-
         user = User()
         user.id = exist['email']
-        user.name = exist['firstname'] 
-        user.role = 'guest'
+        user.name = exist['firstname']     
         return user
     '''login via form wwith session'''
     if 'email' in request.form: 
@@ -68,7 +61,6 @@ def request_loader(request):
         # DO NOT ever store passwords in plaintext and always compare password
         # hashes using constant-time comparison!
         user.is_authenticated = request.form['password'] == exist['password']
-        user.role = 'auth'
         return user
     return 
 
@@ -83,20 +75,19 @@ def unauthorized_handler():
         return redirect(url_for('login', _scheme='https', _external=True))
 
 #generate generic token 
-def get_token(role, email, expires_in=600):
-    return jwt.encode({role: email, 'exp': time() + expires_in}, \
+def get_token(email, expires_in=600):
+    return jwt.encode({'generic': email, 'exp': time() + expires_in}, \
         app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
 #verify token
-def verify_token(role,token):
+def verify_token(token):
     try:
-        id = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])[role]
+        id = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])['generic']
     except:
         return
     #when a session is open return it
-    #session.clear()
     if 'email' in session and id == session['email']:
-        print(session)
+        print(id)
         return session
     return db.get_user(id)
 
