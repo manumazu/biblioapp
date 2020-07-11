@@ -94,7 +94,7 @@ def newArduino(app_id = None):
   globalVars = initApp()
   if flask_login.current_user.id == 'emmanuel.mazurier@gmail.com':
     if app_id is not None:
-      module = db.get_arduino_map(flask_login.current_user.id, app_id)
+      module = db.get_module(app_id)
     else:
       module = {}
     user_id = globalVars['arduino_map']['user_id']
@@ -162,7 +162,7 @@ def listCategories(uuid = None):
       categories = db.get_categories_for_app(user_app['id'])
       data = {}
       data['list_title'] = user_app['arduino_name']
-      token = models.get_token(user['email'])
+      token = models.get_token('guest',user['email'])
       for i in range(len(categories)):
         categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
         categories[i]['token'] = token
@@ -629,7 +629,7 @@ def getModule(uuid):
       data = {}
       data = user_app
       data['total_leds'] = user_app['nb_lines']*user_app['nb_cols']
-      data['token'] = models.get_token(user['email'])
+      data['token'] = models.get_token('guest',user['email'])
       response = app.response_class(
             response=json.dumps(data),
             mimetype='application/json'
@@ -646,7 +646,7 @@ def listAuthorsForModule(uuid):
     user = db.get_user_for_uuid(uuid)
     data = {}
     if(user_app):
-      token = models.get_token(user['email'])
+      token = models.get_token('guest',user['email'])
       data['list_title'] = user_app['arduino_name']
       data['elements']=[]
       alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
@@ -857,7 +857,7 @@ def customCodes(uuid = None):
       codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], True)
       data = {}
       data['list_title'] = 'Your codes for ' + session['app_name']
-      token = models.get_token(flask_login.current_user.id)
+      token = models.get_token('guest',flask_login.current_user.id)
       for i in range(len(codes)):
         codes[i]['url'] = url_for('customCode',code_id=codes[i]['id'])
         codes[i]['token'] = token
@@ -947,7 +947,7 @@ def customEffects(uuid = None):
       effects = tools.get_leds_effects()
       data = {}
       data['list_title'] = 'Effects for ' + session['app_name']
-      token = models.get_token(flask_login.current_user.id)
+      token = models.get_token('guest',flask_login.current_user.id)
       data['elements']= effects
       response = app.response_class(
         response=json.dumps(data),
@@ -1039,7 +1039,7 @@ def forgotPassword():
     email=request.form.get('uemail')
     exist = db.get_user(email)
     if exist != None:
-      token = models.get_token(exist['email'])
+      token = models.get_token('auth',exist['email'])
       msg = Message('[Biblioapp] Reset Your Password', recipients = [exist['email']])
       msg.body=render_template('email/reset_password.txt', user=exist, token=token)
       msg.html=render_template('email/reset_password.html',user=exist, token=token)
