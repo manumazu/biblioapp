@@ -26,7 +26,10 @@ def request_loader(request):
     '''login via token for uuid'''
     if 'token' in request.args:
         token = request.args.get('token')
-        exist = verify_token(token)
+        if 'reset_password' in request.path:
+            exist = verify_token('auth',token)
+        else:
+            exist = verify_token('guest',token)
         if exist is None:
             return 
         #open session for mobile app request
@@ -75,14 +78,14 @@ def unauthorized_handler():
         return redirect(url_for('login', _scheme='https', _external=True))
 
 #generate generic token 
-def get_token(email, expires_in=600):
-    return jwt.encode({'generic': email, 'exp': time() + expires_in}, \
+def get_token(role,email, expires_in=600):
+    return jwt.encode({role: email, 'exp': time() + expires_in}, \
         app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
 #verify token
-def verify_token(token):
+def verify_token(role,token):
     try:
-        id = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])['generic']
+        id = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])[role]
     except:
         return
     #when a session is open return it
