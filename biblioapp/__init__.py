@@ -122,7 +122,7 @@ def newArduino(app_id = None):
       module = db.set_module(data)
       if 'id' in module:
           module = db.get_module(module['id'])
-          db.set_user_app(user_id, module['id'])
+          db.set_user_app(module['id_user'], module['id'])
           if module['id_ble']=='xxxx':
             id_ble = tools.set_id_ble(module)
             db.update_id_ble(module['id'], id_ble)
@@ -899,19 +899,19 @@ def customCode(code_id):
 
     data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
     customvars = ''
-    if len(data['customvars'])>0:
+    if data and len(data['customvars'])>0:
       customvars = json.loads(data['customvars'])
-    #send json when token mode
-    if('token' in request.args):
-      response = app.response_class(
-        response=json.dumps(data['customcode'].decode()),
-        mimetype='application/json'
-      )
-      return response
-    maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']
-    return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
-      customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects(), \
-      shelf_infos=globalVars['arduino_map'])
+      #send json when token mode
+      if('token' in request.args):
+        response = app.response_class(
+          response=json.dumps(data['customcode'].decode()),
+          mimetype='application/json'
+        )
+        return response
+      maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']
+      return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
+        customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects(), \
+        shelf_infos=globalVars['arduino_map'])
   abort(404)
 
 @app.route('/customcodedelete/', methods=['POST'])

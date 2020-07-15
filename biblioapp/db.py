@@ -58,7 +58,8 @@ def get_user_for_uuid(uuid):
 
 def get_module(id) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_app WHERE id=%s",(id))
+  mysql['cursor'].execute("SELECT ba.*, bua.id_user FROM biblio_app ba \
+    INNER JOIN biblio_user_app bua ON bua.id_app = ba.id WHERE ba.id=%s",(id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -107,7 +108,8 @@ def set_user_app(id_user, id_app) :
     ON DUPLICATE KEY UPDATE `id_user`=%s", (id_user, id_app, id_user))
   mysql['conn'].commit()
   mysql['cursor'].close()
-  mysql['conn'].close()  
+  print(mysql['cursor']._last_executed)
+  mysql['conn'].close() 
 
 def get_tidy_books(app_id, line = None) :
   mysql = get_db()
