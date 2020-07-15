@@ -793,20 +793,29 @@ def bookReferencer():
         lastPos = db.get_last_saved_position(session.get('app_id'))
         newInterval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
         if lastPos:
-          newPos = lastPos['max_pos']+1
+          newPos = lastPos['position']+1
           newRow = lastPos['row']
-          newLedNum = lastPos['max_led']+lastPos['range']
+          newLedNum = lastPos['led_column']+lastPos['range']
+          #adjust new led column with static element
+          statics = db.get_static_positions(session.get('app_id'),lastPos['row']) 
+          if statics:         
+            for static in statics:
+             if int(newLedNum) == int(static['led_column']):
+              newLedNum += static['range']
         else:
           newPos = 1
           newRow = 1
           newLedNum = 0        
         led_column = db.set_position(session.get('app_id'), bookId['id'], newPos, newRow, newInterval, 'book', newLedNum)
+        address = db.get_position_for_book(session.get('app_id'), bookId['id'])
       #confirm message
       if bookId:
         message['result'] = 'success'
         message['message'] = 'Book added with id '+str(bookId['id'])
         if forcePosition == 'true' and newLedNum != None:
           message['message'] += ' at position n°' +str(newPos)+ ' and LED n° ' + str(int(newLedNum)+1) + ' in row n°'+str(newRow)
+          message['address'] = [{'action':'add', 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
+      'id_node':bookId['id'], 'borrowed':address['borrowed']}]
       else:
         message = {'result':'error', 'message':'Error saving book'}
 

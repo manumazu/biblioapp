@@ -402,10 +402,12 @@ def del_item_position(app_id, item_id, item_type, numrow) :
   #print(mysql['cursor']._last_executed)    
   return True
 
+#get address for max position in all rows
 def get_last_saved_position(id_app):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT max(position) as max_pos, max(led_column) as max_led, `range`, `row`, id_app \
-   FROM `biblio_position` WHERE id_app = %s and item_type='book' GROUP by row ORDER BY row DESC LIMIT 1", (id_app));
+  mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and item_type='book' and \
+    position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and item_type='book' GROUP by row) \
+    ORDER BY row DESC LIMIT 1", (id_app, id_app));
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
