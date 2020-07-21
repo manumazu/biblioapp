@@ -627,40 +627,40 @@ def setResetForModule():
 
 
 #get authors liste from arduino 
-@flask_login.login_required
 @app.route('/authors', methods=['GET'])
+@flask_login.login_required
 def listAuthors():
   globalVars = initApp()  
-  #for mobile app 
-  if('uuid' in request.args):
-    data = {}
-    token = models.get_token('guest',flask_login.current_user.id)
-    data['list_title'] = session['app_name']
-    data['elements']=[]
-    alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
-    for j in range(len(alphabet)):
-      '''data['elements'][j]={}
-      data['elements'][j]['initial']=alphabet[j]'''
-      #print(data)
-      items = db.get_authors_for_app(session['app_id'], alphabet[j])
-      if items:
-        '''set url for authenticate requesting location from app'''
-        for i in range(len(items)):
-          items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
-          items[i]['token'] = token
-        #data['elements'][j]['items'] = items
-      data['elements'].append({'initial':alphabet[j],'items':items})
-    response = app.response_class(
-          response=json.dumps(data),
-          mimetype='application/json'
-    )
-    return response
-  #for web
-  else:
-    if globalVars['arduino_map'] != None:
+  if globalVars['arduino_map'] != None:
+    #for mobile app 
+    if('uuid' in request.args):
+      data = {}
+      token = models.get_token('guest',flask_login.current_user.id)
+      data['list_title'] = session['app_name']
+      data['elements']=[]
+      alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+      for j in range(len(alphabet)):
+        '''data['elements'][j]={}
+        data['elements'][j]['initial']=alphabet[j]'''
+        #print(data)
+        items = db.get_authors_for_app(session['app_id'], alphabet[j])
+        if items:
+          '''set url for authenticate requesting location from app'''
+          for i in range(len(items)):
+            items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
+            items[i]['token'] = token
+          #data['elements'][j]['items'] = items
+        data['elements'].append({'initial':alphabet[j],'items':items})
+      response = app.response_class(
+            response=json.dumps(data),
+            mimetype='application/json'
+      )
+      return response
+    #for web
+    else:
       return render_template('authors.html', user_login=flask_login.current_user.name, db=db, \
-        user_id=globalVars['arduino_map']['user_id'], \
-      shelf_infos=globalVars['arduino_map'])    
+          user_id=globalVars['arduino_map']['user_id'], \
+        shelf_infos=globalVars['arduino_map'])    
   abort(404)    
 
 @app.route('/booksearch/', methods=['GET', 'POST'])

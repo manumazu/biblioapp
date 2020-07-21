@@ -24,11 +24,12 @@ def user_loader(email):
 @login_manager.request_loader
 def request_loader(request):
     '''login via token for uuid'''
+    exist = None
     if 'token' in request.args:
         token = request.args.get('token')
-        if 'reset_password' in request.path:
+        if 'reset_password' in request.path: #verify token for reset password
             exist = verify_token('auth',token)
-        else:
+        elif 'uuid' in request.view_args or 'uuid' in request.args : #verify token for guest requests
             exist = verify_token('guest',token)
         if exist is None:
             return 
