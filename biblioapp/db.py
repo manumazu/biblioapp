@@ -108,7 +108,7 @@ def set_user_app(id_user, id_app) :
     ON DUPLICATE KEY UPDATE `id_user`=%s", (id_user, id_app, id_user))
   mysql['conn'].commit()
   mysql['cursor'].close()
-  print(mysql['cursor']._last_executed)
+  #print(mysql['cursor']._last_executed)
   mysql['conn'].close() 
 
 def get_tidy_books(app_id, line = None) :

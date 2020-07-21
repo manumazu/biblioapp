@@ -89,6 +89,26 @@ def editArduino(app_id):
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, shelf_infos=globalVars['arduino_map'])
   abort(404)
 
+#get module infos from arduino for current arduino_name
+@app.route('/module/<uuid>/')
+def getModule(uuid):
+  uuid = tools.uuid_decode(uuid)
+  if uuid:
+    user_app = db.get_app_for_uuid(uuid)
+    user = db.get_user_for_uuid(uuid)
+    if(user_app):
+      data = {}
+      data = user_app
+      data['total_leds'] = user_app['nb_lines']*user_app['nb_cols']
+      data['token'] = models.get_token('guest',user['email'])
+      response = app.response_class(
+            response=json.dumps(data),
+            mimetype='application/json'
+      )
+      return response
+  abort(404)  
+
+
 @app.route("/adminmodule/", defaults={'app_id': None}, methods=['GET', 'POST'])
 @app.route("/adminmodule/<app_id>/", methods=['GET', 'POST'])
 @flask_login.login_required
@@ -133,38 +153,17 @@ def newArduino(app_id = None):
       shelf_infos=globalVars['arduino_map'])
   abort(404)
 
-@app.route('/authors/')
+@app.route('/categories', methods=['GET'])
 @flask_login.login_required
-def listAuthors():
+def listCategories():
   globalVars = initApp()
-  if globalVars['arduino_map'] != None:
-    return render_template('authors.html', user_login=flask_login.current_user.name, db=db, \
-      user_id=globalVars['arduino_map']['user_id'], \
-    shelf_infos=globalVars['arduino_map'])
-  abort(404)
-
-@app.route('/categories/')
-@app.route('/categories/<uuid>/')
-def listCategories(uuid = None):
-  if(flask_login.current_user.is_authenticated):
-    globalVars = initApp()
-    if globalVars['arduino_map'] != None:
-      user_id = globalVars['arduino_map']['user_id']
-      categories = db.get_categories_for_user(user_id)
-    else:
-      abort(404)
-  elif uuid is None:
-      return redirect(url_for('login', _scheme='https', _external=True))
-  if uuid is not None:
-    uuid = tools.uuid_decode(uuid)
-    if uuid:
-      user_app = db.get_app_for_uuid(uuid)
-      user = db.get_user_for_uuid(uuid)
-      user_id = user['id']
-      categories = db.get_categories_for_app(user_app['id'])
-      data = {}
-      data['list_title'] = user_app['arduino_name']
-      token = models.get_token('guest',user['email'])
+  #for mobile app
+  if('uuid' in request.args):
+    categories = db.get_categories_for_app(session['app_id'])
+    data = {}
+    data['list_title'] = session['app_name']
+    token = models.get_token('guest',flask_login.current_user.id)
+    if categories:
       for i in range(len(categories)):
         categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
         categories[i]['token'] = token
@@ -179,10 +178,16 @@ def listCategories(uuid = None):
         mimetype='application/json'
       )
       return response
+    else:
+      return ('', 204)
+  #for web
   else:
-    return render_template('categories.html', user_login=globalVars['user_login'], categories=categories, \
-    shelf_infos=globalVars['arduino_map'])
-
+    if globalVars['arduino_map'] != None:
+      user_id = globalVars['arduino_map']['user_id']
+      categories = db.get_categories_for_user(user_id)    
+      return render_template('categories.html', user_login=globalVars['user_login'], categories=categories, \
+      shelf_infos=globalVars['arduino_map'])
+    abort(404)
 
 @app.route("/app/")
 @flask_login.login_required
@@ -580,14 +585,14 @@ def locateBooksForTag(tag_id):
   return redirect(url_for('listAuthors', _scheme='https', _external=True))
 
 #get request from arduino for current arduino_name
-@app.route('/request/<uuid>/')
-def getRequestForModule(uuid):
-  uuid = tools.uuid_decode(uuid)
-  if uuid:
-    user_app = db.get_app_for_uuid(uuid)
-    if(user_app):
+@app.route('/request', methods=['GET'])
+@flask_login.login_required
+def getRequestForModule():
+  globalVars = initApp()
+  if globalVars['arduino_map'] != None:
+    if('uuid' in request.args):
       positions = []
-      datas = db.get_request(user_app['id'])
+      datas = db.get_request(session['app_id'])
       if datas:      
         for data in datas:
           positions.append({'action':'add', 'row':data['row'], 'led_column':data['led_column'], \
@@ -602,74 +607,60 @@ def getRequestForModule(uuid):
               mimetype='application/json'
         )
         return response
+      else:
+        return ('', 204)
   abort(404)
 
 #remove all request from arduino for current module
-'''todo : must be protected'''
-@app.route('/reset/<uuid>/')
-def setResetForModule(uuid):
-  uuid = tools.uuid_decode(uuid)
-  if uuid:
-    user_app = db.get_app_for_uuid(uuid)
-    if(user_app):
-      data = db.clean_request(user_app['id'])#clean all module's request
-      response = app.response_class(
-            response=json.dumps(data),
-            mimetype='application/json'
-      )
-      return response
-  abort(404)  
+@app.route('/reset', methods=['GET'])
+@flask_login.login_required
+def setResetForModule():
+  globalVars = initApp()  
+  if globalVars['arduino_map'] != None:
+    data = db.clean_request(session['app_id'])#clean all module's request
+    response = app.response_class(
+          response=json.dumps(data),
+          mimetype='application/json'
+    )
+    return response
+  abort(404)
 
-#get module infos from arduino for current arduino_name
-@app.route('/module/<uuid>/')
-def getModule(uuid):
-  uuid = tools.uuid_decode(uuid)
-  if uuid:
-    user_app = db.get_app_for_uuid(uuid)
-    user = db.get_user_for_uuid(uuid)
-    if(user_app):
-      data = {}
-      data = user_app
-      data['total_leds'] = user_app['nb_lines']*user_app['nb_cols']
-      data['token'] = models.get_token('guest',user['email'])
-      response = app.response_class(
-            response=json.dumps(data),
-            mimetype='application/json'
-      )
-      return response
-  abort(404)  
 
-#get authors liste from arduino for current arduino_name
-@app.route('/authors/<uuid>/')
-def listAuthorsForModule(uuid):
-  uuid = tools.uuid_decode(uuid)
-  if uuid:  
-    user_app = db.get_app_for_uuid(uuid)
-    user = db.get_user_for_uuid(uuid)
+#get authors liste from arduino 
+@flask_login.login_required
+@app.route('/authors', methods=['GET'])
+def listAuthors():
+  globalVars = initApp()  
+  #for mobile app 
+  if('uuid' in request.args):
     data = {}
-    if(user_app):
-      token = models.get_token('guest',user['email'])
-      data['list_title'] = user_app['arduino_name']
-      data['elements']=[]
-      alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
-      for j in range(len(alphabet)):
-        '''data['elements'][j]={}
-        data['elements'][j]['initial']=alphabet[j]'''
-        #print(data)
-        items = db.get_authors_for_app(user_app['id'], alphabet[j])
-        if items:
-          '''set url for authenticate requesting location from app'''
-          for i in range(len(items)):
-            items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
-            items[i]['token'] = token
-          #data['elements'][j]['items'] = items
-        data['elements'].append({'initial':alphabet[j],'items':items})
-
-      response = app.response_class(
-            response=json.dumps(data),
-            mimetype='application/json'
-      )
-      return response
+    token = models.get_token('guest',flask_login.current_user.id)
+    data['list_title'] = session['app_name']
+    data['elements']=[]
+    alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+    for j in range(len(alphabet)):
+      '''data['elements'][j]={}
+      data['elements'][j]['initial']=alphabet[j]'''
+      #print(data)
+      items = db.get_authors_for_app(session['app_id'], alphabet[j])
+      if items:
+        '''set url for authenticate requesting location from app'''
+        for i in range(len(items)):
+          items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
+          items[i]['token'] = token
+        #data['elements'][j]['items'] = items
+      data['elements'].append({'initial':alphabet[j],'items':items})
+    response = app.response_class(
+          response=json.dumps(data),
+          mimetype='application/json'
+    )
+    return response
+  #for web
+  else:
+    if globalVars['arduino_map'] != None:
+      return render_template('authors.html', user_login=flask_login.current_user.name, db=db, \
+        user_id=globalVars['arduino_map']['user_id'], \
+      shelf_infos=globalVars['arduino_map'])    
   abort(404)    
 
 @app.route('/booksearch/', methods=['GET', 'POST'])
@@ -856,10 +847,9 @@ def bookDelete():
     return redirect(url_for('myBookShelf', _scheme='https', _external=True))
 
 
-@app.route('/customcodes/', methods=['GET', 'POST'])
-@app.route('/customcodes/<uuid>/', methods=['GET', 'POST'])
+@app.route('/customcodes', methods=['GET', 'POST'])
 @flask_login.login_required
-def customCodes(uuid = None):
+def customCodes():
   globalVars = initApp()
   if globalVars['arduino_map'] != None:
     #print(codes)
