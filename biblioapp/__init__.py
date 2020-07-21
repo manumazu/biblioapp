@@ -939,9 +939,9 @@ def customCodeTemplate(template):
     return render_template('_customcode_effect.html', effects=effects)        
   abort(404)
 
-@app.route('/customeffects/<uuid>/')
+@app.route('/customeffects')
 @flask_login.login_required
-def customEffects(uuid = None):
+def customEffects():
   globalVars = initApp()
   if globalVars['arduino_map'] != None:
     if('token' in request.args):
