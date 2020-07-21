@@ -533,14 +533,6 @@ def locateBooksForTag(tag_id):
     tag['green'] = colors[1]
     tag['blue'] = colors[2]
 
-  if('uuid' in request.args):
-    uuid = tools.uuid_decode(request.args.get('uuid'))
-    if uuid:
-      module = db.get_app_for_uuid(uuid)
-  else:
-    module = db.get_app_for_uuid(globalVars['arduino_map']['id_ble'])
-  #app_modules = db.get_arduino_for_user(flask_login.current_user.id)
-
   action = 'add'
   if('action' in request.args):#for add or remove
     action = request.args.get('action')
@@ -551,17 +543,17 @@ def locateBooksForTag(tag_id):
 
   #for module in app_modules:
   if(mode!='toggle'):
-    db.clean_request(module['id'])#clean all module's request
+    db.clean_request(session['app_id'])#clean all module's request
 
   positions = []
   for node in nodes:
-    address = db.get_position_for_book(module['id'], node['id_node'])
+    address = db.get_position_for_book(session['app_id'], node['id_node'])
     if address:
       book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
       if(action=='add'):#add request for tag's nodes
-        db.set_request(module['id'], node['id_node'], address['row'], address['position'], address['range'], address['led_column'], 'book')
+        db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], address['led_column'], 'book')
       if(action=='remove'):#delete request for tag's nodes
-        db.del_request(module['id'], address['position'], address['row'])
+        db.del_request(session['app_id'], address['position'], address['row'])
 
       if tag['color'] is None:
         tag['color'] = ''
