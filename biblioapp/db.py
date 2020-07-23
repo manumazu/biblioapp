@@ -190,9 +190,9 @@ def del_book(book_id, user_id) :
   mysql['cursor'].close()
   mysql['conn'].close()
 
-def get_request(app_id) :
+def get_request(app_id, action) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s",app_id)
+  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s and `action`=%s and client='server'",(app_id, action))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -202,7 +202,8 @@ def get_request(app_id) :
 
 def get_request_for_position(app_id, position, row) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s and `column`=%s and `row`=%s",(app_id, position, row))
+  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s and `column`=%s and `row`=%s \
+    and `action`='add'", (app_id, position, row))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -210,20 +211,21 @@ def get_request_for_position(app_id, position, row) :
     return row
   return False 
 
-def set_request(app_id, node_id, row, column, interval, led_column, node_type) :
+def set_request(app_id, node_id, row, column, interval, led_column, node_type, client, action) :
   now = tools.getNow()
   mysql = get_db()
-  mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `id_node`, `node_type`, `row`, `column`, `range`, `led_column`) \
-    VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s, `led_column`=%s",  \
-  (app_id, node_id, node_type, row, column, interval, led_column, now.strftime("%Y-%m-%d %H:%M:%S"), interval, led_column))
+  mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `id_node`, `node_type`, `row`, `column`, `range`, \
+    `led_column`, `client`, `action`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE \
+    `date_add`=%s, `range`=%s, `led_column`=%s, `client`=%s, `action`=%s", (app_id, node_id, node_type, row, column, \
+      interval, led_column, client, action, now.strftime("%Y-%m-%d %H:%M:%S"), interval, led_column, client, action))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
   return True
 
-def del_request(app_id, column, row) :
+def del_request(app_id, led_column, row) :
   mysql = get_db()
-  mysql['cursor'].execute("DELETE FROM biblio_request where id_app=%s and `column`=%s and `row`=%s",(app_id, column,row))
+  mysql['cursor'].execute("DELETE FROM biblio_request where id_app=%s and `led_column`=%s and `row`=%s",(app_id, led_column,row)) 
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()

@@ -82,7 +82,7 @@ def editArduino(app_id):
             if mode == 'save': 
               db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])            
             if mode == 'preview': #set distant request for preview
-              db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static')
+              db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static', 'server', 'add')
             #suppr static when position is reseted to 0
             if int(positions[i]) == 0:
               db.del_item_position(int(app_id), pos, 'static', numrow)            
@@ -328,7 +328,7 @@ def ajaxDelPosition():
         has_request = db.get_request_for_position(session.get('app_id'), position['position'], position['row'])
         #remove request
         if has_request:
-          db.del_request(session.get('app_id'), position['position'], position['row'])
+          db.del_request(session.get('app_id'), position['led_column'], position['row'])
         #get list for remaining items and sort them again
         items = db.get_positions_for_row(session.get('app_id'), position['row'])
         if items:
@@ -477,6 +477,7 @@ def locateBook():
 
   '''get form request params'''
   if (request.method == 'POST'):
+    client = 'server'
     app_id = request.form.get('app_id')
     column = request.form.get('column')
     row = request.form.get('row')
@@ -490,6 +491,7 @@ def locateBook():
 
   '''get params from arduino'''      
   if (request.method == 'GET') and ('token' in request.args):
+    client = 'mobile'
     app_id = session['app_id']
     book_id = request.args.get('book_id')
     color = request.args.get('color')
@@ -497,13 +499,20 @@ def locateBook():
     if 'remove_request' in request.args:
       action = 'remove'
 
+  #store request
   if action == 'remove':
-    db.del_request(app_id, address['position'], address['row'])
+    #db.del_request(app_id, address['position'], address['row'])
     retMsg = 'Location removed for book {}'.format(book_id)
   else: 
-    db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'], 'book')
     retMsg = 'Location requested for book {}'.format(book_id)
 
+  #manage request
+  db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'], \
+    'book', client, action)
+  if client=='mobile' and action=='remove':#don't need to store request for mobile
+    db.del_request(session['app_id'], address['led_column'], address['row'])    
+
+  #send data for mobile
   if('token' in request.args):
     data = {'action':action, 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
       'id_node':book_id, 'borrowed':address['borrowed']}
@@ -537,26 +546,26 @@ def locateBooksForTag(tag_id):
   if('action' in request.args):#for add or remove
     action = request.args.get('action')
 
-  mode = ''
-  if('mode' in request.args):
-    mode = request.args.get('mode')
-
-  #for module in app_modules:
-  if(mode!='toggle'):
-    db.clean_request(session['app_id'])#clean all module's request
+  client = 'server'
+  if('token' in request.args):
+    client = 'mobile'
 
   positions = []
   for node in nodes:
     address = db.get_position_for_book(session['app_id'], node['id_node'])
     if address:
       book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
-      if(action=='add'):#add request for tag's nodes
-        db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], address['led_column'], 'book')
-      if(action=='remove'):#delete request for tag's nodes
-        db.del_request(session['app_id'], address['position'], address['row'])
+    
+      #manage request
+      db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], \
+        address['led_column'], 'book', client, action)
+      #don't need to store remove request for mobile
+      if client=='mobile' and action=='remove':
+        db.del_request(session['app_id'], address['led_column'], address['row'])
 
       if tag['color'] is None:
         tag['color'] = ''
+
       positions.append({'item':book['title'], 'action':action, 'row':address['row'], 'led_column':address['led_column'], \
         'interval':address['range'], 'color':tag['color'], 'id_node':node['id_node']})
 
@@ -582,25 +591,54 @@ def locateBooksForTag(tag_id):
 def getRequestForModule():
   globalVars = initApp()
   if globalVars['arduino_map'] != None:
+
+    #get request for distant mobile app
     if('uuid' in request.args):
-      positions = []
-      datas = db.get_request(session['app_id'])
-      if datas:      
-        for data in datas:
-          positions.append({'action':'add', 'row':data['row'], 'led_column':data['led_column'], \
+
+      positions_add = []
+      blocks = []
+      datas_add = db.get_request(session['app_id'], 'add')
+      if datas_add:      
+        for data in datas_add:
+          positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
           'interval':data['range'], 'color':'', 'id_node':data['id_node']})
 
-        positions.sort(key=tools.sortPositions)
-        blocks = tools.build_block_position(positions, 'add')
-        #print(blocks)
+        positions_add.sort(key=tools.sortPositions)
+        blocks = tools.build_block_position(positions_add, 'add')
 
-        response = app.response_class(
-              response=json.dumps(blocks),
-              mimetype='application/json'
-        )
-        return response
+      positions_remove = []
+      datas_remove = db.get_request(session['app_id'], 'remove')
+      resp = "event: ping\n"
+      if datas_remove:
+        #soft remove   
+        for data in datas_remove:
+          positions_remove.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
+          'interval':data['range'], 'color':'', 'id_node':data['id_node']})
+
+        positions_remove.sort(key=tools.sortPositions)
+        blocks += tools.build_block_position(positions_remove, 'remove')
+
+        #hard remove  
+        for data in datas_remove:
+          db.del_request(session['app_id'], data['led_column'], data['row'])
+        
+      #print(blocks)
+
+      #set message for SSE
+      resp = "event: ping"
+      if len(blocks) > 0:        
+        json_dump = json.dumps(blocks)
+        resp += "\ndata: "+json_dump
+        resp += "\nid: "+hashlib.md5(json_dump.encode("utf-8")).hexdigest()
+        resp += "\nretry: 2000"
       else:
-        return ('', 204)
+        resp += "\ndata: {}"
+        resp +="\nid: 0"
+        resp += "\nretry: 5000"
+      resp += "\n\n"
+      response = app.make_response(resp) 
+      response.headers['Content-Type'] = "text/event-stream"
+      return response
   abort(404)
 
 #remove all request from arduino for current module
