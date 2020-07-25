@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
-{% block title %}modules{% endblock %}
+{% block title %}Bibliobus{% endblock %}
 {% block styles %}
     {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
 {% endblock %}
 
 {% block body %}
@@ -11,49 +12,43 @@
 {% endblock %}
 
 {% block content %}
-	<div class="container">
-	
-	{% if modules %}
-	  	<h1 class="mt-5 text-white font-weight-light">Select a book shelf module :</h1>
-	    <ul>
-	  	{%for module in modules %}
-		<li><h3>{{ module['arduino_name'] }}</h3>
-			<form method="POST" action="{{ url_for('selectArduino') }}">
-				<fieldset>
+ <!-- Header - set the background image for the header in the line below -->
+  <header class="py-5 bg-image-full" style="background-image: url('/static/img/presentation_2_1852x1040.jpg');">
+    <img class="img-fluid d-block mx-auto" src="/static/img/three-books_gray.svg" alt="Biblio App" width="200px">
+  </header>
 
-				<input type="hidden" name="module_id" value="{{ module['id'] }}">
-				<input type="hidden" name="module_name" value="{{ module['arduino_name'] }}">
-				<input type="hidden" name="action" value="select">
+  <!-- Content section -->
+  <section class="py-5">
+    <div class="container">
+      <h1>Biblio(bus) est un système de localisation d'objets.</h1>
+      <p class="lead">Bibliobus permet d'indexer, de partager, et de localiser des objets facilement et qui, en plus, est joli.</p>
+      <p>C’est un système d’éclairage pour rechercher et repérer, via un signal lumineux, un objet disposé sur un support. Basé sur un index interrogeable à distance et couplé à circuit de type Arduino, communiquants en liaison série (bus), il permet d'interroger un support pour trouver un objet.</p>
+    </div>
+  </section>
 
-				<div class="form-group form-inline">
-					<select class="col-sm-2 form-control" id="numshelf" name="numshelf">
-					<option selected="selected" value="0">Shelf number</option>
-			     	{% for line in range(module['nb_lines']) %}
-					  <option value="{{line+1}}">Shelf {{line+1}}</option>
-				 	{% endfor %}
-					</select>
-					&nbsp;
-					<button type="submit" class="btn btn-primary">Select this module</button>
-				</div>
+  <!-- Image element - set the background image for the header in the line below -->
+  <div class="py-5 bg-image-full" style="background-image: url('/static/img/presentation_3_1900x1175.jpg');">
+    <!-- Put anything you want here! There is just a spacer below for demo purposes! -->
+    <div style="height: 200px;"></div>
+  </div>
 
-				</fieldset>
+  <!-- Content section -->
+  <section class="py-5">
+    <div class="container">
+      <h1>L'adressage d'objets, pourquoi faire ?</h1>
+      <p class="lead">La consommation et la production d'objets sont devenus cruciaux pour l'économie de distribution. </p>
+      <p>Parmi ces objets, il en est certains qui nous sont nécessaires pour vivre. Ces objets doivent demeurer échangeables, réutilisables, partageables.<br />
+      Bibliobus est un moyen efficace et ludique pour inscrire le cycle de vie des objets dans une économie circulaire efficiente,  pour tous.</p>
+    </div>
+  </section>
 
-			</form>
-		</li>
-		 <a href="{{ url_for('editArduino', app_id=module['id']) }}">Edit module</a>
-	  	{% endfor %}
-	    </ul>
-
-	{% else %}
-
-		<h3  class="mt-5 text-white font-weight-light">It seems that don't you have a Bibus module yet :( </h3>
-		<p>You must have a "bibus" module in order to configure your first connected bookshelf.</p>
-		<p>You can buy one very soon...</p>
-
-	{% endif %}
-
-	{{ super() }}
-	</div>
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Bibliob.us 2020</p>
+    </div>
+    <!-- /.container -->
+  </footer>
 {% endblock %}
 
 {% block scripts %}

@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block title %}modules{% endblock %}
+{% block styles %}
+    {{super()}}
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+{% block content %}
+	<div class="container">
+	
+	{% if modules %}
+	  	<h1 class="mt-5 text-white font-weight-light">Select a book shelf module :</h1>
+	    <ul>
+	  	{%for module in modules %}
+		<li><h3>{{ module['arduino_name'] }}</h3>
+			<form method="POST" action="{{ url_for('selectArduino') }}">
+				<fieldset>
+
+				<input type="hidden" name="module_id" value="{{ module['id'] }}">
+				<input type="hidden" name="module_name" value="{{ module['arduino_name'] }}">
+				<input type="hidden" name="action" value="select">
+
+				<div class="form-group form-inline">
+					<select class="col-sm-2 form-control" id="numshelf" name="numshelf">
+					<option selected="selected" value="0">Shelf number</option>
+			     	{% for line in range(module['nb_lines']) %}
+					  <option value="{{line+1}}">Shelf {{line+1}}</option>
+				 	{% endfor %}
+					</select>
+					&nbsp;
+					<button type="submit" class="btn btn-primary">Select this module</button>
+				</div>
+
+				</fieldset>
+
+			</form>
+		</li>
+		 <a href="{{ url_for('editArduino', app_id=module['id']) }}">Edit module</a>
+	  	{% endfor %}
+	    </ul>
+
+	{% else %}
+
+		<h3  class="mt-5 text-white font-weight-light">It seems that don't you have a Bibus module yet :( </h3>
+		<p>You must have a "bibus" module in order to configure your first connected bookshelf.</p>
+		<p>You can buy one very soon...</p>
+
+	{% endif %}
+
+	{{ super() }}
+	</div>
+{% endblock %}
+
+{% block scripts %}
+  {{super()}}
+  <script src="{{url_for('static', filename='app.js')}}"></script>
+{% endblock %}
+
+{% endblock %}

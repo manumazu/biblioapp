@@ -44,7 +44,14 @@ def initApp():
       arduino_name = None  
   return {'user_login':user_login,'arduino_map':arduino_map,'arduino_name':arduino_name}
 
-@app.route("/", methods=['GET', 'POST'])
+@app.route("/")
+def presentation():
+  userName = ""
+  if flask_login.current_user.is_authenticated:
+    userName=flask_login.current_user.name
+  return render_template('index.html', user_login=userName)
+
+@app.route("/modules", methods=['GET', 'POST'])
 @flask_login.login_required
 def selectArduino():
   modules = db.get_arduino_for_user(flask_login.current_user.id)
@@ -56,7 +63,7 @@ def selectArduino():
         session['app_numshelf'] = int(request.form.get('numshelf'))
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
-  return render_template('index.html', user_login=flask_login.current_user.name, modules=modules)
+  return render_template('modules.html', user_login=flask_login.current_user.name, modules=modules)
 
 @app.route("/module/<app_id>", methods=['GET', 'POST'])
 @flask_login.login_required
@@ -622,7 +629,7 @@ def getRequestForModule():
         for data in datas_remove:
           db.del_request(session['app_id'], data['led_column'], data['row'])
         
-      #print(blocks)
+      print(blocks)
 
       #set message for SSE
       resp = "event: ping"
