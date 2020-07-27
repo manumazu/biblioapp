@@ -37,7 +37,7 @@
 						<a class="dropdown-item" href="{{ url_for('myBookShelf') }}">Manage books</a>
 						<a class="dropdown-item" href="{{ url_for('searchBookReference') }}">Add new book</a>
 						<a class="dropdown-item" href="{{ url_for('editArduino', app_id=shelf_infos['id']) }}">Edit bookshelf</a>
-						<a class="dropdown-item" href="/">Change bookshelf</a>	
+						<a class="dropdown-item" href="{{ url_for('selectArduino') }}">Change bookshelf</a>	
 					</div>
 				</li>
 			{% endif %}
