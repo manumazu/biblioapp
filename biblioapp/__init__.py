@@ -1,6 +1,6 @@
-from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify
+from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, Response
 from flask_bootstrap import Bootstrap
-import flask_login, hashlib, base64, math
+import flask_login, hashlib, base64, math, time
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_session import Session
@@ -223,7 +223,7 @@ def myBookShelf():
           element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
       'title':row['title'], 'author':row['author'], 'position':row['position'], 'range':row['range'], \
       'borrowed':row['borrowed'], 'url':'/book/'+str(row['id'])}
-          requested = db.get_request_for_position(app_id, row['position'], shelf)
+          requested = db.get_request_for_position(app_id, row['position'], shelf, 'server') #get requested elements from server (mobile will be set via SSE)
           if requested:
             element[row['led_column']]['requested']=True
         if statics[shelf]:
@@ -356,6 +356,9 @@ def listNodesForTag(tag_id):
     tag = db.get_tag_by_id(tag_id)
     data = {}
     data['list_title'] = tag['tag']
+    client = 'server'
+    if('token' in request.args):
+      client = 'mobile'
     if nodes:
         books = []
         #for node in nodes:
@@ -366,7 +369,7 @@ def listNodesForTag(tag_id):
             for module in app_modules:
               address = db.get_position_for_book(module['id'], book['id'])
               if address:
-                hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
+                hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'], client)
                 books[i]['address'] = address
                 books[i]['arduino_name'] = module['arduino_name']
                 books[i]['app_id'] = module['id']
@@ -600,53 +603,55 @@ def getRequestForModule():
   if globalVars['arduino_map'] != None:
 
     #get request for distant mobile app
-    if('uuid' in request.args):
+    #if('uuid' in request.args):
+    client = 'server'
+    if 'client' in request.args:
+      client = request.args.get('client') 
+      
+    positions_add = []
+    blocks = []
+    datas_add = db.get_request(session['app_id'], 'add', client)
+    if datas_add:      
+      for data in datas_add:
+        positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
+        'interval':data['range'], 'color':'', 'id_node':data['id_node']})
 
-      positions_add = []
-      blocks = []
-      datas_add = db.get_request(session['app_id'], 'add')
-      if datas_add:      
-        for data in datas_add:
-          positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
-          'interval':data['range'], 'color':'', 'id_node':data['id_node']})
+      positions_add.sort(key=tools.sortPositions)
+      blocks = tools.build_block_position(positions_add, 'add')
 
-        positions_add.sort(key=tools.sortPositions)
-        blocks = tools.build_block_position(positions_add, 'add')
+    positions_remove = []
+    datas_remove = db.get_request(session['app_id'], 'remove', client)
+    resp = "event: ping\n"
+    if datas_remove:
+      #soft remove   
+      for data in datas_remove:
+        positions_remove.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
+        'interval':data['range'], 'color':'', 'id_node':data['id_node']})
 
-      positions_remove = []
-      datas_remove = db.get_request(session['app_id'], 'remove')
-      resp = "event: ping\n"
-      if datas_remove:
-        #soft remove   
-        for data in datas_remove:
-          positions_remove.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
-          'interval':data['range'], 'color':'', 'id_node':data['id_node']})
+      positions_remove.sort(key=tools.sortPositions)
+      blocks += tools.build_block_position(positions_remove, 'remove')
 
-        positions_remove.sort(key=tools.sortPositions)
-        blocks += tools.build_block_position(positions_remove, 'remove')
-
-        #hard remove  
-        for data in datas_remove:
-          db.del_request(session['app_id'], data['led_column'], data['row'])
+      #hard remove  
+      for data in datas_remove:
+        time.sleep(3) #wait for other clients before remove
+        db.del_request(session['app_id'], data['led_column'], data['row'])
         
-      print(blocks)
+    #print(blocks)
 
-      #set message for SSE
-      resp = "event: ping"
-      if len(blocks) > 0:        
-        json_dump = json.dumps(blocks)
-        resp += "\ndata: "+json_dump
-        resp += "\nid: "+hashlib.md5(json_dump.encode("utf-8")).hexdigest()
-        resp += "\nretry: 2000"
-      else:
-        resp += "\ndata: {}"
-        resp +="\nid: 0"
-        resp += "\nretry: 5000"
-      resp += "\n\n"
-      response = app.make_response(resp) 
-      response.headers['Content-Type'] = "text/event-stream"
-      return response
-  abort(404)
+    #set message for SSE
+    resp = "event: ping\n"
+    if len(blocks) > 0:        
+      json_dump = json.dumps(blocks)
+      resp += "data: "+json_dump
+      resp += "\nid: "+hashlib.md5(json_dump.encode("utf-8")).hexdigest()
+      #resp += "\nretry: 2000"
+    else:
+      resp += "\ndata: {}"
+      resp +="\nid: 0"
+      resp += "\nretry: 5000"
+    resp += "\n\n"
+    return Response(resp, mimetype='text/event-stream')    
+  #abort(404)
 
 #remove all request from arduino for current module
 @app.route('/reset', methods=['GET'])

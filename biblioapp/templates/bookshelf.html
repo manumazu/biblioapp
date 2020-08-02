@@ -17,7 +17,7 @@
   <h3 class="mt-3 text-white font-weight-light">Liste of books in your "{{ shelf_infos['arduino_name'] }}" bookcase :</h3>
 
 <p class="mb-1">
-  <div class="text-white-50 d-inline">Drag elements to record their position in shelfs.</div>
+  <div class="text-white-50 d-inline" id="bookshelfInfos">Drag elements to record their position in shelfs.</div>
 
 <ul class="nav nav-pills">
 {% for line in range(nb_lines) %}
@@ -44,7 +44,7 @@
   	  {% for position,book in tidybooks[line] %}
   	  	{%if book['item_type']=='book' %}
   	     <li id="book_{{book['id']}}" class="ui-state-default coverbook">
-                 {% if book['requested'] %}<span class="badge badge-success badge-pill requested">R</span>{% endif %}
+                 {% if book['requested'] %}<!--span class="badge badge-success badge-pill requested">S</span-->{% endif %}
                  {% if book['borrowed'] %}<span class="badge badge-info badge-pill borrowed">B</span>{% endif %}
                  <span class="badge badge-dark badge-pill del">X</span>
                  <p><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} <br /> <strong>{{ book['title'] }}</strong></a></p>
@@ -71,9 +71,7 @@
 
 </div>
 
-
 <button type="button" class="btn btn-primary m-3" id="save-order">Save changes</button>
-
 
 <div class="notranged">
 	<h3>Add book in shelf</h3>    
@@ -98,6 +96,23 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
   <script src="{{url_for('static', filename='range.js')}}"></script>
   <script src="{{url_for('static', filename='app.js')}}"></script>  
+  <script type="text/javascript">
+
+    //SSE client
+    if(typeof(EventSource) !== "undefined") {
+      //set SSE for request from mobile App
+      var sourceMobile = new EventSource("/request?client=mobile");
+      setEventListener(sourceMobile, 'M');
+
+      //set SSE for request from server
+      var sourceServer = new EventSource("/request?client=server");
+      setEventListener(sourceServer, 'S');
+
+     } else {
+      document.getElementById("bookshelfInfos").innerHTML = "Sorry, your browser does not support server-sent events...";
+    }       
+
+  </script>  
 {% endblock %}
 
 {% endblock %}

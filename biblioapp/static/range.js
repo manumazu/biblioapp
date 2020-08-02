@@ -177,3 +177,36 @@ function setProgressValue(currentShelf, init_progress_value = 0) {
 		$('#shelf_progress_'+currentShelf).parent().css('display','none');
 	}
 }
+
+
+function setEventListener(source, type) {
+	var currentEventId = null;
+	source.addEventListener("ping", function(event) {
+    	var json = JSON.parse(event.data);
+    	if(currentEventId != event.lastEventId && json.length>0) 
+    	{
+	      	//parse json and set or unset badges 
+	      	json.forEach(function(elem) {
+	        	//add book request's badge for client mobile 
+	        	if(elem['action']=='add') {
+	          		elem['nodes'].forEach(function(id) {
+	            		var node = $('#book_'+id);
+	            		//if(node.find('span').hasClass('requested') == false) 
+	              		node.append('<span class="badge badge-success badge-pill requested">' + type + '</span>');
+	          		});
+	        	}
+	        	//remove request's badge for client mobile 
+	        	if(elem['action']=='remove') {
+	          		elem['nodes'].forEach(function(id) {
+	            		var node = $('#book_'+id);
+	            		//if(node.find('span').hasClass('requested') == true) 
+	              		node.find('span').remove('.requested');
+	          		});
+	        	}
+	     	});
+      		console.log(event.data);
+    	}
+    	currentEventId = event.lastEventId;
+    	return currentEventId;
+  });
+}
