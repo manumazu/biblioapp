@@ -187,6 +187,10 @@ function setEventListener(source, type) {
     	{
 	      	//parse json and set or unset badges 
 	      	json.forEach(function(elem) {
+	      		//check source of event : server or mobile
+	      		var type = 'S';
+	      		if('client' in elem && elem['client']=='mobile')
+	      			type = 'M';
 	        	//add book request's badge for client mobile 
 	        	if(elem['action']=='add') {
 	          		elem['nodes'].forEach(function(id) {

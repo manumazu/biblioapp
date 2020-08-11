@@ -190,9 +190,9 @@ def del_book(book_id, user_id) :
   mysql['cursor'].close()
   mysql['conn'].close()
 
-def get_request(app_id, action, client = 'server') :
+def get_request(app_id, action) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s and `action`=%s and client=%s",(app_id, action, client))
+  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s and `action`=%s",(app_id, action))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -200,10 +200,10 @@ def get_request(app_id, action, client = 'server') :
     return row
   return False
 
-def get_request_for_position(app_id, position, row, client = 'server') :
+def get_request_for_position(app_id, position, row) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s and `column`=%s and `row`=%s \
-    and `action`='add' and client=%s", (app_id, position, row, client))
+    and `action`='add'", (app_id, position, row))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()

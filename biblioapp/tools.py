@@ -104,7 +104,7 @@ def build_block_position(positions, action):
       blockend += firstElem['interval']
       if cpt==1:
         block = {'action':action, 'row':pos['row'], 'index':i, 'start':firstElem['led_column'], 'color':pos['color'],}
-      block.update({'interval':blockend+pos['interval'], 'nodes':blockelem})
+      block.update({'interval':blockend+pos['interval'], 'nodes':blockelem, 'client':pos['client']})
 
       #populate blocks list
       if block not in blocks:
@@ -126,7 +126,7 @@ def build_block_position(positions, action):
     for id_node in uniqelem:
       if id_node == pos['id_node']:
         blocks.append({'action':action, 'row':pos['row'], 'index':i, 'start':pos['led_column'], \
-          'color':pos['color'], 'interval':pos['interval'], 'nodes':[id_node]})
+          'color':pos['color'], 'interval':pos['interval'], 'nodes':[id_node], 'client':pos['client']})
 
   #reset order for blocks:
   if(action=='remove'):

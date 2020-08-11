@@ -26,22 +26,19 @@ def initApp():
   if(flask_login.current_user.is_authenticated):
     user_login = flask_login.current_user.name  
     #prevent empty session for module : select first one
-    modules = db.get_arduino_for_user(flask_login.current_user.id) 
-    if modules:   
-      if 'app_id' not in session:
-          for module in modules:
-            session['app_id'] = module['id']
-            session['app_name'] = module['arduino_name']
-            flash('Bookshelf "{}"selected'.format(module['arduino_name']))
-            break
-      arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
-      arduino_name = arduino_map['arduino_name']            
-    else:
-      arduino_map = None
-      arduino_name = None        
+    if 'app_id' not in session:
+      modules = db.get_arduino_for_user(flask_login.current_user.id) 
+      if modules:   
+        for module in modules:
+          session['app_id'] = module['id']
+          session['app_name'] = module['arduino_name']
+          flash('Bookshelf "{}"selected'.format(module['arduino_name']))
+          break
+    arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
+    arduino_name = arduino_map['arduino_name']     
   else:
-      arduino_map = None
-      arduino_name = None  
+    arduino_map = None
+    arduino_name = None  
   return {'user_login':user_login,'arduino_map':arduino_map,'arduino_name':arduino_name}
 
 @app.route("/")
@@ -223,7 +220,7 @@ def myBookShelf():
           element[row['led_column']] = {'item_type':row['item_type'],'id':row['id'], \
       'title':row['title'], 'author':row['author'], 'position':row['position'], 'range':row['range'], \
       'borrowed':row['borrowed'], 'url':'/book/'+str(row['id'])}
-          requested = db.get_request_for_position(app_id, row['position'], shelf, 'server') #get requested elements from server (mobile will be set via SSE)
+          requested = db.get_request_for_position(app_id, row['position'], shelf) #get requested elements from server (mobile will be set via SSE)
           if requested:
             element[row['led_column']]['requested']=True
         if statics[shelf]:
@@ -369,7 +366,7 @@ def listNodesForTag(tag_id):
             for module in app_modules:
               address = db.get_position_for_book(module['id'], book['id'])
               if address:
-                hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'], client)
+                hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
                 books[i]['address'] = address
                 books[i]['arduino_name'] = module['arduino_name']
                 books[i]['app_id'] = module['id']
@@ -511,7 +508,6 @@ def locateBook():
 
   #store request
   if action == 'remove':
-    #db.del_request(app_id, address['position'], address['row'])
     retMsg = 'Location removed for book {}'.format(book_id)
   else: 
     retMsg = 'Location requested for book {}'.format(book_id)
@@ -519,8 +515,6 @@ def locateBook():
   #manage request
   db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'], \
     'book', client, action)
-  if client=='mobile' and action=='remove':#don't need to store request for mobile
-    db.del_request(session['app_id'], address['led_column'], address['row'])    
 
   #send data for mobile
   if('token' in request.args):
@@ -569,15 +563,12 @@ def locateBooksForTag(tag_id):
       #manage request
       db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], \
         address['led_column'], 'book', client, action)
-      #don't need to store remove request for mobile
-      if client=='mobile' and action=='remove':
-        db.del_request(session['app_id'], address['led_column'], address['row'])
 
       if tag['color'] is None:
         tag['color'] = ''
 
       positions.append({'item':book['title'], 'action':action, 'row':address['row'], 'led_column':address['led_column'], \
-        'interval':address['range'], 'color':tag['color'], 'id_node':node['id_node']})
+        'interval':address['range'], 'color':tag['color'], 'id_node':node['id_node'], 'client':client})
 
   '''get elements for block build'''
   positions.sort(key=tools.sortPositions)
@@ -607,26 +598,28 @@ def getRequestForModule():
     client = 'server'
     if 'client' in request.args:
       client = request.args.get('client') 
+    elif 'uuid' in request.args and 'token' in request.args:
+      client = 'mobile'
       
     positions_add = []
     blocks = []
-    datas_add = db.get_request(session['app_id'], 'add', client)
+    datas_add = db.get_request(session['app_id'], 'add')
     if datas_add:      
       for data in datas_add:
         positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
-        'interval':data['range'], 'color':'', 'id_node':data['id_node']})
+        'interval':data['range'], 'color':'', 'id_node':data['id_node'], 'client':data['client']})
 
       positions_add.sort(key=tools.sortPositions)
       blocks = tools.build_block_position(positions_add, 'add')
 
     positions_remove = []
-    datas_remove = db.get_request(session['app_id'], 'remove', client)
+    datas_remove = db.get_request(session['app_id'], 'remove')
     resp = "event: ping\n"
     if datas_remove:
       #soft remove   
       for data in datas_remove:
         positions_remove.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
-        'interval':data['range'], 'color':'', 'id_node':data['id_node']})
+        'interval':data['range'], 'color':'', 'id_node':data['id_node'], 'client':data['client']})
 
       positions_remove.sort(key=tools.sortPositions)
       blocks += tools.build_block_position(positions_remove, 'remove')

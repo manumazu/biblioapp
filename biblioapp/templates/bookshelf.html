@@ -101,12 +101,8 @@
     //SSE client
     if(typeof(EventSource) !== "undefined") {
       //set SSE for request from mobile App
-      var sourceMobile = new EventSource("/request?client=mobile");
-      setEventListener(sourceMobile, 'M');
-
-      //set SSE for request from server
-      var sourceServer = new EventSource("/request?client=server");
-      setEventListener(sourceServer, 'S');
+      var sourceMobile = new EventSource("/request");
+      setEventListener(sourceMobile);
 
      } else {
       document.getElementById("bookshelfInfos").innerHTML = "Sorry, your browser does not support server-sent events...";
