@@ -591,22 +591,22 @@ def locateBooksForTag(tag_id):
 @flask_login.login_required
 def getRequestForModule():
   globalVars = initApp()
-  if globalVars['arduino_map'] != None:
+  if globalVars['arduino_map'] != None:  
 
     #get request for distant mobile app
     #if('uuid' in request.args):
-    client = 'server'
-    if 'client' in request.args:
-      client = request.args.get('client') 
-    elif 'uuid' in request.args and 'token' in request.args:
-      client = 'mobile'
+    source = 'server'
+    if 'uuid' in request.args and 'token' in request.args:
+      source = 'mobile'
       
     positions_add = []
     blocks = []
     datas_add = db.get_request(session['app_id'], 'add')
     if datas_add:      
       for data in datas_add:
-        positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
+        #send display request only for server (for mobile, leds are already displayed)
+        if (source == 'mobile' and data['client']=='server') or (source == 'server'):
+          positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
         'interval':data['range'], 'color':'', 'id_node':data['id_node'], 'client':data['client']})
 
       positions_add.sort(key=tools.sortPositions)
@@ -624,10 +624,10 @@ def getRequestForModule():
       positions_remove.sort(key=tools.sortPositions)
       blocks += tools.build_block_position(positions_remove, 'remove')
 
-      #hard remove  
+      #hard remove 
       for data in datas_remove:
-        time.sleep(3) #wait for other clients before remove
-        db.del_request(session['app_id'], data['led_column'], data['row'])
+        #time.sleep(1) #wait for other clients before remove
+        db.del_request(session['app_id'], data['led_column'], data['row'])        
         
     #print(blocks)
 
@@ -637,7 +637,7 @@ def getRequestForModule():
       json_dump = json.dumps(blocks)
       resp += "data: "+json_dump
       resp += "\nid: "+hashlib.md5(json_dump.encode("utf-8")).hexdigest()
-      #resp += "\nretry: 2000"
+      resp += "\nretry: 2000"
     else:
       resp += "\ndata: {}"
       resp +="\nid: 0"
