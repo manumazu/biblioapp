@@ -626,8 +626,10 @@ def getRequestForModule():
 
       #hard remove 
       for data in datas_remove:
-        #time.sleep(1) #wait for other clients before remove
-        db.del_request(session['app_id'], data['led_column'], data['row'])        
+        diff = tools.seconds_between_now(data['date_add'])
+        #wait for other clients before remove
+        if diff > 3:
+          db.del_request(session['app_id'], data['led_column'], data['row'])      
         
     #print(blocks)
 

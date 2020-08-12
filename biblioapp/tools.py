@@ -198,3 +198,9 @@ def formatBookApi(api, data, isbn):
 
 def get_leds_effects():
   return [ 'rainbow', 'rainbowWithGlitter', 'confetti', 'sinelon' , 'juggle', 'bpm', 'snowSparkle', 'fadeOut' ]
+
+
+def seconds_between_now(d1):
+    #d1 = datetime.strptime(str(d1), "%Y-%m-%d %H:%M:%S")
+    d2 = getNow()
+    return abs((d2 - d1).seconds)
