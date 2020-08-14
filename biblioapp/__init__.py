@@ -621,7 +621,8 @@ def getRequestForModule():
     if datas_remove:
       #soft remove   
       for data in datas_remove:
-        positions_remove.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
+        if (source == 'mobile' and data['client']=='server') or (source == 'server'):
+          positions_remove.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
         'interval':data['range'], 'id_tag':'', 'color':'', 'id_node':data['id_node'], 'client':data['client']})
 
       positions_remove.sort(key=tools.sortPositions)
