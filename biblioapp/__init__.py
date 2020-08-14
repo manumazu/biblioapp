@@ -169,8 +169,10 @@ def listCategories():
     token = models.get_token('guest',flask_login.current_user.id)
     if categories:
       for i in range(len(categories)):
+        hasRequest = db.get_request_for_tag(session['app_id'], categories[i]['id'])
         categories[i]['url'] = url_for('locateBooksForTag',tag_id=categories[i]['id'])
         categories[i]['token'] = token
+        categories[i]['hasRequest'] = hasRequest
         if categories[i]['color'] is not None:
           colors = categories[i]['color'].split(",")
           categories[i]['red'] = colors[0]
@@ -562,13 +564,13 @@ def locateBooksForTag(tag_id):
     
       #manage request
       db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], \
-        address['led_column'], 'book', client, action)
+        address['led_column'], 'book', client, action, tag_id, tag['color'])
 
       if tag['color'] is None:
         tag['color'] = ''
 
       positions.append({'item':book['title'], 'action':action, 'row':address['row'], 'led_column':address['led_column'], \
-        'interval':address['range'], 'color':tag['color'], 'id_node':node['id_node'], 'client':client})
+        'interval':address['range'], 'id_tag':tag_id, 'color':tag['color'], 'id_node':node['id_node'], 'client':client})
 
   '''get elements for block build'''
   positions.sort(key=tools.sortPositions)
@@ -607,7 +609,8 @@ def getRequestForModule():
         #send display request only for server (for mobile, leds are already displayed)
         if (source == 'mobile' and data['client']=='server') or (source == 'server'):
           positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
-        'interval':data['range'], 'color':'', 'id_node':data['id_node'], 'client':data['client']})
+        'interval':data['range'], 'id_tag':data['id_tag'], 'color':data['color'], 'id_node':data['id_node'], \
+        'client':data['client']})
 
       positions_add.sort(key=tools.sortPositions)
       blocks = tools.build_block_position(positions_add, 'add')
@@ -619,7 +622,7 @@ def getRequestForModule():
       #soft remove   
       for data in datas_remove:
         positions_remove.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
-        'interval':data['range'], 'color':'', 'id_node':data['id_node'], 'client':data['client']})
+        'interval':data['range'], 'id_tag':'', 'color':'', 'id_node':data['id_node'], 'client':data['client']})
 
       positions_remove.sort(key=tools.sortPositions)
       blocks += tools.build_block_position(positions_remove, 'remove')
@@ -686,6 +689,8 @@ def listAuthors():
           for i in range(len(items)):
             items[i]['url'] = url_for('locateBooksForTag',tag_id=items[i]['id'])
             items[i]['token'] = token
+            hasRequest = db.get_request_for_tag(session['app_id'], items[i]['id'])
+            items[i]['hasRequest'] = hasRequest
           #data['elements'][j]['items'] = items
         data['elements'].append({'initial':alphabet[j],'items':items})
       response = app.response_class(

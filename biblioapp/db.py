@@ -211,13 +211,25 @@ def get_request_for_position(app_id, position, row) :
     return row
   return False 
 
-def set_request(app_id, node_id, row, column, interval, led_column, node_type, client, action) :
+def get_request_for_tag(app_id, tag_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT * FROM biblio_request where id_app=%s and `id_tag`=%s \
+    and `action`='add'", (app_id, tag_id))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False   
+
+def set_request(app_id, node_id, row, column, interval, led_column, node_type, client, action, tag_id = None, color = None) :
   now = tools.getNow()
   mysql = get_db()
   mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `id_node`, `node_type`, `row`, `column`, `range`, \
-    `led_column`, `client`, `action`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE \
-    `date_add`=%s, `range`=%s, `led_column`=%s, `client`=%s, `action`=%s", (app_id, node_id, node_type, row, column, \
-      interval, led_column, client, action, now.strftime("%Y-%m-%d %H:%M:%S"), interval, led_column, client, action))
+    `led_column`, `client`, `action`, `id_tag`, `color`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) \
+    ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s, `led_column`=%s, `client`=%s, `action`=%s", (app_id, node_id, node_type,\
+     row, column, interval, led_column, client, action, tag_id, color, now.strftime("%Y-%m-%d %H:%M:%S"), interval, led_column, \
+     client, action))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
