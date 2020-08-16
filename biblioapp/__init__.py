@@ -663,7 +663,7 @@ def getRequestForModule():
 def setResetForModule():
   globalVars = initApp()  
   if globalVars['arduino_map'] != None:
-    data = db.clean_request(session['app_id'])#clean all module's request
+    data = db.set_request_remove(session['app_id'])#force remove for all module's request
     response = app.response_class(
           response=json.dumps(data),
           mimetype='application/json'

@@ -271,6 +271,14 @@ def clean_request(app_id) :
   mysql['conn'].close()
   return True
 
+def set_request_remove(app_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_request SET `action`='remove' WHERE `id_app`=%s and action='add'",(app_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True  
+
 
 ''' manage book '''
 def get_bookapi(isbn, user_id):
