@@ -272,8 +272,10 @@ def clean_request(app_id) :
   return True
 
 def set_request_remove(app_id) :
+  now = tools.getNow()
   mysql = get_db()
-  mysql['cursor'].execute("UPDATE biblio_request SET `action`='remove' WHERE `id_app`=%s and action='add'",(app_id))
+  mysql['cursor'].execute("UPDATE biblio_request SET `action`='remove', `date_add`=%s WHERE `id_app`=%s and action='add'",\
+    (now.strftime("%Y-%m-%d %H:%M:%S"), app_id))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
