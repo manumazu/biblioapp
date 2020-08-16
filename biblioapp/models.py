@@ -1,4 +1,4 @@
-from biblioapp import app, db, tools, flask_login, login_manager, session, hashlib, redirect, url_for, request, jsonify
+from biblioapp import app, db, tools, flask_login, login_manager, session, hashlib, redirect, url_for, request, jsonify, Response
 from time import time
 import jwt
 
@@ -75,7 +75,15 @@ def request_loader(request):
 def unauthorized_handler():
     #return 'Unauthorized'
     if 'token' in request.args:
-        return jsonify(success=False,
+        #manage error response for request with SSE
+        if 'uuid' in request.args and 'request' in request.path:
+            resp = "event: error\n"
+            resp += "data:Unauthorized"
+            resp += "\nretry: 5000"
+            resp += "\n\n"
+            return Response(resp, status=200, mimetype='text/event-stream')    
+        else:
+            return jsonify(success=False,
                        data={'token_required': True},
                        message='Authorize please to access this page.'), 401
     else:
