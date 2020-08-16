@@ -603,24 +603,29 @@ def getRequestForModule():
       
     positions_add = []
     blocks = []
-    datas_add = db.get_request(session['app_id'], 'add')
+    if source == 'mobile':
+      datas_add = db.get_request_for_mobile(session['app_id'], 'add', 0)
+    else:
+      datas_add = db.get_request(session['app_id'], 'add')
     if datas_add:      
       for data in datas_add:
-        #send display request only for server (for mobile, leds are already displayed)
-        if (source == 'mobile' and data['client']=='server') or (source == 'server'):
-          positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
+        positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
         'interval':data['range'], 'id_tag':data['id_tag'], 'color':data['color'], 'id_node':data['id_node'], \
         'client':data['client']})
+        #flag sent nodes for mobile
+        if source == 'mobile':
+          db.set_request_sent(session['app_id'], data['id_node'], 1)
 
       positions_add.sort(key=tools.sortPositions)
       blocks = tools.build_block_position(positions_add, 'add')
 
-    positions_remove = []
+    positions_remove = []  
     datas_remove = db.get_request(session['app_id'], 'remove')
     resp = "event: ping\n"
     if datas_remove:
       #soft remove   
       for data in datas_remove:
+        #send remove for mobile only when request come from server 
         if (source == 'mobile' and data['client']=='server') or (source == 'server'):
           positions_remove.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
         'interval':data['range'], 'id_tag':'', 'color':'', 'id_node':data['id_node'], 'client':data['client']})
