@@ -538,7 +538,7 @@ def locateBook():
 
 @app.route('/locate_for_tag/<tag_id>')  
 @flask_login.login_required
-def locateBooksForTag(tag_id):
+def locateBooksForTag(tag_id, methods=['GET', 'POST']):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
   tag = db.get_tag_by_id(tag_id)
