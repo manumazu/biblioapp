@@ -361,6 +361,17 @@ def stats_positions(app_id, rownum):
   if row:
     return row 
 
+def get_borrowed_books(app_id):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT * FROM biblio_position bp WHERE bp.id_app=%s and bp.item_type='book' and bp.borrowed = 1", \
+    (app_id))
+  row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False
+
 def set_borrow_book(app_id, item_id, mode) :
   if mode == 'add':
     borrowed = 1

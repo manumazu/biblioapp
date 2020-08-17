@@ -456,6 +456,39 @@ def ajaxCategories():
   )
   return response
 
+#get list of borrowed books
+@app.route('/borrowed')
+@flask_login.login_required
+def borrowedBooks():
+  globalVars = initApp()
+  if globalVars['arduino_map'] != None:
+    addresses = db.get_borrowed_books(session.get('app_id'))
+    data = {}
+    data['list_title'] = "Borrowed books"
+    if addresses:
+        books = []
+        #for address in addresses:
+        for i in range(len(addresses)):
+          book = db.get_book(addresses[i]['id_item'], globalVars['arduino_map']['user_id'])
+          books.append(book)
+          hasRequest = db.get_request_for_position(session.get('app_id'), addresses[i]['position'], addresses[i]['row'])
+          books[i]['address'] = addresses[i]
+          books[i]['hasRequest'] = hasRequest
+          books[i]['arduino_name'] = globalVars['arduino_map']['arduino_name']
+          books[i]['app_id'] = session.get('app_id')     
+          books[i]['color'] = '255,0,0'
+        data['items'] = books
+    #send json when token mode
+    if('token' in request.args):
+      response = app.response_class(
+        response=json.dumps(data),
+        mimetype='application/json'
+      )
+      return response     
+    return render_template('borrowed.html', books=books, user_login=globalVars['user_login'], \
+      shelf_infos=globalVars['arduino_map'])
+  abort(404)
+
 #post request from app
 @app.route('/borrow/', methods=['GET'])
 @flask_login.login_required
@@ -483,6 +516,7 @@ def locateBook():
   globalVars = initApp()
   action = 'add'
   positions = []
+  color = ''
 
   '''get form request params'''
   if (request.method == 'POST'):
@@ -493,8 +527,8 @@ def locateBook():
     book_id = request.form.get('book_id')
     leds_range = request.form.get('range')
     address = db.get_position_for_book(app_id, book_id)
-    led_column = db.set_position(app_id, book_id, column, row, leds_range, 'book')
-    #led_column = request.form.get('led_column')
+    if address['borrowed'] == 1:
+      color = '255,0,0'
     if 'remove_request' in request.form:
       action = 'remove'
 
@@ -516,7 +550,7 @@ def locateBook():
 
   #manage request
   db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'], \
-    'book', client, action)
+    'book', client, action, None, color)
 
   #send data for mobile
   if('token' in request.args):

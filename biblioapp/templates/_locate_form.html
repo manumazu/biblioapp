@@ -1,4 +1,4 @@
-{% if 'tag' in request.path %}
+{% if 'tag' in request.path or 'borrowed' in request.path %}
   <!-- for tag list tpl-->
   <form action="/locate/" method="post" class="form-horizontal">
     <input type="hidden" name="range" id="range" value="{{ book['address']['range'] }}">
