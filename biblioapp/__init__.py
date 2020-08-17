@@ -465,8 +465,8 @@ def borrowedBooks():
     addresses = db.get_borrowed_books(session.get('app_id'))
     data = {}
     data['list_title'] = "Borrowed books"
+    books = []
     if addresses:
-        books = []
         #for address in addresses:
         for i in range(len(addresses)):
           book = db.get_book(addresses[i]['id_item'], globalVars['arduino_map']['user_id'])
@@ -477,7 +477,7 @@ def borrowedBooks():
           books[i]['arduino_name'] = globalVars['arduino_map']['arduino_name']
           books[i]['app_id'] = session.get('app_id')     
           books[i]['color'] = '255,0,0'
-        data['items'] = books
+    data['items'] = books
     #send json when token mode
     if('token' in request.args):
       response = app.response_class(
