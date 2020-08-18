@@ -2,6 +2,7 @@
 {% block title %}Authors{% endblock %}
 {% block styles %}
     {{super()}}
+   	<link rel="alternate" href="android-app://com.bearstech.bibliobus/https/bibliob.us/locate_for_tag/.*" /> 
 {% endblock %}
 
 {% block body %}
@@ -24,7 +25,7 @@
 		    <ul>
 		  	{%for author in authors %}
 			<li><a href="/tag/{{ author['id'] }}">{{ author['tag'] }}</a>
-				<a href="{{ url_for('locateBooksForTag', tag_id=author['id']) }}"><span class="badge badge-pill badge-success">Locate</span></a>
+				<a href="{{ url_for('locateBooksForTag', tag_id=author['id'], uuid=uuid_encode) }}"><span class="badge badge-pill badge-success">Locate</span></a>
 			</li>
 		  	{% endfor %}
 		    </ul>

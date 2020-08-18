@@ -40,6 +40,13 @@ def uuid_decode(encode):
   except ValueError:
     return False
 
+def uuid_encode(string):
+  try:
+    encode = base64.b64encode(string.encode('utf-8'))
+    return encode
+  except ValueError:
+    return False    
+
 #def set_token(email):
 #  return hashlib.md5(email.encode('utf-8')).hexdigest()
 

@@ -102,7 +102,7 @@ def verify_token(role,token):
         return
     #when a session is open return it
     if 'email' in session and id == session['email']:
-        print(id)
+        #print(id)
         return session
     return db.get_user(id)
 

@@ -192,7 +192,7 @@ def listCategories():
       user_id = globalVars['arduino_map']['user_id']
       categories = db.get_categories_for_user(user_id)    
       return render_template('categories.html', user_login=globalVars['user_login'], categories=categories, \
-      shelf_infos=globalVars['arduino_map'])
+      shelf_infos=globalVars['arduino_map'], uuid_encode=tools.uuid_encode(globalVars['arduino_map']['id_ble']))
     abort(404)
 
 @app.route("/app/")
@@ -741,8 +741,8 @@ def listAuthors():
     #for web
     else:
       return render_template('authors.html', user_login=flask_login.current_user.name, db=db, \
-          user_id=globalVars['arduino_map']['user_id'], \
-        shelf_infos=globalVars['arduino_map'])    
+          user_id=globalVars['arduino_map']['user_id'], shelf_infos=globalVars['arduino_map'], 
+          uuid_encode=tools.uuid_encode(globalVars['arduino_map']['id_ble'])) 
   abort(404)    
 
 @app.route('/booksearch/', methods=['GET', 'POST'])
