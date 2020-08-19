@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block title %}Bibliobus{% endblock %}
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+{% block content %}
+
+  <!-- Content section -->
+  <section class="py-5">
+    <div class="container">
+      <h1>Règles de confidentialité pour votre équipement</h1>
+      <p class="lead">L'application Biblioapp a besoin d'utiliser les ressources de votre équipement (smartphone, tablette) pour pouvoir fonctionner.</p>
+      <p>- <strong>Bluetooth</strong> : vous devez activer et accpeter l'utilisation du Bluetooth sur votre appareil pour pouvoir vous connecter au module Bibus qui doit être installé et connecté à votre bibliothèque.</p>
+      <p>- <strong>Caméra</strong> : vous devez accepter son utilisation par l'application pour pouvoir scanner les codes barres des codes ISBN pour les livres à référencer dans votre bibliothèque.</p>
+    </div>
+  </section>
+
+  <!-- Content section -->
+  <section class="py-5">
+    <div class="container">
+      <h1>Règles de confidentialité pour vos données</h1>
+      <p class="lead">Vos données personnelles (email, contenus de bibliothèque) sont récoltées uniquement dans le but de faire fonctionner l'application. Elles ne sont pas partagées avec d'autres systèmes que celui qui régit l'application.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Bibliob.us 2020</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+{% endblock %}
+
+{% block scripts %}
+  {{super()}}
+  <script src="{{url_for('static', filename='app.js')}}"></script>
+{% endblock %}
+
+{% endblock %}
