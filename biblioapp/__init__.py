@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, Response
 from flask_bootstrap import Bootstrap
-import flask_login, hashlib, base64, math, time
+import flask_login, hashlib, base64, math, time, os
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_session import Session
@@ -1224,7 +1224,25 @@ def logout():
 
 @app.route('/apple-app-site-association')
 def appleAppSiteAssociation():
-  return render_template('apple-app-site-association')
+  SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+  json_url = os.path.join(SITE_ROOT, 'static', 'apple-app-site-association')
+  data = json.load(open(json_url))
+  response = app.response_class(
+      response=json.dumps(data),
+      mimetype='application/json'
+    )
+  return response
+
+@app.route('/.well-known/assetlinks.json')
+def assetlinks():
+  SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+  json_url = os.path.join(SITE_ROOT, 'static', 'assetlinks.json')
+  data = json.load(open(json_url))
+  response = app.response_class(
+      response=json.dumps(data),
+      mimetype='application/json'
+    )
+  return response
 
 @app.route('/privacy')
 def privacy():
