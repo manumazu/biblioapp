@@ -1222,5 +1222,9 @@ def logout():
     flash('Logged out')
     return redirect(url_for('login', _scheme='https', _external=True))
 
+@app.route('/apple-app-site-association')
+def appleAppSiteAssociation():
+  return render_template('apple-app-site-association')
+
 if __name__ == "__main__":
-    app.run(debug=True)
+  app.run(debug=True)
