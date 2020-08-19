@@ -1,0 +1,5 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target" : { "namespace": "Bibliobus", "package_name": "com.bearstech.bibliobus",
+               "sha256_cert_fingerprints": ["SHA256: 85:3E:C0:F3:9C:A3:1A:E9:68:41:FC:F0:B5:8D:8D:C5:41:DB:02:88:0D:29:FD:A9:85:BD:DD:A4:A2:16:4B:47"] }
+}]
