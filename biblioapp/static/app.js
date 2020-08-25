@@ -64,3 +64,12 @@
 	        updatePreview();
 	    });	    
 	}
+
+//for service worker
+if("serviceWorker" in navigator) {
+	navigator.serviceWorker.register("/sw.js").then(function(e){
+		console.log("App: Achievement unlocked.");
+	}).catch(function(e){
+		console.error("App: Crash for register",e);
+	});
+}

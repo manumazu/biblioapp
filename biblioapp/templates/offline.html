@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}Bibliobus{% endblock %}
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+{% block content %}
+ <!-- Header - set the background image for the header in the line below -->
+  <header class="py-5 bg-image-full" style="background-image: url('/static/img/presentation_2_1852x1040.jpg');">
+    <img class="img-fluid d-block mx-auto" src="/static/img/three-books_gray.svg" alt="Biblio App" width="200px">
+  </header>
+
+  <!-- Content section -->
+  <section class="py-5">
+    <div class="container">
+      <h1>Vous êtes hors ligne.</h1>
+      <p class="lead">Réactivez une connexion Internet pour charger le contenu du site correctement.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Bibliob.us 2020</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+{% endblock %}
+
+{% block scripts %}
+  {{super()}}
+  <script src="{{url_for('static', filename='app.js')}}"></script>
+{% endblock %}
+
+{% endblock %}

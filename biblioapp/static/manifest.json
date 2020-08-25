@@ -1,0 +1,21 @@
+{
+    "short_name": "Bibliobus",
+    "name": "Bibliobus",
+    "icons": [
+      {
+        "src": "/static/img/logo-192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/static/img/logo-512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ],
+    "start_url": "https://bibliob.us",
+    "background_color": "#2b3e50",
+    "display": "standalone",
+    "scope": "https://bibliob.us",
+    "theme_color": "#343a40"
+}

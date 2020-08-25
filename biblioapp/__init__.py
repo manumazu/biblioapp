@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, Response
+from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
+Response, send_from_directory
 from flask_bootstrap import Bootstrap
 import flask_login, hashlib, base64, math, time, os
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -1222,31 +1223,23 @@ def logout():
     flash('Logged out')
     return redirect(url_for('login', _scheme='https', _external=True))
 
+@app.route('/privacy')
+def privacy():
+  return render_template('privacy.html') 
+
+@app.route('/offline')
+def offline():
+  return render_template('offline.html')       
+
 @app.route('/apple-app-site-association')
-def appleAppSiteAssociation():
-  SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-  json_url = os.path.join(SITE_ROOT, 'static', 'apple-app-site-association')
-  data = json.load(open(json_url))
-  response = app.response_class(
-      response=json.dumps(data),
-      mimetype='application/json'
-    )
-  return response
+@app.route('/manifest.json')
+@app.route('/sw.js')
+def static_from_root():
+    return send_from_directory(app.static_folder, request.path[1:])
 
 @app.route('/.well-known/assetlinks.json')
 def assetlinks():
-  SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-  json_url = os.path.join(SITE_ROOT, 'static', 'assetlinks.json')
-  data = json.load(open(json_url))
-  response = app.response_class(
-      response=json.dumps(data),
-      mimetype='application/json'
-    )
-  return response
-
-@app.route('/privacy')
-def privacy():
-  return render_template('privacy.html')  
+  return send_from_directory(app.static_folder, 'assetlinks.json') 
 
 if __name__ == "__main__":
   app.run(debug=True)
