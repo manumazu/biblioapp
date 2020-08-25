@@ -13,9 +13,9 @@
         "sizes": "512x512"
       }
     ],
-    "start_url": "https://bibliob.us",
-    "background_color": "#2b3e50",
+    "start_url": "/",
+    "background_color": "#343a40",
     "display": "standalone",
-    "scope": "https://bibliob.us",
-    "theme_color": "#343a40"
+    "scope": "/",
+    "theme_color": "#2b3e50"
 }
