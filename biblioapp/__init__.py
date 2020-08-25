@@ -1233,6 +1233,7 @@ def offline():
 
 @app.route('/apple-app-site-association')
 @app.route('/manifest.json')
+@app.route('/favicon.ico')
 @app.route('/sw.js')
 def static_from_root():
     return send_from_directory(app.static_folder, request.path[1:])
