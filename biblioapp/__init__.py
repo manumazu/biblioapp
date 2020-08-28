@@ -1044,30 +1044,48 @@ def customEffects():
 @flask_login.login_required
 def ajaxSearch():
   globalVars = initApp()
-  results = db.search_book(session['app_id'], request.args.get('term'))
   term = request.args.get('term')
   data = {}
   if len(term) > 2:
+    results = db.search_book(session['app_id'], term)
     #search for mobile app
     if request.method == 'GET' and request.args.get('token'):
-      books = []    
+      books = []   
+      #when results
       if results:
-          #for node in nodes:
-          for i in range(len(results)):
-              book = db.get_book(results[i]['id'], globalVars['arduino_map']['user_id'])
-              books.append(book)
-              app_modules = db.get_arduino_for_user(flask_login.current_user.id)
-              for module in app_modules:
-                address = db.get_position_for_book(module['id'], book['id'])
-                if address:
-                  books[i]['address'] = address
+
+        #search for tag
+        tag_id = None
+        tag_color = None        
+        tag = db.get_tag(term)
+        if tag:
+          tag_id = tag['id']
+          tag_color = tag['color']
+
+        for i in range(len(results)):
+          book = db.get_book(results[i]['id'], globalVars['arduino_map']['user_id'])
+          books.append(book)
+          app_modules = db.get_arduino_for_user(flask_login.current_user.id)
+          for module in app_modules:
+            address = db.get_position_for_book(module['id'], book['id'])
+            if address:
+              books[i]['address'] = address
+              books[i]['hasRequest'] = False
+              #for display mode, force set request 
+              if request.args.get('display')==1:
+                db.set_request(session['app_id'], book['id'], address['row'], address['position'], \
+                  address['range'], address['led_column'], 'book', 'server', 'add', tag_id, tag_color)
+                books[i]['hasRequest'] = True
+
           data['list_title'] = str(len(results)) 
           data['list_title'] += " books " if len(results) > 1 else " book "
           data['list_title'] += "for \""+request.args.get('term')+"\""
+      #no result
       else:
         data['list_title'] = "No result for \""+request.args.get('term')+"\""
       data['items'] = books
-    #autcomplete for book permutation
+
+    #autcomplete for book permutation for server
     else:
       data = []
       if results:
