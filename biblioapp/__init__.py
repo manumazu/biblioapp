@@ -1072,7 +1072,7 @@ def ajaxSearch():
               books[i]['address'] = address
               books[i]['hasRequest'] = False
               #for display mode, force set request 
-              if request.args.get('display')==1:
+              if 'display' in request.args and int(request.args.get('display'))==1:
                 db.set_request(session['app_id'], book['id'], address['row'], address['position'], \
                   address['range'], address['led_column'], 'book', 'server', 'add', tag_id, tag_color)
                 books[i]['hasRequest'] = True
