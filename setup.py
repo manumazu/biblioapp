@@ -12,6 +12,7 @@ setup(
         'flask-login',
         'flask-mail',
         'pyjwt',
-        'flask-session'
+        'flask-session',
+        'flask-cors'
     ],
 )

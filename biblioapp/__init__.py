@@ -5,8 +5,10 @@ import flask_login, hashlib, base64, math, time, os
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_session import Session
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 app.config.from_object("config")
 mail = Mail(app)
 #Session(app)
