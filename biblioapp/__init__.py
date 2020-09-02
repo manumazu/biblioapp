@@ -8,7 +8,7 @@ from flask_session import Session
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config.from_object("config")
 mail = Mail(app)
 #Session(app)
@@ -97,7 +97,7 @@ def editArduino(app_id):
   abort(404)
 
 #get module infos from arduino for current arduino_name
-@app.route('/module/<uuid>/')
+@app.route('/api/module/<uuid>/')
 def getModule(uuid):
   uuid = tools.uuid_decode(uuid)
   if uuid:
@@ -161,11 +161,12 @@ def newArduino(app_id = None):
   abort(404)
 
 @app.route('/categories', methods=['GET'])
+@app.route('/api/categories', methods=['GET'])
 @flask_login.login_required
 def listCategories():
   globalVars = initApp()
   #for mobile app
-  if('uuid' in request.args):
+  if('api' in request.path and 'uuid' in request.args):
     categories = db.get_categories_for_app(session['app_id'])
     data = {}
     data['list_title'] = session['app_name']
@@ -350,6 +351,7 @@ def ajaxDelPosition():
   return response
 
 @app.route('/tag/<tag_id>')
+@app.route('/api/tag/<tag_id>')
 @flask_login.login_required
 def listNodesForTag(tag_id):
   globalVars = initApp()
@@ -382,7 +384,7 @@ def listNodesForTag(tag_id):
                   books[i]['color'] = tag['color']
         data['items'] = books
     #send json when token mode
-    if('token' in request.args):
+    if('api' in request.path and 'token' in request.args):
       response = app.response_class(
         response=json.dumps(data),
         mimetype='application/json'
@@ -411,6 +413,7 @@ def ajaxTagColor(tag_id):
 
 
 @app.route('/book/<book_id>')
+@app.route('/api/book/<book_id>')
 @flask_login.login_required
 def getBook(book_id):
   globalVars = initApp()
@@ -434,7 +437,7 @@ def getBook(book_id):
           book['app_id'] = module['id']
           book['hasRequest'] = hasRequest
       #send json when token mode
-      if('token' in request.args):
+      if('api' in request.path and 'token' in request.args):
         response = app.response_class(
           response=json.dumps(book),
           mimetype='application/json'
@@ -461,6 +464,7 @@ def ajaxCategories():
 
 #get list of borrowed books
 @app.route('/borrowed')
+@app.route('/api/borrowed')
 @flask_login.login_required
 def borrowedBooks():
   globalVars = initApp()
@@ -482,7 +486,7 @@ def borrowedBooks():
           books[i]['color'] = '255,0,0'
     data['items'] = books
     #send json when token mode
-    if('token' in request.args):
+    if('api' in request.path and 'token' in request.args):
       response = app.response_class(
         response=json.dumps(data),
         mimetype='application/json'
@@ -494,17 +498,17 @@ def borrowedBooks():
 
 #post request from app
 @app.route('/borrow/', methods=['GET'])
+@app.route('/api/borrow/', methods=['GET'])
 @flask_login.login_required
 def borrowBook():
   globalVars = initApp()
   ret = []
-  if request.method == 'GET' and 'token' in request.args:
+  if('api' in request.path and 'token' in request.args):
     app_id = session['app_id']
     book_id = request.args.get('book_id')
     action = request.args.get('action')
     db.set_borrow_book(app_id, book_id, action)
     address = db.get_position_for_book(app_id, book_id)
-  if('token' in request.args):
     ret.append({'item':book_id,'action':'borrow','address':address}) 
     response = app.response_class(
       response=json.dumps(ret),
@@ -514,6 +518,7 @@ def borrowBook():
 
 #post request from app
 @app.route('/locate/', methods=['GET', 'POST'])
+@app.route('/api/locate/', methods=['GET', 'POST'])
 @flask_login.login_required
 def locateBook():
   globalVars = initApp()
@@ -536,7 +541,7 @@ def locateBook():
       action = 'remove'
 
   '''get params from arduino'''      
-  if (request.method == 'GET') and ('token' in request.args):
+  if ('api' in request.path and 'token' in request.args) and (request.method == 'GET'):
     client = 'mobile'
     app_id = session['app_id']
     book_id = request.args.get('book_id')
@@ -556,7 +561,7 @@ def locateBook():
     'book', client, action, None, color)
 
   #send data for mobile
-  if('token' in request.args):
+  if('api' in request.path and 'token' in request.args):
     data = {'action':action, 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
       'id_node':book_id, 'borrowed':address['borrowed']}
     if color != None :
@@ -573,7 +578,8 @@ def locateBook():
     return redirect(url_for('listAuthors', _scheme='https', _external=True))
   return redirect(url_for('myBookShelf', _scheme='https', _external=True))
 
-@app.route('/locate_for_tag/<tag_id>')  
+@app.route('/locate_for_tag/<tag_id>') 
+@app.route('/api/locate_for_tag/<tag_id>')  
 @flask_login.login_required
 def locateBooksForTag(tag_id, methods=['GET', 'POST']):
   globalVars = initApp()
@@ -615,7 +621,7 @@ def locateBooksForTag(tag_id, methods=['GET', 'POST']):
   #print(blocks)
 
   #send json when token mode
-  if('token' in request.args):
+  if('api' in request.path and 'token' in request.args):
     response = app.response_class(
       response=json.dumps(blocks),
       mimetype='application/json'
@@ -627,6 +633,7 @@ def locateBooksForTag(tag_id, methods=['GET', 'POST']):
 
 #get request from arduino for current arduino_name
 @app.route('/request', methods=['GET'])
+@app.route('/api/request', methods=['GET'])
 @flask_login.login_required
 def getRequestForModule():
   globalVars = initApp()
@@ -635,7 +642,7 @@ def getRequestForModule():
     #get request for distant mobile app
     #if('uuid' in request.args):
     source = 'server'
-    if 'uuid' in request.args and 'token' in request.args:
+    if 'api' in request.path and 'token' in request.args:
       source = 'mobile'
       
     positions_add = []
@@ -695,7 +702,7 @@ def getRequestForModule():
   #abort(404)
 
 #remove all request from arduino for current module
-@app.route('/reset', methods=['GET'])
+@app.route('/api/reset', methods=['GET'])
 @flask_login.login_required
 def setResetForModule():
   globalVars = initApp()  
@@ -711,12 +718,13 @@ def setResetForModule():
 
 #get authors liste from arduino 
 @app.route('/authors', methods=['GET'])
+@app.route('/api/authors', methods=['GET'])
 @flask_login.login_required
 def listAuthors():
   globalVars = initApp()  
   if globalVars['arduino_map'] != None:
     #for mobile app 
-    if('uuid' in request.args):
+    if('api' in request.path and 'uuid' in request.args):
       data = {}
       token = models.get_token('guest',flask_login.current_user.id)
       data['list_title'] = session['app_name']
@@ -749,6 +757,7 @@ def listAuthors():
   abort(404)    
 
 @app.route('/booksearch/', methods=['GET', 'POST'])
+@app.route('/api/booksearch/', methods=['GET', 'POST'])
 @flask_login.login_required
 def searchBookReference():
   import requests
@@ -786,7 +795,7 @@ def searchBookReference():
           shelf_infos=globalVars['arduino_map'])
 
     '''manage infos from mobile app'''
-    if request.method == 'GET' and request.args.get('token') and request.args.get('isbn'):
+    if 'api' in request.path and request.args.get('token') and request.args.get('isbn'):
       res = []
       '''Search books with googleapis api'''
       if request.args.get('search_api')=='googleapis':
@@ -820,6 +829,7 @@ def searchBookReference():
   abort(404)
 
 @app.route('/bookreferencer/', methods=['POST', 'GET'])
+@app.route('/api/bookreferencer/', methods=['POST', 'GET'])
 @flask_login.login_required
 def bookReferencer():
   globalVars = initApp()
@@ -834,7 +844,7 @@ def bookReferencer():
     #return render_template('bookreferencer.html', user_login=globalVars['user_login'])    
 
   '''save book from mobile app'''
-  if request.method == 'GET' and request.args.get('token') and request.args.get('save_bookapi'):
+  if 'api' in request.path and request.args.get('token') and request.args.get('save_bookapi'):
     import requests
     ref = request.args.get('ref')
     isbn = request.args.get('isbn')
@@ -933,13 +943,14 @@ def bookDelete():
 
 
 @app.route('/customcodes', methods=['GET', 'POST'])
+@app.route('/api/customcodes', methods=['GET', 'POST'])
 @flask_login.login_required
 def customCodes():
   globalVars = initApp()
   if globalVars['arduino_map'] != None:
     #print(codes)
     #send json when token mode
-    if('token' in request.args):
+    if('api' in request.path and 'token' in request.args):
       codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], True)
       data = {}
       data['list_title'] = 'Your codes for ' + session['app_name']
@@ -970,6 +981,7 @@ def customCodes():
   abort(404)
 
 @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
+@app.route('/api/customcode/<code_id>', methods=['GET', 'POST'])
 @flask_login.login_required
 def customCode(code_id):
   globalVars = initApp()
@@ -986,7 +998,7 @@ def customCode(code_id):
     if data and len(data['customvars'])>0:
       customvars = json.loads(data['customvars'])
       #send json when token mode
-      if('token' in request.args):
+      if('api' in request.path and 'token' in request.args):
         response = app.response_class(
           response=json.dumps(data['customcode'].decode()),
           mimetype='application/json'
@@ -1025,6 +1037,7 @@ def customCodeTemplate(template):
   abort(404)
 
 @app.route('/customeffects')
+@app.route('/api/customeffects')
 @flask_login.login_required
 def customEffects():
   globalVars = initApp()
@@ -1043,6 +1056,7 @@ def customEffects():
   abort(404) 
 
 @app.route('/ajax_search/')
+@app.route('/api/ajax_search/')
 @flask_login.login_required
 def ajaxSearch():
   globalVars = initApp()
