@@ -1,5 +1,5 @@
 [{
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target" : { "namespace": "android_app", "package_name": "com.bearstech.bibliobus",
-               "sha256_cert_fingerprints": ["SHA256: 85:3E:C0:F3:9C:A3:1A:E9:68:41:FC:F0:B5:8D:8D:C5:41:DB:02:88:0D:29:FD:A9:85:BD:DD:A4:A2:16:4B:47"] }
+               "sha256_cert_fingerprints": ["FD:6C:E6:B4:05:31:89:00:C6:4E:73:B7:8A:41:B8:EA:6F:36:8D:1A:74:92:A6:68:52:CE:29:D2:E8:D6:8C:31"] }
 }]
