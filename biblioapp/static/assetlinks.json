@@ -2,4 +2,9 @@
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target" : { "namespace": "android_app", "package_name": "com.bearstech.bibliobus",
                "sha256_cert_fingerprints": ["FD:6C:E6:B4:05:31:89:00:C6:4E:73:B7:8A:41:B8:EA:6F:36:8D:1A:74:92:A6:68:52:CE:29:D2:E8:D6:8C:31"] }
+},
+{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target" : { "namespace": "android_app", "package_name": "com.ionic.bibliobus",
+               "sha256_cert_fingerprints": ["FD:6C:E6:B4:05:31:89:00:C6:4E:73:B7:8A:41:B8:EA:6F:36:8D:1A:74:92:A6:68:52:CE:29:D2:E8:D6:8C:31"] }
 }]
