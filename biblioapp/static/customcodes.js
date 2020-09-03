@@ -178,7 +178,7 @@ function saveCustomCode(code_id, customvars, published) {
 
 	//console.log(elements['customvars']);	
 
-	dest_url = '/customcodes/'; // new object
+	dest_url = '/customcodes'; // new object
 	if(code_id != 0) {
 		dest_url = '/customcode/'+code_id; // update current object
 	}
@@ -189,7 +189,7 @@ function saveCustomCode(code_id, customvars, published) {
   	      contentType: 'application/json',
   	      url: dest_url, 
   	      dataType: 'json',
-  	      complete: function(res){ window.location='/customcodes/?saved='+code_id; }
+  	      complete: function(res){ window.location='/customcodes?saved='+code_id; }
       });
 }
 
