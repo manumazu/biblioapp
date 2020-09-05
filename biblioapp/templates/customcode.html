@@ -52,6 +52,7 @@
 
 {% block scripts %}
   {{super()}}
+  <script src="{{url_for('static', filename='app.js')}}"></script>
    <script type="text/javascript">var max_leds = '{{ max_leds }}';</script>
    <script src="{{url_for('static', filename='customcodes.js')}}" async=""></script>
 {% endblock %}
