@@ -42,28 +42,48 @@
 
 /* color editor methods */
 
-  function getColor() {
-    // returns a string of red, green, blue values
-    var color = [];       
-    color.push($('#red').val());
-    color.push($('#green').val());
-    color.push($('#blue').val());
-    return color.join(',');
-	}
+function getColor() {
+// returns a string of red, green, blue values
+var color = [];       
+color.push($('#red').val());
+color.push($('#green').val());
+color.push($('#blue').val());
+return color.join(',');
+}
 
-	function updatePreview() {
-	    var c = getColor();
-	    $('#rgbText').text("Color is rgb(" + c  + ")");
-	    $('#previewColor').css('backgroundColor','rgb(' + c + ')');
-	}
+function updatePreview() {
+    var c = getColor();
+    $('#rgbText').text("Color is rgb(" + c  + ")");
+    $('#previewColor').css('backgroundColor','rgb(' + c + ')');
+}
 
-	function colorEditor() {
-	    $("#colorEditor").modal();
-	    updatePreview();
-	    $('input[type=range]').on('input', function () {
-	        updatePreview();
-	    });	    
-	}
+function colorEditor() {
+    $("#colorEditor").modal();
+    updatePreview();
+    $('input[type=range]').on('input', function () {
+        updatePreview();
+    });	    
+}
+
+function videosPresentation(contentId) {
+	$("#videosPresentation .modal-dialog .modal-content").each( function(index) {
+		$(this).hide();
+	});
+    $("#videosPresentation").modal();
+    $("#"+contentId).show(); 
+
+    //force stop video on closing modal box
+    $('#'+contentId+' .close').click(function(){
+    	var iframe = $('#'+contentId+' .modal-body .embedVideo')[0].contentWindow;
+    	iframe.postMessage('{"event":"command","func":"'+'stopVideo'+   '","args":""}', '*');
+	});
+}
+
+/*$('#videosPresentation .close').click(function(){
+  $('.embedVideo').each(function(){
+    $(this).stopVideo();
+  });
+});*/
 
 //for service worker
 if("serviceWorker" in navigator) {

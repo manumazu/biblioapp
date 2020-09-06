@@ -1,0 +1,64 @@
+	<div class="modal" id="videosPresentation">
+	  <div class="modal-dialog" role="document" style="max-width:600px !important;">
+
+	    <div class="modal-content bg-secondary" id="commandeVocale" style="display: none;">
+	      <div class="modal-header">
+	        <h5 class="modal-title">La commande vocale</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+			<iframe width="100%" height="315" class="embedVideo" src="https://www.youtube-nocookie.com/embed/WcScIaD1N-Q?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	      </div>
+	      <div class="modal-footer">
+	      	<p>La commande vocale fonctionne comme une recherche par mot clé. Elle permet d’extraire à partir d’une phrase type les mots clés à traiter. Il y a 2 types de commandes : “trouve” et “affiche”.</p> 
+
+			<p>Si je demande à l’appli “trouve les livres d'histoire”, le résultat  sera la liste des items trouvés pour le mot clé histoire (comme si j’avais saisi “histoire” dans la recherche).</p>
+
+			<p>Si je demande “affiche les livres d’histoire”, j’aurai le même résultat que précédemment et en plus les livres concernés seront allumés.</p>
+	      </div>
+	    </div>
+
+	   	<div class="modal-content bg-secondary" id="listeContenus" style="display: none;">
+	      <div class="modal-header">
+	        <h5 class="modal-title">Les listes de contenus</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+			<iframe width="100%" height="315" class="embedVideo" src="https://www.youtube-nocookie.com/embed/baHH_1vhDkI?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	      </div>
+	      <div class="modal-footer">
+			<p>2 types de listes issues de l'index sont accessibles depuis le menu </p>
+			
+			<ul>
+				<li>Liste des auteurs (liste par défaut) est une navigation alphabétique des initials de noms. On peut afficher ainsi facilement tous les livres d’un auteur, en bleu (couleur par défaut).</li>
+				<li>Liste des catégories :<br/>
+				Les catégories disposent de codes couleurs qu’on peut éditer via l’application de gestion de bibliothèque sur le serveur. Les livres d’une catégorie sont indiqués dans la bibliothèque par les leds avec le code couleur concerné, sinon en bleu</li>
+			</ul>
+			
+			<p>Chacune des listes est déclinable en une liste détaillée des ouvrages concernés. Et enfin, on peut aller voir la fiche détaillée d’un ouvrage en cliquant sur “more”. </p>
+
+	      </div>
+	    </div>
+
+	   	<div class="modal-content bg-secondary" id="effetsLumineux" style="display: none;">
+	      <div class="modal-header">
+	        <h5 class="modal-title">Les effets lumineux</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+			<iframe width="100%" height="315" class="embedVideo" src="https://www.youtube-nocookie.com/embed/gX644hvzfVE?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	      </div>
+	      <div class="modal-footer">
+            <p>Ce sont des effets qui sont programmés dans l’arduino, mais qu’on peut commander depuis l’appli mobile. La différence entre le code personnalisé qu’on peut jouer depuis le serveur, et le code enregistré dans l’arduino est qu’ils ne sont pas de même nature. </p>
+            <p>Le premier est exécuté de manière séquentiel par l’appli mobile et envoyé sous forme de message à l’arduino, tandis que l’autre est exécuté par l’arduino permettant des effets plus puissants (comme le fade in / fade out).</p>
+	      </div>
+	    </div>	    
+
+	  </div>
+	</div>
