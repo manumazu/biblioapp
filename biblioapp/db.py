@@ -502,7 +502,7 @@ def get_categories_for_app(id_user, id_app):
     INNER JOIN biblio_tag_user btu ON btn.id_tag = btu.id_tag \
     INNER JOIN biblio_book bb ON btn.id_node = bb.id \
     INNER JOIN biblio_position bp ON bb.id = bp.id_item and bp.item_type='book'\
-    WHERE bt.id_taxonomy=1 and bp.id_app=%s and btu.id_user=%s GROUP BY bt.id ORDER BY bt.tag", (id_user, id_app))
+    WHERE bt.id_taxonomy=1 and bp.id_app=%s and btu.id_user=%s GROUP BY bt.id ORDER BY bt.tag", (id_app, id_user))
   #print(mysql['cursor']._last_executed)
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
