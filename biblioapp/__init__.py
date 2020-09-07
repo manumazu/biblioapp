@@ -167,7 +167,7 @@ def listCategories():
   globalVars = initApp()
   #for mobile app
   if('api' in request.path and 'uuid' in request.args):
-    categories = db.get_categories_for_app(session['app_id'])
+    categories = db.get_categories_for_app(globalVars['arduino_map']['user_id'], session['app_id'])
     data = {}
     data['list_title'] = session['app_name']
     token = models.get_token('guest',flask_login.current_user.id)
@@ -357,7 +357,7 @@ def listNodesForTag(tag_id):
   globalVars = initApp()
   if globalVars['arduino_map'] != None:
     nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
-    tag = db.get_tag_by_id(tag_id)
+    tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['user_id'])
     data = {}
     data['list_title'] = tag['tag']
     client = 'server'
@@ -397,19 +397,21 @@ def listNodesForTag(tag_id):
 @app.route('/ajax_tag_color/<tag_id>', methods=['POST'])
 @flask_login.login_required
 def ajaxTagColor(tag_id):
-  if request.method == 'POST':
-    red = request.form['red'] 
-    green = request.form['green'] 
-    blue = request.form['blue']
-    color = red+','+green+','+blue
-    result = False
-    if db.set_color_for_tag(tag_id, color):
-      result = True
-    response = app.response_class(
-      response=json.dumps(result),
-      mimetype='application/json'
-    )
-    return response
+  globalVars = initApp()
+  if globalVars['arduino_map'] != None:  
+    if request.method == 'POST':
+      red = request.form['red'] 
+      green = request.form['green'] 
+      blue = request.form['blue']
+      color = red+','+green+','+blue
+      result = False
+      if db.set_color_for_tag(globalVars['arduino_map']['user_id'], tag_id, color):
+        result = True
+      response = app.response_class(
+        response=json.dumps(result),
+        mimetype='application/json'
+      )
+      return response
 
 
 @app.route('/book/<book_id>')
@@ -584,7 +586,7 @@ def locateBook():
 def locateBooksForTag(tag_id, methods=['GET', 'POST']):
   globalVars = initApp()
   nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
-  tag = db.get_tag_by_id(tag_id)
+  tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['user_id'])
   if tag['color'] is not None:
     colors = tag['color'].split(",")
     tag['red'] = colors[0]
@@ -925,6 +927,7 @@ def bookSave(book, user_id, tags = None):
     catTagIds = db.set_tags(tags.split(','),'Categories')
     if len(catTagIds)>0:
       db.set_tag_node(bookId, catTagIds)
+      db.set_tag_user(user_id, catTagIds)
   return bookId
 
 

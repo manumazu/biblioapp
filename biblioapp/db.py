@@ -495,13 +495,15 @@ def get_node_for_tag(id_tag, id_user):
     return row
   return False
 
-def get_categories_for_app(id_app):
+def get_categories_for_app(id_user, id_app):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT bt.id, bt.tag, bt.color, count(bb.id) as nbnode FROM `biblio_tags` bt \
+  mysql['cursor'].execute("SELECT bt.id, bt.tag, btu.color, count(bb.id) as nbnode FROM `biblio_tags` bt \
     INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
+    INNER JOIN biblio_tag_user btu ON btn.id_tag = btu.id_tag \
     INNER JOIN biblio_book bb ON btn.id_node = bb.id \
     INNER JOIN biblio_position bp ON bb.id = bp.id_item and bp.item_type='book'\
-    WHERE bt.id_taxonomy=1 and bp.id_app=%s GROUP BY bt.id ORDER BY bt.tag", id_app)
+    WHERE bt.id_taxonomy=1 and bp.id_app=%s and btu.id_user=%s GROUP BY bt.id ORDER BY bt.tag", (id_user, id_app))
+  #print(mysql['cursor']._last_executed)
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -511,10 +513,12 @@ def get_categories_for_app(id_app):
 
 def get_categories_for_user(id_user):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT bt.id, bt.tag, bt.color, count(bb.id) as nbnode FROM `biblio_tags` bt \
+  mysql['cursor'].execute("SELECT bt.id, bt.tag, btu.color, count(bb.id) as nbnode FROM `biblio_tags` bt \
     INNER JOIN biblio_tag_node btn ON bt.id = btn.id_tag \
+    INNER JOIN biblio_tag_user btu ON btn.id_tag = btu.id_tag \
     INNER JOIN biblio_book bb ON btn.id_node = bb.id \
-    WHERE bt.id_taxonomy=1 and bb.id_user=%s GROUP BY bt.id ORDER BY bt.tag", id_user)
+    WHERE bt.id_taxonomy=1 and bb.id_user=%s and btu.id_user=%s GROUP BY bt.id ORDER BY bt.tag", (id_user, id_user))
+  #print(mysql['cursor']._last_executed)
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -573,17 +577,19 @@ def get_tag(tag):
     return row
   return False
 
-def set_color_for_tag(id_tag, color):
+def set_color_for_tag(id_user, id_tag, color):
   mysql = get_db()
-  mysql['cursor'].execute("UPDATE biblio_tags SET color=%s WHERE id=%s", (color, id_tag))
+  mysql['cursor'].execute("UPDATE biblio_tag_user SET color=%s WHERE id_tag=%s and id_user=%s", (color, id_tag, id_user))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
   return True
 
-def get_tag_by_id(tag_id):
+def get_tag_by_id(tag_id, user_id):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, tag, color, id_taxonomy FROM biblio_tags WHERE id=%s", tag_id)
+  mysql['cursor'].execute("SELECT bt.id, bt.tag, btu.color, bt.id_taxonomy FROM biblio_tags bt \
+    LEFT JOIN biblio_tag_user btu ON bt.id = btu.id_tag and btu.id_user=%s \
+    WHERE id=%s", (user_id, tag_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -637,6 +643,16 @@ def set_tag_node(node, tagIds):
     mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
+
+def set_tag_user(user_id, tagIds):
+  mysql = get_db()
+  #print(tagIds)
+  for tag in tagIds:
+    mysql['cursor'].execute("INSERT INTO biblio_tag_user (`id_user`, `id_tag`) VALUES (%s, %s) ON DUPLICATE KEY UPDATE id_tag=%s", \
+    (user_id, tag['id'], tag['id']))
+    mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()  
 
 def get_user(email):
   mysql = get_db()
