@@ -359,12 +359,12 @@ def listNodesForTag(tag_id):
     nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
     tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['user_id'])
     data = {}
+    books = []
     data['list_title'] = tag['tag']
     client = 'server'
     if('token' in request.args):
       client = 'mobile'
     if nodes:
-        books = []
         #for node in nodes:
         for i in range(len(nodes)):
             book = db.get_book(nodes[i]['id_node'], globalVars['arduino_map']['user_id'])
