@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+{% block title %}User infos{% endblock %}
+{% block styles %}
+    {{super()}}
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+	<h1 class="mt-5 text-white font-weight-light">Udpate user infos</h1>
+
+	<form action="{{ url_for('userInfos') }}" method="POST"  class="form-horizontal">
+
+	<fieldset>
+		<div class="form-group row">
+			<label for="firstname" class="col-lg-1 col-form-label">firstname</label> 
+			<div class="col-lg-3">
+				<input type="text" name="firstname" value="{{ user['firstname'] }}" class="form-control">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="lastname" class="col-lg-1 col-form-label">lastname</label> 
+			<div class="col-lg-3">
+				<input type="text" name="lastname" value="{{ user['lastname'] }}" class="form-control">
+			</div>
+		</div>	
+		<div class="form-group row">
+			<label for="email" class="col-lg-1 col-form-label">email</label> 
+			<div class="col-lg-3">
+				<input type="text" name="email" value="{{ user['email'] }}" class="form-control">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="apikey" class="col-lg-1 col-form-label">apikey</label>
+				<div class="mt-2">
+					{{ user['api_key'] }}<input type="hidden" name="apikey" value="{{ user['api_key'] }}">
+				</div>
+		</div>
+	</fieldset>
+
+		<input type="submit" name="submit" class="btn btn-lg btn-primary"/>
+	</form>		
+
+	<h2 class="mt-5 text-white font-weight-light">Change password</h2>
+
+	<form action="{{ url_for('resetPassword') }}" method="POST"  class="form-horizontal">
+	<fieldset>
+		<div class="form-group row">
+			<label for="password" class="col-lg-2 col-form-label">Current password</label>
+		   	<div class="col-lg-3">
+				<input type="password" name="password" class="form-control"  placeholder="password">
+		   	</div>
+	    </div>
+
+		<div class="form-group row">
+			<label for="upassword" class="col-lg-2 col-form-label">New password</label>
+		   	<div class="col-lg-3">
+				<input type="password" name="upassword" class="form-control"  placeholder="new password">
+		   	</div>
+	    </div>
+
+		<div class="form-group row">
+			<label for="cpassword" class="col-lg-2 col-form-label">Confirm new password</label>
+			<div class="col-lg-3">
+				<input type="password" name="cpassword" class="form-control"  placeholder="confirm password">
+		   </div>
+	    </div>
+
+	</fieldset>
+
+		<input type="submit" name="submit" class="btn btn-lg btn-primary"/>
+	</form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{super()}}
+  <script src="{{url_for('static', filename='app.js')}}"></script>
+{% endblock %}
+
+{% endblock %}

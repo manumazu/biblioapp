@@ -30,7 +30,7 @@
 	    <div class="collapse navbar-collapse" id="navbarColor01">
 		{% if user_login %}	    	
 		    <ul class="navbar-nav mr-auto">	      	
-			<li class="nav-item active"><a class="nav-link" href="#">Welcome {{ user_login }}<span class="sr-only">(current)</span> !!</a></li>
+			<li class="nav-item active"><a class="nav-link" href="{{ url_for('userInfos') }}">Welcome {{ user_login }}<span class="sr-only">(current)</span> !!</a></li>
 			<li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
 			{% if shelf_infos is defined %}
 				<li class="nav-item dropdown">
@@ -66,12 +66,13 @@
 	  </div>
 	</nav>
 
-	{% with messages = get_flashed_messages() %}
+	{% with messages = get_flashed_messages(with_categories=true) %}
 	{% if messages %}
-	    {% for m in messages %}
-	    <div class="alert alert-dismissible alert-success">
+	    {% for category, message in messages %}
+	    {% set ctop = 5*loop.index %}
+	    <div class="alert alert-dismissible alert-{{category}}" style="position: absolute; top: {{ ctop }}rem; right: 1rem; min-width: 250px; z-index: 100">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		<a href="#" class="alert-link">{{ m }}</a>.
+		<a href="#" class="alert-link">{{ message }}</a>.
 		</div>
 	    {% endfor %}
 	{% endif %}

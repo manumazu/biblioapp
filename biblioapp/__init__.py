@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
 from flask_bootstrap import Bootstrap
-import flask_login, hashlib, base64, math, time, os
+import flask_login, hashlib, base64, math, time, os, secrets
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_session import Session
@@ -35,7 +35,7 @@ def initApp():
         for module in modules:
           session['app_id'] = module['id']
           session['app_name'] = module['arduino_name']
-          flash('Bookshelf "{}"selected'.format(module['arduino_name']))
+          flash('Bookshelf "{}"selected'.format(module['arduino_name']), 'info')
           break
     arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
     arduino_name = arduino_map['arduino_name']     
@@ -61,7 +61,7 @@ def selectArduino():
       session['app_name'] = request.form.get('module_name')
       if request.form.get('numshelf') and int(request.form.get('numshelf'))>0:
         session['app_numshelf'] = int(request.form.get('numshelf'))
-      flash('Bookshelf "{}"selected'.format(request.form.get('module_name')))
+      flash('Bookshelf "{}"selected'.format(request.form.get('module_name')), 'info')
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
   return render_template('modules.html', user_login=flask_login.current_user.name, modules=modules)
 
@@ -575,7 +575,7 @@ def locateBook():
     )
     return response
     
-  flash(retMsg)
+  flash(retMsg, 'info')
   if(request.referrer and 'tag' in request.referrer):
     return redirect(url_for('listAuthors', _scheme='https', _external=True))
   return redirect(url_for('myBookShelf', _scheme='https', _external=True))
@@ -630,7 +630,7 @@ def locateBooksForTag(tag_id, methods=['GET', 'POST']):
     )
     return response
   for i, book in enumerate(positions):
-    flash('Location requested for book {}'.format(book['item']))
+    flash('Location requested for book {}'.format(book['item']), 'info')
   return redirect(url_for('listAuthors', _scheme='https', _external=True))
 
 #get request from arduino for current arduino_name
@@ -941,7 +941,7 @@ def bookDelete():
     db.clean_tag_for_node(book_id, 1)#clean tags for categories
     db.clean_tag_for_node(book_id, 2)#clean tags for authors
     db.del_book(book_id, globalVars['arduino_map']['user_id'])
-    flash('Book "{}" is deleted'.format(book['title']))
+    flash('Book "{}" is deleted'.format(book['title']), 'warning')
     return redirect(url_for('myBookShelf', _scheme='https', _external=True))
 
 
@@ -968,7 +968,7 @@ def customCodes():
       )
       return response  
     if request.args.get('saved'):
-      flash('Your code is saved')  
+      flash('Your code is saved', 'success')  
     #manage post data from json request
     if request.method == 'POST':
       if request.is_json:
@@ -1021,7 +1021,7 @@ def customCodeDelete():
   customcode = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
   if customcode: 
     db.del_customcode(code_id, globalVars['arduino_map']['user_id'])
-    flash('Code "{}" is deleted'.format(customcode['title']))
+    flash('Code "{}" is deleted'.format(customcode['title']), 'warning')
     return redirect(url_for('customCodes', _scheme='https', _external=True))  
 
 @app.route('/ajax_customcodetemplate/<template>')
@@ -1148,6 +1148,17 @@ def ajaxPermutePosition():
   return response
 
 '''
+User infos
+'''
+@app.route("/user", methods=['GET', 'POST'])
+@flask_login.login_required
+def userInfos():
+  user = db.get_user(flask_login.current_user.id)
+  user['api_key'] = secrets.token_urlsafe(29)
+
+  return render_template('user.html', user=user, user_login=flask_login.current_user.name)    
+
+'''
 Reset Password
 '''
 @app.route("/forgot_password", methods=['GET', 'POST'])
@@ -1171,25 +1182,56 @@ def forgotPassword():
 @app.route("/reset_password", methods=['GET', 'POST'])
 def resetPassword():
   #verify token and display form
+  token = ''
+  errors = []
   if 'token' in request.args:
     token = request.args.get('token')
-    #token was verified by request_loader
+    #token was verified by request_loader or user is logged
     if flask_login.current_user.is_authenticated:
       email = flask_login.current_user.id
     else:
-      abort(403)
+      abort(403)    
+
+  #check for changing password
   if request.method == 'POST':
-    password = request.form.get('upassword')
-    cpassword = request.form.get('cpassword')
-    token = request.args.get('token')
-    if password == cpassword and email != None:
-      hashed = generate_password_hash(password)
-      db.set_user_pwd(email, hashed)
-      flash('Your password has been reset.')
-      return redirect(url_for('login', _scheme='https', _external=True))
+    if flask_login.current_user.is_authenticated:
+      email = flask_login.current_user.id    
     else:
-      flash('Password confirm is different.')
-      return redirect(url_for('resetPassword', _scheme='https', _external=True, token=token))
+      abort(403)         
+    user = db.get_user(email)
+
+    #check if current password is correct 
+    if 'password' in request.form:
+      if check_password_hash(user['password'], request.form['password']) == False:
+        errors.append('Your current password is not the same than the one you give.')  
+
+    #check new password
+    npassword = request.form.get('upassword')
+    cpassword = request.form.get('cpassword')
+
+    if npassword != '' and npassword == cpassword and email != None:
+      hashed = generate_password_hash(npassword)
+      db.set_user_pwd(email, hashed)
+      flash('Your password has been reset', 'success')
+    else:
+      errors.append('New password is empty or different than password confirm')
+
+    #manage errors
+    if 'token' in request.args:
+      errorRedirect = 'resetPassword'
+      successRedirect = 'login'
+      paramsRedirect = {'token':token, '_scheme':'https', '_external':True}
+    else:
+      errorRedirect = 'userInfos'
+      successRedirect = 'userInfos' 
+      paramsRedirect = {'_scheme':'https', '_external':True}
+    if len(errors) > 0:
+      for error in errors:
+        flash(error, 'danger')
+      return redirect(url_for(errorRedirect, **paramsRedirect))
+    else:
+      return redirect(url_for(successRedirect, _scheme='https', _external=True))
+
   return render_template('reset_password.html', token=token)      
 
 '''
@@ -1236,7 +1278,7 @@ def verifRecaptcha():
 def login():
     if request.method == 'GET':
       if request.args.get('saved'):
-        flash('Congratulation, your account is saved! You can login now')  
+        flash('Congratulation, your account is saved! You can login now', 'success')  
       return render_template('login.html')
 
     email = request.form['email']
@@ -1257,7 +1299,7 @@ def login():
 def logout():
     session.clear()
     flask_login.logout_user()
-    flash('Logged out')
+    flash('Logged out', 'info')
     return redirect(url_for('login', _scheme='https', _external=True))
 
 @app.route('/privacy')
