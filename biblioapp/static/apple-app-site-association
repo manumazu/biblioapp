@@ -5,7 +5,8 @@
       {
         "appID": "VYNQAR86R7.com.bearstech.bibliobus",
         "paths": [
-          "/locate_for_tag/*"
+          "/api/locate_for_tag/*",
+          "/api/locate/*"
         ]
       }
     ]
