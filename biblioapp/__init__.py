@@ -391,7 +391,7 @@ def listNodesForTag(tag_id):
       )
       return response     
     return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
-      shelf_infos=globalVars['arduino_map'], tag=tag)
+      shelf_infos=globalVars['arduino_map'], tag=tag, uuid_encode=tools.uuid_encode(globalVars['arduino_map']['id_ble']))
   abort(404)
 
 @app.route('/ajax_tag_color/<tag_id>', methods=['POST'])
@@ -527,6 +527,9 @@ def locateBook():
   action = 'add'
   positions = []
   color = ''
+  app_id = session['app_id']
+  book_id = None
+  address = None
 
   '''get form request params'''
   if (request.method == 'POST'):
@@ -552,15 +555,18 @@ def locateBook():
     if 'remove_request' in request.args:
       action = 'remove'
 
-  #store request
-  if action == 'remove':
-    retMsg = 'Location removed for book {}'.format(book_id)
-  else: 
-    retMsg = 'Location requested for book {}'.format(book_id)
-
   #manage request
-  db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'], \
+  if address != None and book_id != None :
+    db.set_request(app_id, book_id, address['row'], address['position'], address['range'], address['led_column'], \
     'book', client, action, None, color)
+    if action == 'remove':
+      retMsg = 'Location removed for book {}'.format(book_id)
+    else: 
+      retMsg = 'Location requested for book {}'.format(book_id)
+    flash(retMsg, 'info')
+  else :
+    retMsg = 'Unable to find book'
+    flash(retMsg, 'danger')
 
   #send data for mobile
   if('api' in request.path and 'token' in request.args):
@@ -574,8 +580,7 @@ def locateBook():
       mimetype='application/json'
     )
     return response
-    
-  flash(retMsg, 'info')
+  
   if(request.referrer and 'tag' in request.referrer):
     return redirect(url_for('listAuthors', _scheme='https', _external=True))
   return redirect(url_for('myBookShelf', _scheme='https', _external=True))
