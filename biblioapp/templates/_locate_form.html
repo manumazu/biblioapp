@@ -1,5 +1,6 @@
 {% if 'tag' in request.path or 'borrowed' in request.path %}
   <!-- for tag list tpl-->
+  {%if book['hasRequest'] %}
   <form action="/locate/" method="post" class="form-horizontal">
     <input type="hidden" name="range" id="range" value="{{ book['address']['range'] }}">
     <input type="hidden" name="row" value="{{ book['address']['row'] }}">
@@ -7,13 +8,11 @@
     <input type="hidden" name="book_id" value="{{ book['id'] }}">
     <input type="hidden" name="column" value="{{ book['address']['position'] }}">
     <input type="hidden" name="row" value="{{ book['address']['row'] }}">   
-  {%if book['hasRequest'] %}
     <input type="submit" value="Remove request" class="btn btn-danger" name="remove_request">
-  {% else %}
-    <input type="submit" value="Locate in {{ book['arduino_name'] }} !" class="btn btn-success" name="add_request">
-    <a href="{{ url_for('locateBook', book_id=book['id'], uuid=uuid_encode) }}"><button type="button" class="btn btn-primary">Locate in {{ book['arduino_name'] }}</button></a>
-  {% endif %}  
   </form>
+  {% else %}
+    <br /><a href="{{ url_for('locateBook', book_id=book['id'], uuid=book['uuid_encode']) }}"><button type="button" class="btn btn-primary">Locate in {{ book['arduino_name'] }}</button></a>
+  {% endif %}  
 {% else %}
 <!-- for book tpl-->
   <div class="jumbotron">

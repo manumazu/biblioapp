@@ -376,6 +376,7 @@ def listNodesForTag(tag_id):
                 hasRequest = db.get_request_for_position(module['id'], address['position'], address['row'])
                 books[i]['address'] = address
                 books[i]['arduino_name'] = module['arduino_name']
+                books[i]['uuid_encode'] = tools.uuid_encode(module['id_ble'])
                 books[i]['app_id'] = module['id']
                 books[i]['app_uuid'] = module['uuid']
                 books[i]['app_mac'] = module['mac']
@@ -391,7 +392,7 @@ def listNodesForTag(tag_id):
       )
       return response     
     return render_template('tag.html', books=books, user_login=globalVars['user_login'], \
-      shelf_infos=globalVars['arduino_map'], tag=tag, uuid_encode=tools.uuid_encode(globalVars['arduino_map']['id_ble']))
+      shelf_infos=globalVars['arduino_map'], tag=tag)
   abort(404)
 
 @app.route('/ajax_tag_color/<tag_id>', methods=['POST'])
@@ -530,10 +531,12 @@ def locateBook():
   app_id = session['app_id']
   book_id = None
   address = None
+  client = 'server'
+  if ('api' in request.path and 'token' in request.args):
+    client = 'mobile'
 
   '''get form request params'''
   if (request.method == 'POST'):
-    client = 'server'
     app_id = request.form.get('app_id')
     column = request.form.get('column')
     row = request.form.get('row')
@@ -545,9 +548,8 @@ def locateBook():
     if 'remove_request' in request.form:
       action = 'remove'
 
-  '''get params from arduino'''      
-  if ('api' in request.path and 'token' in request.args) and (request.method == 'GET'):
-    client = 'mobile'
+  '''get params for location'''      
+  if (request.method == 'GET'):
     app_id = session['app_id']
     book_id = request.args.get('book_id')
     color = request.args.get('color')
