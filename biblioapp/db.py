@@ -656,7 +656,7 @@ def set_tag_user(user_id, tagIds):
 
 def get_user(email):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, email, password, firstname FROM biblio_user WHERE email=%s", email)
+  mysql['cursor'].execute("SELECT id, email, password, firstname, lastname FROM biblio_user WHERE email=%s", email)
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -664,18 +664,25 @@ def get_user(email):
     return row
   return None
 
-def set_user(email, firstname, lastname, password):
+def set_user(email, hash_email, firstname, lastname, password, user_id):
+  user = {}
   mysql = get_db()
-  mysql['cursor'].execute("INSERT INTO biblio_user (email, firstname, lastname, password) VALUES (%s, %s, %s, %s)", \
-    (email, firstname, lastname, password))
-  mysql['conn'].commit()
-  mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
-  user = mysql['cursor'].fetchone()   
+  if user_id is not None:
+    mysql['cursor'].execute("UPDATE biblio_user set email=%s, hash_email=%s, firstname=%s, lastname=%s WHERE \
+    id=%s", (email, hash_email, firstname, lastname, user_id))
+    mysql['conn'].commit()
+    user['id'] = user_id
+  else:
+    mysql['cursor'].execute("INSERT INTO biblio_user (email, hash_email, firstname, lastname, password, created_at) VALUES \
+    (%s, %s, %s, %s, %s, now())", (email, hash_email, firstname, lastname, password))
+    mysql['conn'].commit()
+    mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
+    user = mysql['cursor'].fetchone()   
   mysql['cursor'].close()
   mysql['conn'].close()
-  if user:
+  if len(user):
     return user
-  return None  
+  return None
 
 def set_user_pwd(email, password):
   mysql = get_db()

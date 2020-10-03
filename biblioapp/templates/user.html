@@ -15,7 +15,7 @@
 
 	<h1 class="mt-5 text-white font-weight-light">Udpate user infos</h1>
 
-	<form action="{{ url_for('userInfos') }}" method="POST"  class="form-horizontal">
+	<form action="{{ url_for('userInfos') }}" method="POST"  class="form-horizontal" id="form-userInfos" onsubmit="return validUserInfos();">
 
 	<fieldset>
 		<div class="form-group row">
@@ -32,15 +32,9 @@
 		</div>	
 		<div class="form-group row">
 			<label for="email" class="col-lg-1 col-form-label">email</label> 
-			<div class="col-lg-3">
+			<div class="col-lg-4">
 				<input type="text" name="email" value="{{ user['email'] }}" class="form-control">
 			</div>
-		</div>
-		<div class="form-group row">
-			<label for="apikey" class="col-lg-1 col-form-label">apikey</label>
-				<div class="mt-2">
-					{{ user['api_key'] }}<input type="hidden" name="apikey" value="{{ user['api_key'] }}">
-				</div>
 		</div>
 	</fieldset>
 
@@ -82,6 +76,17 @@
 {% block scripts %}
   {{super()}}
   <script src="{{url_for('static', filename='app.js')}}"></script>
+  <script type="text/javascript">
+  	var email1 = $('input[name="email"]').val();
+  	function validUserInfos() {
+		var email2 = $('input[name="email"]').val();
+		if(email1!=email2) {
+			var res = confirm('Email has changed.\nLogin is required after udpate.');
+			return res;
+		}
+		return true;
+	}
+  </script>
 {% endblock %}
 
 {% endblock %}

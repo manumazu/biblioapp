@@ -1161,7 +1161,20 @@ User infos
 @flask_login.login_required
 def userInfos():
   user = db.get_user(flask_login.current_user.id)
-  user['api_key'] = secrets.token_urlsafe(29)
+  print(user)
+  #user['api_key'] = secrets.token_urlsafe(29)
+  if request.method == 'POST':
+      firstname=request.form.get('firstname')
+      lastname=request.form.get('lastname')
+      email=request.form.get('email')
+      hash_email = hashlib.md5(email.encode("utf-8")).hexdigest()
+      test = db.set_user(email, hash_email, firstname, lastname, None, user['id'])
+      if test is not None:
+        if user['email'] != email:
+          return redirect(url_for('logout', _scheme='https', _external=True))
+        else:
+          flash('User infos updated', 'success')
+          return redirect(url_for('userInfos', _scheme='https', _external=True))
 
   return render_template('user.html', user=user, user_login=flask_login.current_user.name)    
 
@@ -1259,7 +1272,8 @@ def signUp():
     else:
       #hash pwd and save user 
       hashed = generate_password_hash(password)
-      test = db.set_user(email, firstname, lastname, hashed)
+      hash_email = hashlib.md5(email.encode("utf-8")).hexdigest()
+      test = db.set_user(email, hash_email, firstname, lastname, hashed, None)
       if test is not None:
         message = {'success':True, 'redirect':url_for('login')}
     response = app.response_class(
