@@ -357,7 +357,7 @@ def listNodesForTag(tag_id):
   globalVars = initApp()
   if globalVars['arduino_map'] != None:
     nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
-    tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['user_id'])
+    tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['user_id'])   
     data = {}
     books = []
     data['list_title'] = tag['tag']
@@ -1161,7 +1161,6 @@ User infos
 @flask_login.login_required
 def userInfos():
   user = db.get_user(flask_login.current_user.id)
-  print(user)
   #user['api_key'] = secrets.token_urlsafe(29)
   if request.method == 'POST':
       firstname=request.form.get('firstname')

@@ -43,7 +43,7 @@ def uuid_decode(encode):
 def uuid_encode(string):
   try:
     encode = base64.b64encode(string.encode('utf-8'))
-    return encode
+    return encode.decode('utf-8')
   except ValueError:
     return False    
 
