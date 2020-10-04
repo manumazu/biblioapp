@@ -33,7 +33,19 @@ def get_arduino_for_user(user_email):
   mysql['cursor'].close()
   mysql['conn'].close()
   if row:
-    return row    
+    return row 
+
+def get_arduino_for_api(hash_email):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT ba.*, bu.email FROM biblio_app ba \
+    INNER JOIN biblio_user_app bua ON bua.id_app = ba.id \
+    INNER JOIN biblio_user bu ON bu.id=bua.id_user \
+    WHERE bu.hash_email=%s", hash_email)
+  rows = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if rows:
+    return rows        
 
 def get_app_for_uuid(uuid) :
   mysql = get_db()

@@ -115,6 +115,24 @@ def getModule(uuid):
       return response
   abort(404)  
 
+#get position for book isbn - third party application
+@app.route("/api/get-position-for-modules/<hash_email>")
+def listModules(hash_email):
+  modules = db.get_arduino_for_api(hash_email)
+  data = {}
+  if modules:
+      data['token'] = models.get_token('guest',modules[0]['email'])
+      data['bibus'] = []
+      for module in modules:
+        data['bibus'].append({'uuid': tools.uuid_encode(module['id_ble']), 'name': module['arduino_name']})
+      response = app.response_class(
+            response=json.dumps(data),
+            mimetype='application/json'
+      )
+      return response
+  abort(401) 
+
+
 
 @app.route("/adminmodule/", defaults={'app_id': None}, methods=['GET', 'POST'])
 @app.route("/adminmodule/<app_id>/", methods=['GET', 'POST'])
