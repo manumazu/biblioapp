@@ -69,7 +69,7 @@ def selectArduino():
 @flask_login.login_required
 def editArduino(app_id):
   globalVars = initApp()
-  module = globalVars['arduino_map']
+  module = db.get_arduino_map(flask_login.current_user.id, app_id) #globalVars['arduino_map']
   if module:
     session['app_id'] = module['id']
     session['app_name'] = module['arduino_name']
