@@ -440,13 +440,13 @@ def get_led_column(app_id, item_id, row, column) :
   mysql['conn'].close()
   #check for static columns to shift book's real position 
   statics = get_static_positions(app_id, row)
-  if res['column'] is not None:
-    if statics:
-      for static in statics:
-        if res['column'] >= static['led_column']:
-          res['column'] += static['range']
-    return res['column']
-  return int(0)
+  if res['column'] is None:
+    res['column'] = 0
+  if statics:
+    for static in statics:
+      if res['column'] >= static['led_column']:
+        res['column'] += static['range']
+  return res['column']
 
 def get_static_positions(app_id, row):
   mysql = get_db()
