@@ -84,15 +84,15 @@ def editArduino(app_id):
         data = request.get_json()
         for numrow in data:
           positions = data[numrow]
+          #print(positions)
           for i in range(len(positions)):
             pos = i+1        
             if mode == 'save': 
               db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])            
             if mode == 'preview': #set distant request for preview
               db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static', 'server', 'add')
-            #suppr static when position is reseted to 0
-            if int(positions[i]) == 0:
-              db.del_item_position(int(app_id), pos, 'static', numrow)            
+            if mode == 'remove': #remove all static 
+              db.del_item_position(int(app_id), pos, 'static', numrow)        
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, shelf_infos=globalVars['arduino_map'])
   abort(404)
 

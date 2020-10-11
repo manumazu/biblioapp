@@ -92,6 +92,30 @@ $(document).ready(function() {
 	 	return JSON.stringify(lines);
 	}
 
+	$("#removeStaticPositions").on('click', function() {
+	 //'/module/<app_id>'
+	 	var res = confirm('Are you sure ?');
+	 	if (res) {
+		 	var elements = getSlideElements();
+		 	//console.log(elements);
+			$.ajax({
+				dataType: 'json',
+	        	contentType: 'application/json',
+				data: elements,
+			    type: 'POST',
+			    url: $("#formEditArduino").attr('action')+'?mode=remove',
+			    complete: function() {
+			    	$('#alertPreview').hide();
+			    	$('#alertSave').show();
+			    	//reload page
+			    	window.location = $("#formEditArduino").attr('action');	
+			    }
+			});
+		}
+	});
+
+
+
 	$("#saveStaticPositions").on('click', function() {
 	 //'/module/<app_id>'
 	 	var elements = getSlideElements();
