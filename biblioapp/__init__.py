@@ -909,16 +909,16 @@ def bookReferencer():
           newPos = lastPos['position']+1
           newRow = lastPos['row']
           newLedNum = lastPos['led_column']+lastPos['range']
-          #adjust new led column with static element
-          statics = db.get_static_positions(session.get('app_id'),lastPos['row']) 
-          if statics:         
-            for static in statics:
-             if int(newLedNum) == int(static['led_column']):
-              newLedNum += static['range']
-        else:
+        else:#first book in line
           newPos = 1
           newRow = 1
-          newLedNum = 0        
+          newLedNum = 0   
+        #adjust new led column with static element
+        statics = db.get_static_positions(session.get('app_id'),newPos) 
+        if statics:         
+          for static in statics:
+           if int(newLedNum) == int(static['led_column']):
+            newLedNum += static['range']               
         led_column = db.set_position(session.get('app_id'), bookId['id'], newPos, newRow, newInterval, 'book', newLedNum)
         address = db.get_position_for_book(session.get('app_id'), bookId['id'])
       #confirm message
