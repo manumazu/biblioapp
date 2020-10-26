@@ -351,7 +351,7 @@ def get_position_for_book(app_id, book_id) :
 
 def get_positions_for_row(app_id, row) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id_item FROM biblio_position where id_app=%s and `row`=%s \
+  mysql['cursor'].execute("SELECT * FROM biblio_position where id_app=%s and `row`=%s \
     and `item_type`<>'static' order by `position`",(app_id, row))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
@@ -396,29 +396,7 @@ def set_borrow_book(app_id, item_id, mode) :
   mysql['conn'].close()
   return True
 
-def sort_items(app_id, user_id, items, row, leds_interval) :
-  i=0
-  sortable=[] 
-  for item in items :
-    if 'id_item' in item:
-      item_id=item['id_item']
-    else:
-      item_id=item     
-    if item_id is not None:
-      position = get_position_for_book(app_id, item_id)
-      if position:
-        interval = position['range'] 
-      else:
-        book = get_book(item_id, user_id)
-        interval = tools.led_range(book, leds_interval)
-    i+=1
-    led_column = set_position(app_id, item_id, i, row, interval, 'book')
-    sortable.append({'book':item_id, 'position':i, 'fulfillment':int(led_column+interval), 'shelf':row})
-  return sortable
-
-def set_position(app_id, item_id, position, row, interval, item_type, led_column = None) :
-  if(led_column is None):
-    led_column = get_led_column(app_id, item_id, row, position)
+def set_position(app_id, item_id, position, row, interval, item_type, led_column) :
   mysql = get_db()
   mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, \
       `position`, `row`, `range`, `led_column`) VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY \
@@ -428,20 +406,28 @@ def set_position(app_id, item_id, position, row, interval, item_type, led_column
   mysql['cursor'].close()
   mysql['conn'].close()
   #print(mysql['cursor']._last_executed)
-  return led_column
+
+def set_led_column(app_id, item_id, row, led_column) :
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_position SET `led_column`=%s WHERE `id_app`=%s AND `id_item`=%s AND \
+    `item_type`='book' AND `row`=%s", (led_column, app_id, item_id, row))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
 
 '''compute sum of intervals for setting physical position'''
 def get_led_column(app_id, item_id, row, column) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT sum(`range`) as `column` FROM `biblio_position` \
     WHERE `position`<%s  and id_app=%s and `row`=%s and id_item <> %s and item_type='book'",(column, app_id, row, item_id))
+  #print(mysql['cursor']._last_executed)
   res = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
-  #check for static columns to shift book's real position 
-  statics = get_static_positions(app_id, row)
   if res['column'] is None:
     res['column'] = 0
+  #check for static columns to shift book's real position     
+  statics = get_static_positions(app_id, row)    
   if statics:
     for static in statics:
       if res['column'] >= static['led_column']:

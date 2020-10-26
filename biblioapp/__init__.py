@@ -299,12 +299,31 @@ def jsonBookshelf():
 def ajaxSort():
   globalVars = initApp()
   if request.method == 'POST' and session.get('app_id'):
+   
     #save order for bookshelf
     if 'row' in request.form :
       current_row = request.form['row'] 
       book_ids = request.form.getlist('book[]')
-      sortable = db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], book_ids, current_row, \
-        globalVars['arduino_map']['leds_interval'])
+      app_id = session.get('app_id')
+      i=0
+      sortable = []
+      for book_id in book_ids:
+        position = db.get_position_for_book(app_id, book_id)
+        if position:
+          interval = position['range'] 
+        else:
+          book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
+          interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
+        i+=1   
+        db.set_position(app_id, book_id, i, current_row, interval, 'book', 0) #reinit led column
+      
+      #update new leds number
+      positions = db.get_positions_for_row(app_id, current_row)
+      for pos in positions:
+        led_column = db.get_led_column(app_id, pos['id_item'], current_row, pos['position'])
+        db.set_led_column(app_id, pos['id_item'], current_row, led_column)
+        sortable.append({'book':pos['id_item'], 'position':pos['position'], 'fulfillment':int(led_column+pos['range']), 'shelf':current_row})
+
     #save order for customcodes
     if 'customcode' in request.form:
       code_ids = request.form.getlist('code[]')
@@ -331,7 +350,10 @@ def ajaxSetPosition():
     #update position
     column = request.form.get('column');
     row = request.form.get('row')
-    led_column = db.set_position(session.get('app_id'), book_id, column, row, leds_range, 'book')
+    app_id = session.get('app_id')
+    db.set_position(app_id, book_id, column, row, leds_range, 'book', 0) #reinit led column
+    led_column = db.get_led_column(app_id, book_id, row, column)
+    db.set_led_column(app_id, book_id, row, led_column)
     ret={'led_column':int(led_column)}
     response = app.response_class(
           response=json.dumps(ret),
@@ -357,11 +379,30 @@ def ajaxDelPosition():
         #remove request
         if has_request:
           db.del_request(session.get('app_id'), position['led_column'], position['row'])
+
         #get list for remaining items and sort them again
         items = db.get_positions_for_row(session.get('app_id'), position['row'])
         if items:
-          sortable = db.sort_items(session.get('app_id'), globalVars['arduino_map']['user_id'], items, position['row'], \
-            globalVars['arduino_map']['leds_interval'])
+          app_id = session.get('app_id')
+          i=0
+          sortable = []
+          for item in items:
+            position = db.get_position_for_book(app_id, item['id_item'])
+            if position:
+              interval = position['range'] 
+            else:
+              book = db.get_book(item['id_item'], user_id)
+              interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
+            i+=1   
+            db.set_position(app_id, item['id_item'], i, position['row'], interval, 'book', 0) #reinit led column
+          
+          #update new leds number
+          positions = db.get_positions_for_row(app_id, position['row'])
+          for pos in positions:
+            led_column = db.get_led_column(app_id, pos['id_item'], pos['row'], pos['position'])
+            db.set_led_column(app_id, pos['id_item'], pos['row'], led_column)
+            sortable.append({'book':pos['id_item'], 'position':pos['position'], 'fulfillment':int(led_column+pos['range']), 'shelf':pos['row']})
+
   response = app.response_class(
         response=json.dumps(sortable),
         mimetype='application/json'
@@ -919,7 +960,7 @@ def bookReferencer():
           for static in statics:
            if int(newLedNum) == int(static['led_column']):
             newLedNum += static['range']               
-        led_column = db.set_position(session.get('app_id'), bookId['id'], newPos, newRow, newInterval, 'book', newLedNum)
+        db.set_position(session.get('app_id'), bookId['id'], newPos, newRow, newInterval, 'book', newLedNum)
         address = db.get_position_for_book(session.get('app_id'), bookId['id'])
       #confirm message
       if bookId:
