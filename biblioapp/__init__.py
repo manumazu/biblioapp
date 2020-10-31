@@ -721,6 +721,10 @@ def getRequestForModule():
       datas_add = db.get_request(session['app_id'], 'add')
     if datas_add:      
       for data in datas_add:
+
+        if data['color'] is None:
+          data['color'] = ''
+
         positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
         'interval':data['range'], 'id_tag':data['id_tag'], 'color':data['color'], 'id_node':data['id_node'], \
         'client':data['client']})
