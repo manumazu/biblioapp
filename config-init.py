@@ -1,0 +1,11 @@
+SECRET_KEY = '2d9-E2.)f&é,A$p@fpa+zSU03êû9_'
+MYSQL_DATABASE_USER = 'bibliobus'
+MYSQL_DATABASE_PASSWORD  = 'bibliobus'
+MYSQL_DATABASE_DB = 'bibliobus'
+MYSQL_DATABASE_HOST = 'db'
+MAIL_SERVER = 'localhost'
+MAIL_PORT = 8025
+MAIL_DEFAULT_SENDER = 'contact@bibliob.us'
+SESSION_TYPE = 'filesystem'
+SESSION_PERMANENT = False
+PERMANENT_SESSION_LIFETIME = 1800

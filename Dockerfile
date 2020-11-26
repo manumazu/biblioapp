@@ -8,7 +8,8 @@ RUN pip install -r requirements.txt
 RUN pip install gunicorn
 
 COPY biblioapp /app/biblioapp
-ADD config.py boot.sh /app/
+COPY config-init.py /app/config.py
+ADD boot.sh /app/
 RUN chmod +x /app/boot.sh
 
 ENV FLASK_APP biblioapp
