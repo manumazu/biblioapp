@@ -17,6 +17,7 @@ services:
 
   app:
     build: .
+    image: manumazu/bibliobus
     ports:
       - "5000" #don't need exposed port
     volumes:
