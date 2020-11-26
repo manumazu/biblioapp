@@ -9,7 +9,12 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
-app.config.from_object("config")
+app.config.from_pyfile("../config.py")
+#override elements from environment settings
+for variable, value in os.environ.items():
+  if variable.startswith("MYSQL_"):
+    app.config[variable] = value
+
 mail = Mail(app)
 #Session(app)
 sess = Session()

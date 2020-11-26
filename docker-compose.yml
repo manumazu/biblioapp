@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  db:
+    image: mariadb
+    restart: always    
+    environment:
+      - MYSQL_USER=bibliobus
+      - MYSQL_PASSWORD=bibliobus
+      - MYSQL_DATABASE=bibliobus
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./data-dump:/docker-entrypoint-initdb.d
+      - dbdata:/var/lib/mysql   
+
+  app:
+    build: .
+    ports:
+      - "5000" #don't need exposed port
+    volumes:
+      - ./biblioapp:/app/biblioapp
+    environment:
+      - FLASK_APP=biblioapp
+      - FLASK_ENV=development
+      - MYSQL_DATABASE_HOST=db
+    depends_on:
+      - db   
+
+  reverse-proxy:
+    image: nginx
+    volumes:
+      - ./conf-proxy:/etc/nginx
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - app    
+
+volumes:
+  dbdata: {}
