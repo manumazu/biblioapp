@@ -1,3 +1,3 @@
 #!/bin/sh
 . venv/bin/activate
-exec gunicorn -b :5000 --access-logfile - --error-logfile - biblioapp:app
+exec gunicorn --bind :5000 --workers 3 --access-logfile - --error-logfile - biblioapp:app
