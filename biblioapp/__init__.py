@@ -101,6 +101,34 @@ def editArduino(app_id):
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, shelf_infos=globalVars['arduino_map'])
   abort(404)
 
+@app.route("/customcolors/<app_id>", methods=['GET', 'POST'])
+@flask_login.login_required
+def customColors(app_id):
+  globalVars = initApp()
+  module = db.get_arduino_map(flask_login.current_user.id, app_id) #globalVars['arduino_map']
+  if module:
+    session['app_id'] = module['id']
+    session['app_name'] = module['arduino_name']
+    if request.method == 'POST':
+      if request.is_json:
+        mode = request.args.get('mode')
+        if mode == 'preview':
+          db.clean_request(app_id) #clean request for preview
+        data = request.get_json()
+        for numrow in data:
+          positions = data[numrow]
+          print(positions)
+          for i in range(len(positions)):
+            pos = i+1        
+            '''if mode == 'save': 
+              db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])            
+            if mode == 'preview': #set distant request for preview
+              db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static', 'server', 'add')
+            if mode == 'remove': #remove all static 
+              db.del_item_position(int(app_id), pos, 'static', numrow)'''     
+    return render_template('customcolors.html', user_login=flask_login.current_user.name, module=module, db=db, shelf_infos=globalVars['arduino_map'])
+  abort(404)  
+
 #get module infos from arduino for current arduino_name
 @app.route('/api/module/<uuid>/')
 def getModule(uuid):

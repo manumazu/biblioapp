@@ -1,0 +1,69 @@
+#formEditArduino .control-label, #formAdminArduino .control-label {
+    justify-content: left;
+}
+
+#shelf {
+  border:1px solid #fff;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;  
+  padding: 10px;
+  padding-left: 20px;
+  width:100%;
+  margin-left:0px;
+  margin-bottom: 10px;
+}
+
+#shelf span {
+    margin-left: -10px;
+}
+
+ul.static { display: none;}
+
+.ui-slider-horizontal {
+    height: 50px !important;
+    width: 100% ! important;
+    margin-top: 10px;
+}
+.ui-widget-content {
+    background: #4e5d6c; 
+}
+
+/* Add tooltips to slider handles */
+.ui-state-default {
+    height: 50px !important;
+    /*background: repeating-linear-gradient(-45deg, #4e5d6c, #4e5d6c 10px, #ccc 10px, #ccc 20px) !important;*/
+    width: 5px !important;
+    top:0px !important;
+    margin-left: 0px !important;
+}
+
+.ui-slider-handle:after {
+    content : attr(data-value);
+    position: absolute;
+    bottom: 20px;
+    left: -30px;
+    min-width: 130px;
+    height: 20px;
+    background-color: #eee;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    border: #ddd 1px solid;
+    color: #333;
+    font: .7em/1em Arial, Sans-Serif;
+    padding: 1px;
+    text-align: center;
+}
+.ui-slider-handle:before {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 8px solid #eee;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    top: -8px;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -1px;
+}  
+

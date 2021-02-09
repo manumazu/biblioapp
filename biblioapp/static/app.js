@@ -42,27 +42,45 @@
 
 /* color editor methods */
 
-function getColor() {
-// returns a string of red, green, blue values
-var color = [];       
-color.push($('#red').val());
-color.push($('#green').val());
-color.push($('#blue').val());
-return color.join(',');
+function getColor(from = null) {
+	//parse color from form field
+	if(from != null) {
+		var rgb = $('#'+from).val();	
+		if(rgb != undefined && rgb != '') 
+		{		
+			var colors = $('#'+from).val().split(",");
+			$('#red').val(colors[0]);
+			$('#green').val(colors[1]);
+			$('#blue').val(colors[2]);
+			return rgb;
+		}
+		return '0,0,0';
+	}
+	else {
+		// returns a string of red, green, blue values
+		var color = [];       
+		color.push($('#red').val());
+		color.push($('#green').val());
+		color.push($('#blue').val());
+		return color.join(',');
+	}
 }
 
-function updatePreview() {
-    var c = getColor();
+function updatePreview(from = null) {
+    var c = getColor(from);
     $('#rgbText').text("Color is rgb(" + c  + ")");
     $('#previewColor').css('backgroundColor','rgb(' + c + ')');
 }
 
-function colorEditor() {
+function colorEditor(dest = null) {
     $("#colorEditor").modal();
-    updatePreview();
+    updatePreview(dest);
     $('input[type=range]').on('input', function () {
         updatePreview();
-    });	    
+    });
+    if(dest !== null) {
+    	$('#destination').val(dest);
+    }	    
 }
 
 function videosPresentation(contentId) {
