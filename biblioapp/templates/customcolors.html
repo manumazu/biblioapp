@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Bookshelf module{% endblock %}
+{% block title %}Bookshelf custom colors{% endblock %}
 {% block styles %}
 	<link rel="stylesheet" href="{{url_for('static', filename='customcolors.css')}}">
     {{super()}}
@@ -15,20 +15,16 @@
 
 	<div class="container">
 		
-	<h1 class="mt-5 text-white font-weight-light">Edit your bookshelf :</h1>
+	<h1 class="mt-5 text-white font-weight-light">Edit custom colors:</h1>
 	
 	  {% if module %}
 
-
-			<h3>Edit custom colors:</h3>	
-      <p>Set the emplacement of separations between colors foreach line in shelf. Click on "add color" to split new separation.</p>  
+    <p>Drag the emplacement of separations between colors foreach line in shelf. Click on "add color" to split new separation.</p>  
 
     <form method="POST" action="{{ url_for('customColors', app_id=module['id']) }}" id="formCustomColors">
       <input type="hidden" name="module_id" value="{{ module['id'] }}">
     </form>
 
-
-			<div id="shelf">
 
       <script type="text/javascript">
         var nb_cols = {{ module['nb_cols'] }};
@@ -39,8 +35,9 @@
       {% include '_color_editor.html' %}
 
 			{% for line in range(module['nb_lines']) %}
+      <div id="shelf">
 					<ul id="static_{{ line+1 }}" class="static">
-					{% set statics = db.get_static_positions(module['id'], line+1) %}
+					{% set statics = [] %} {#db.get_static_positions(module['id'], line+1)#}
 					{% if statics %}
 						{% for static in statics %}
 						<li id="sep_{{line+1}}_{{loop.index}}">{{ static['led_column'] }}</li>
@@ -49,18 +46,22 @@
 					{% endif %}						
 					</ul>
 
-          {% set statBooks = db.stats_books(module['id'], line+1) %}
-					<span>Shelf {{ line+1 }} ({{ statBooks['nbbooks'] }} books)</span>      
+        <div class="mb-2">
 
-          <div id="slider_{{ line+1 }}"></div>
+				  <h4>Shelf {{ line+1 }}</h4>      
+
+          <div id="slider_{{ line+1 }}" class="mb-5"></div>
 					<script type="text/javascript">
 						sliderList.push("static_{{ line+1 }}");
 					</script>
-				<div id="add_{{ line+1 }}" class="text-primary">+add color</div>          
 
+          <button type="button" class="btn btn-info" id="add_{{ line+1 }}">Add new color position</button>
+          <button type="button" class="btn btn-danger" id="remove_{{ line+1 }}">Remove last color position</button>
+
+        </div>
+      </div>
 			{% endfor %}
 
-				</div>
 
       <div class="alert alert-info alert-dismissible fade show" role="alert" id="alertPreview">
         <strong>Preview is set !</strong> You should check with "Get distant requests" in BiblioApp.

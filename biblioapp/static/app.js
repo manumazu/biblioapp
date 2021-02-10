@@ -46,15 +46,20 @@ function getColor(from = null) {
 	//parse color from form field
 	if(from != null) {
 		var rgb = $('#'+from).val();	
-		if(rgb != undefined && rgb != '') 
-		{		
+		if(rgb != 'undefined' && rgb != '') 
+		{
 			var colors = $('#'+from).val().split(",");
 			$('#red').val(colors[0]);
 			$('#green').val(colors[1]);
 			$('#blue').val(colors[2]);
 			return rgb;
 		}
-		return '0,0,0';
+		else { //init with empty colors
+			$('#red').val(0);
+			$('#green').val(0);
+			$('#blue').val(0);
+			return '0,0,0';
+		}
 	}
 	else {
 		// returns a string of red, green, blue values
