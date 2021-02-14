@@ -112,20 +112,64 @@ def customColors(app_id):
     if request.method == 'POST':
       if request.is_json:
         mode = request.args.get('mode')
-        if mode == 'preview':
-          db.clean_request(app_id) #clean request for preview
         data = request.get_json()
-        for numrow in data:
-          positions = data[numrow]
-          print(positions)
-          for i in range(len(positions)):
-            pos = i+1        
-            '''if mode == 'save': 
-              db.set_position(app_id, pos, pos, numrow, 1, 'static', positions[i])            
-            if mode == 'preview': #set distant request for preview
-              db.set_request(app_id, pos, numrow, pos, 1, positions[i], 'static', 'server', 'add')
-            if mode == 'remove': #remove all static 
-              db.del_item_position(int(app_id), pos, 'static', numrow)'''     
+        #print(data)
+
+        #group data by colors and positions
+        colorpos = {}
+        for numrow, positions in data.items():
+          for i, position in enumerate(positions):
+            start = 0
+            if(i>0):
+              start = int(positions[i-1]['handle'])+1
+            tmp = [int(numrow)+1, [start,int(position['handle'])]]
+            if position['color'] not in colorpos:
+              colorpos.update({position['color']: [tmp]})
+            else:
+              colorpos[position['color']].append(tmp)
+        #print(colorpos)
+
+        #set coordinates : group by colors and "x" positions for computing "y" coords 
+        coords = {}
+        for color, positions in colorpos.items():
+          #check for y coords size
+          for i, position in enumerate(positions):
+            #set variables
+            row = int(position[0])
+            x_start = int(position[1][0])
+            x_end = int(position[1][1])
+            x_offset = int(x_end-x_start)
+            #set key for grouping dict : color, x pos, x end, first row
+            group_key = color+'_'+str(x_start)+'-'+str(x_end)
+
+            #check for grouping colors wich have the same position on different rows
+            if(i>0):
+              if (position[1]==last_pos): #matching with previous color position
+                group_key += '_'+str(int(row-last_row))
+                y_start = (row-y_offset)-1
+                y_offset += 1                
+                #print('match', position[1], y_offset)
+              else: #not matching
+                group_key += '_'+str(last_row)
+                y_start = row-1
+                y_offset = 1
+                #print('nomatch', position[1], y_offset)
+            else: #not matching
+              #print('nomatch', position[1], y_offset)
+              group_key += '_'+str(row)
+              y_start = row-1
+              y_offset = 1
+
+            #store value for next iteration
+            last_pos = position[1] 
+            last_row = position[0]      
+
+            coord = color+'_'+str(x_start)+'-'+str(x_end)+'_'+str(y_start)+'-'+str(y_offset)
+            #coord = {'color':color, 'x_start':x_start, 'x_offset':x_offset, 'y_start':y_start, 'y_offset':y_offset}
+
+            coords[group_key] = coord
+        print(coords)
+        #print(colorpos)
     return render_template('customcolors.html', user_login=flask_login.current_user.name, module=module, db=db, shelf_infos=globalVars['arduino_map'])
   abort(404)  
 

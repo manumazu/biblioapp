@@ -193,7 +193,27 @@ $(document).ready(function() {
 		$('#rgbText').text("RGB code update");
 	});	
 
-	$("#removeStaticPositions").on('click', function() {
+	
+
+	$("#saveColorsPositions").on('click', function() {
+	 //'/module/<app_id>'
+	 	var elements = getSlideElements();
+	 	console.log(JSON.stringify(elements));
+
+		$.ajax({
+			dataType: 'json',
+        	contentType: 'application/json',
+			data: JSON.stringify(elements),
+		    type: 'POST',
+		    url: $("#formCustomColors").attr('action')+'?mode=save',
+		    complete: function() {
+		    	$('#alertPreview').hide();
+		    	$('#alertSave').show();		    	
+		    }
+		});
+	});	
+
+	/*$("#removeStaticPositions").on('click', function() {
 	 //'/module/<app_id>'
 	 	var res = confirm('Are you sure ?');
 	 	if (res) {
@@ -215,26 +235,6 @@ $(document).ready(function() {
 		}
 	});
 
-
-
-	$("#saveStaticPositions").on('click', function() {
-	 //'/module/<app_id>'
-	 	var elements = getSlideElements();
-	 	//console.log(elements);
-
-		$.ajax({
-			dataType: 'json',
-        	contentType: 'application/json',
-			data: elements,
-		    type: 'POST',
-		    url: $("#formCustomColors").attr('action')+'?mode=save',
-		    complete: function() {
-		    	$('#alertPreview').hide();
-		    	$('#alertSave').show();		    	
-		    }
-		});
-	});
-
 	$("#previewStaticPositions").on('click', function() {
 	 	var elements = getSlideElements();
 	 	//console.log(elements);
@@ -250,6 +250,6 @@ $(document).ready(function() {
 		    	$('#alertSave').hide();	
 		    }
 		});
-	});	
+	});	*/
 
 });
