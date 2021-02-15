@@ -1131,17 +1131,7 @@ def customColors(app_id):
     customcoords = ''
     if(dbcoords['coordinates']!=''):
       customcoords = json.loads(dbcoords['coordinates'])
-    #print(sorted(customcoords))
-    '''if len(customcoords):
-      for i in range(int(module['nb_lines'])):
-        #for i in range(int(coords['y_offset'])):
-        cpt = 1
-        for key, coords in customcoords.items():
-          #print(cpt)
-          if int(i+coords['y_start']) in range(coords['y_start'],coords['y_offset']):
-            print(int(coords['x_start']+coords['x_offset']))
-            cpt+=1
-            #print(coords['x_start'], coords['x_start']+coords['x_offset'])'''
+    #print(customcoords)
 
     if request.method == 'POST':
       if request.is_json:
@@ -1156,29 +1146,30 @@ def customColors(app_id):
             start = 0
             if(i>0):
               start = int(positions[i-1]['handle'])+1
-            tmp = [int(numrow)+1, [start,int(position['handle'])]]
+            tmp = [[start,int(position['handle'])],int(numrow)+1]
             if position['color'] not in colorpos:
               colorpos.update({position['color']: [tmp]})
             else:
               colorpos[position['color']].append(tmp)
-        #print(colorpos)
 
         #set coordinates : group by colors and "x" positions for computing "y" coords 
         coords = {}
         for color, positions in colorpos.items():
-          #check for y coords size
+          #sort list by x position
+          positions.sort(key=tools.sortCoords)
+          #compute y coords size
           for i, position in enumerate(positions):
             #set variables
-            row = int(position[0])
-            x_start = int(position[1][0])
-            x_end = int(position[1][1])
+            row = int(position[1])
+            x_start = int(position[0][0])
+            x_end = int(position[0][1])
             x_offset = int(x_end-x_start)
             #set key for grouping dict : color, x pos, x end, first row
             group_key = str(x_start)+'-'+str(x_end)
             
             #check for grouping colors wich have the same position on different rows
             if(i>0):
-              if (position[1]==last_pos and row==int(last_row+1)): #matching with previous color position
+              if (position[0]==last_pos and row==int(last_row+1)): #matching with previous color position
                 y_start = (row-y_offset)-1
                 y_offset += 1         
                 #print('match', position[1], row, last_row)
@@ -1192,8 +1183,8 @@ def customColors(app_id):
               #print('nomatch', position[1], row)              
 
             #store value for next iteration
-            last_pos = position[1] 
-            last_row = position[0]
+            last_pos = position[0] 
+            last_row = position[1]
 
             group_key += '_'+str(y_start)+'_'+color #update key
 
