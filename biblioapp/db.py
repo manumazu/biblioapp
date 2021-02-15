@@ -783,3 +783,29 @@ def search_book(app_id, keyword) :
   if row:
     return row
   return False
+
+def get_customcolors(user_id, app_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT id, title, coordinates, date_add, date_upd FROM biblio_customcolors \
+    where id_user=%s and id_app=%s", (user_id, app_id))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False  
+
+def set_customcolors(user_id, app_id, title, coordinates) :
+  now = tools.getNow()
+  mysql = get_db()
+  coords = get_customcolors(user_id, app_id)
+  if coords:
+    mysql['cursor'].execute("UPDATE biblio_customcolors SET `title`=%s, `coordinates`=%s, `date_upd`=%s WHERE id_app=%s", \
+      (title, coordinates, now.strftime("%Y-%m-%d %H:%M:%S"), app_id))
+  else :
+    mysql['cursor'].execute("INSERT INTO biblio_customcolors (`id_app`, `id_user`, `title`, `coordinates`) VALUES (%s, %s, %s, %s)", \
+      (app_id, user_id, title, coordinates))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True

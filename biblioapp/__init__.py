@@ -99,79 +99,7 @@ def editArduino(app_id):
             if mode == 'remove': #remove all static 
               db.del_item_position(int(app_id), pos, 'static', numrow)        
     return render_template('module.html', user_login=flask_login.current_user.name, module=module, db=db, shelf_infos=globalVars['arduino_map'])
-  abort(404)
-
-@app.route("/customcolors/<app_id>", methods=['GET', 'POST'])
-@flask_login.login_required
-def customColors(app_id):
-  globalVars = initApp()
-  module = db.get_arduino_map(flask_login.current_user.id, app_id) #globalVars['arduino_map']
-  if module:
-    session['app_id'] = module['id']
-    session['app_name'] = module['arduino_name']
-    if request.method == 'POST':
-      if request.is_json:
-        mode = request.args.get('mode')
-        data = request.get_json()
-        #print(data)
-
-        #group data by colors and positions
-        colorpos = {}
-        for numrow, positions in data.items():
-          for i, position in enumerate(positions):
-            start = 0
-            if(i>0):
-              start = int(positions[i-1]['handle'])+1
-            tmp = [int(numrow)+1, [start,int(position['handle'])]]
-            if position['color'] not in colorpos:
-              colorpos.update({position['color']: [tmp]})
-            else:
-              colorpos[position['color']].append(tmp)
-        #print(colorpos)
-
-        #set coordinates : group by colors and "x" positions for computing "y" coords 
-        coords = {}
-        for color, positions in colorpos.items():
-          #check for y coords size
-          for i, position in enumerate(positions):
-            #set variables
-            row = int(position[0])
-            x_start = int(position[1][0])
-            x_end = int(position[1][1])
-            x_offset = int(x_end-x_start)
-            #set key for grouping dict : color, x pos, x end, first row
-            group_key = color+'_'+str(x_start)+'-'+str(x_end)
-
-            #check for grouping colors wich have the same position on different rows
-            if(i>0):
-              if (position[1]==last_pos): #matching with previous color position
-                group_key += '_'+str(int(row-last_row))
-                y_start = (row-y_offset)-1
-                y_offset += 1                
-                #print('match', position[1], y_offset)
-              else: #not matching
-                group_key += '_'+str(last_row)
-                y_start = row-1
-                y_offset = 1
-                #print('nomatch', position[1], y_offset)
-            else: #not matching
-              #print('nomatch', position[1], y_offset)
-              group_key += '_'+str(row)
-              y_start = row-1
-              y_offset = 1
-
-            #store value for next iteration
-            last_pos = position[1] 
-            last_row = position[0]      
-
-            coord = color+'_'+str(x_start)+'-'+str(x_end)+'_'+str(y_start)+'-'+str(y_offset)
-            #coord = {'color':color, 'x_start':x_start, 'x_offset':x_offset, 'y_start':y_start, 'y_offset':y_offset}
-
-            coords[group_key] = coord
-        print(coords)
-        #print(colorpos)
-    return render_template('customcolors.html', user_login=flask_login.current_user.name, module=module, db=db, shelf_infos=globalVars['arduino_map'])
-  abort(404)  
+  abort(404) 
 
 #get module infos from arduino for current arduino_name
 @app.route('/api/module/<uuid>/')
@@ -1185,6 +1113,103 @@ def customCodeTemplate(template):
     effects = tools.get_leds_effects()
     return render_template('_customcode_effect.html', effects=effects)        
   abort(404)
+
+
+@app.route("/customcolors/<app_id>", methods=['GET', 'POST'])
+@flask_login.login_required
+def customColors(app_id):
+  globalVars = initApp()
+  user_id = globalVars['arduino_map']['user_id']
+  dbcoords = db.get_customcolors(user_id, app_id)
+  module = db.get_arduino_map(flask_login.current_user.id, app_id)
+  #print(module)
+  if module:
+    session['app_id'] = module['id']
+    session['app_name'] = module['arduino_name']
+    
+    #parse coordinates from db
+    customcoords = ''
+    if(dbcoords['coordinates']!=''):
+      customcoords = json.loads(dbcoords['coordinates'])
+    #print(customcoords)
+    '''if len(customcoords):
+      for i in range(int(module['nb_lines'])):
+        #for i in range(int(coords['y_offset'])):
+        cpt = 1
+        for key, coords in customcoords.items():
+          #print(cpt)
+          if int(i+coords['y_start']) in range(coords['y_start'],coords['y_offset']):
+            print(int(coords['x_start']+coords['x_offset']))
+            cpt+=1
+            #print(coords['x_start'], coords['x_start']+coords['x_offset'])'''
+
+    if request.method == 'POST':
+      if request.is_json:
+        mode = request.args.get('mode')
+        data = request.get_json()
+        #print(data)
+
+        #group data by colors and positions
+        colorpos = {}
+        for numrow, positions in data.items():
+          for i, position in enumerate(positions):
+            start = 0
+            if(i>0):
+              start = int(positions[i-1]['handle'])+1
+            tmp = [int(numrow)+1, [start,int(position['handle'])]]
+            if position['color'] not in colorpos:
+              colorpos.update({position['color']: [tmp]})
+            else:
+              colorpos[position['color']].append(tmp)
+          #print(colorpos)
+
+        #set coordinates : group by colors and "x" positions for computing "y" coords 
+        coords = {}
+        for color, positions in colorpos.items():
+          #check for y coords size
+          for i, position in enumerate(positions):
+            #set variables
+            row = int(position[0])
+            x_start = int(position[1][0])
+            x_end = int(position[1][1])
+            x_offset = int(x_end-x_start)
+            #set key for grouping dict : color, x pos, x end, first row
+            group_key = color+'_'+str(x_start)+'-'+str(x_end)
+
+            #check for grouping colors wich have the same position on different rows
+            if(i>0):
+              if (position[1]==last_pos): #matching with previous color position
+                y_start = (row-y_offset)-1
+                y_offset += 1       
+                #group_key += '_'+str(y_start)#-last_row                         
+                #print('match', position[1], y_offset)
+              else: #not matching
+                #group_key += '_'+str(last_row)
+                y_start = row-1
+                y_offset = 1
+                #print('nomatch', position[1], y_offset)
+            else: #not matching
+              #group_key += '_'+str(row)
+              y_start = row-1
+              y_offset = 1
+              #print('nomatch', position[1], y_offset)              
+
+            #store value for next iteration
+            last_pos = position[1] 
+            last_row = position[0]      
+
+            #coord = color+'_'+str(x_start)+'-'+str(x_end)+'_'+str(y_start)+'-'+str(y_offset)
+            coord = {'color':color, 'x_start':x_start, 'x_offset':x_offset, 'y_start':y_start, 'y_offset':y_offset}
+            coords[group_key] = coord
+
+        #save datas
+        coordinates = json.dumps(coords)
+        #print(coordinates)        
+        db.set_customcolors(user_id, app_id, "test", coordinates)
+
+    return render_template('customcolors.html', user_login=flask_login.current_user.name, customcoords=customcoords, \
+     module=module, shelf_infos=globalVars['arduino_map'])
+  abort(404)   
 
 @app.route('/customeffects')
 @app.route('/api/customeffects')

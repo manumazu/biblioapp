@@ -84,13 +84,7 @@ $(document).ready(function() {
 		var arrcol = getSlideElements(index);
 		//console.log('arrcol',arrcol);
 
-		if(arrcol.length) {
-			//sort colors by position
-			arrcol.sort(function(a, b) {
-			  return a.handle - b.handle;
-			});
-		}
-		else { //init color with grey
+		if(!arrcol.length) { //init color with grey
 			let obj = {handle: 0, color:'#4e5d6c'};
 			arrcol.push(obj);	
 		}
@@ -164,7 +158,12 @@ $(document).ready(function() {
 				}
 				let obj = {handle: $('#sep_' + (index+1) + '_'+(i+1)).text(), color:rgb};
 				arrcol.push(obj);
-			});	
+			});
+
+			//important : sort handle by position ascendant
+			arrcol.sort(function(a, b) {
+			  return a.handle - b.handle;
+			});
 
 			//if(arrcol.length)
 			lines[index] = arrcol;

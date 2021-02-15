@@ -212,3 +212,11 @@ def seconds_between_now(d1):
     #d1 = datetime.strptime(str(d1), "%Y-%m-%d %H:%M:%S")
     d2 = getNow()
     return abs((d2 - d1).seconds)
+
+def drawline(line, x, y, xoffset, nb_leds, color):
+  leds = {}
+  dy = int(y+line)-1; #y must be > 0
+  maxled = (dy * nb_leds) + (x + xoffset) #XY(x+xoffset, dy);
+  for j in range(maxled-xoffset):
+    leds[j] = color;
+  return leds

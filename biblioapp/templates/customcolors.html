@@ -36,14 +36,20 @@
 
 			{% for line in range(module['nb_lines']) %}
       <div id="shelf">
+        
 					<ul id="static_{{ line+1 }}" class="static">
-					{% set statics = [] %} {#db.get_static_positions(module['id'], line+1)#}
-					{% if statics %}
-						{% for static in statics %}
-						<li id="sep_{{line+1}}_{{loop.index}}">{{ static['led_column'] }}</li>
-            <input type="text" id="new_color_{{ line+1 }}_{{ loop.index }}" name="custom_color" value="">
-						{% endfor %}
-					{% endif %}						
+          {% if customcoords|length %}
+            {% set counter = [] %}
+            {% for key, coords in customcoords.items() %}
+              {% if coords['y_start'] <= line and line < (coords['y_start']+coords['y_offset'])  %}
+                {% set var = counter.append(1) %}              
+  						  <li id="sep_{{ line+1 }}_{{ counter|length }}">{{ coords['x_start']+coords['x_offset'] }}</li>
+                {% set color = coords['color'].split('(')[1].split(')') %}
+                <input type="text" id="new_color_{{ line+1 }}_{{ counter|length }}" name="custom_color" value="{{ color[0] }}">
+              {% endif %}    
+  					{% endfor %}
+          {% endif %}
+
 					</ul>
 
         <div class="mb-2">
