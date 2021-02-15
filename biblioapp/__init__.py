@@ -1131,7 +1131,7 @@ def customColors(app_id):
     customcoords = ''
     if(dbcoords['coordinates']!=''):
       customcoords = json.loads(dbcoords['coordinates'])
-    #print(customcoords)
+    print(customcoords)
     '''if len(customcoords):
       for i in range(int(module['nb_lines'])):
         #for i in range(int(coords['y_offset'])):
@@ -1161,7 +1161,7 @@ def customColors(app_id):
               colorpos.update({position['color']: [tmp]})
             else:
               colorpos[position['color']].append(tmp)
-          #print(colorpos)
+        #print(colorpos)
 
         #set coordinates : group by colors and "x" positions for computing "y" coords 
         coords = {}
@@ -1175,28 +1175,27 @@ def customColors(app_id):
             x_offset = int(x_end-x_start)
             #set key for grouping dict : color, x pos, x end, first row
             group_key = color+'_'+str(x_start)+'-'+str(x_end)
-
+            
             #check for grouping colors wich have the same position on different rows
             if(i>0):
-              if (position[1]==last_pos): #matching with previous color position
+              if (position[1]==last_pos and row==int(last_row+1)): #matching with previous color position
                 y_start = (row-y_offset)-1
-                y_offset += 1       
-                #group_key += '_'+str(y_start)#-last_row                         
-                #print('match', position[1], y_offset)
+                y_offset += 1         
+                #print('match', position[1], row, last_row)
               else: #not matching
-                #group_key += '_'+str(last_row)
                 y_start = row-1
                 y_offset = 1
-                #print('nomatch', position[1], y_offset)
+                #print('nomatch', position[1], row, last_row)
             else: #not matching
-              #group_key += '_'+str(row)
               y_start = row-1
               y_offset = 1
-              #print('nomatch', position[1], y_offset)              
+              #print('nomatch', position[1], row)              
 
             #store value for next iteration
             last_pos = position[1] 
-            last_row = position[0]      
+            last_row = position[0]
+
+            group_key += '_'+str(y_start) #update key
 
             #coord = color+'_'+str(x_start)+'-'+str(x_end)+'_'+str(y_start)+'-'+str(y_offset)
             coord = {'color':color, 'x_start':x_start, 'x_offset':x_offset, 'y_start':y_start, 'y_offset':y_offset}
@@ -1204,7 +1203,7 @@ def customColors(app_id):
 
         #save datas
         coordinates = json.dumps(coords)
-        #print(coordinates)        
+        print(coordinates)        
         db.set_customcolors(user_id, app_id, "test", coordinates)
 
     return render_template('customcolors.html', user_login=flask_login.current_user.name, customcoords=customcoords, \
