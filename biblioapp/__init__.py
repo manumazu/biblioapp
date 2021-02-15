@@ -1131,7 +1131,7 @@ def customColors(app_id):
     customcoords = ''
     if(dbcoords['coordinates']!=''):
       customcoords = json.loads(dbcoords['coordinates'])
-    print(customcoords)
+    #print(sorted(customcoords))
     '''if len(customcoords):
       for i in range(int(module['nb_lines'])):
         #for i in range(int(coords['y_offset'])):
@@ -1174,7 +1174,7 @@ def customColors(app_id):
             x_end = int(position[1][1])
             x_offset = int(x_end-x_start)
             #set key for grouping dict : color, x pos, x end, first row
-            group_key = color+'_'+str(x_start)+'-'+str(x_end)
+            group_key = str(x_start)+'-'+str(x_end)
             
             #check for grouping colors wich have the same position on different rows
             if(i>0):
@@ -1195,7 +1195,7 @@ def customColors(app_id):
             last_pos = position[1] 
             last_row = position[0]
 
-            group_key += '_'+str(y_start) #update key
+            group_key += '_'+str(y_start)+'_'+color #update key
 
             #coord = color+'_'+str(x_start)+'-'+str(x_end)+'_'+str(y_start)+'-'+str(y_offset)
             coord = {'color':color, 'x_start':x_start, 'x_offset':x_offset, 'y_start':y_start, 'y_offset':y_offset}
@@ -1203,7 +1203,7 @@ def customColors(app_id):
 
         #save datas
         coordinates = json.dumps(coords)
-        print(coordinates)        
+        #print(coordinates)        
         db.set_customcolors(user_id, app_id, "test", coordinates)
 
     return render_template('customcolors.html', user_login=flask_login.current_user.name, customcoords=customcoords, \

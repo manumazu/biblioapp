@@ -150,6 +150,9 @@ def sortIndexBlocks(elem):
 def sortPositions(address):
   return address['row']*100+address['led_column']
 
+def sortCoords(coords):
+  return coords['x_start']
+
 def formatBookApi(api, data, isbn):
   bookapi = {}
 
