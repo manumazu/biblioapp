@@ -1193,7 +1193,8 @@ def customColors(app_id):
             group_key += '_'+str(y_start)+'_'+color #update key
 
             #coord = color+'_'+str(x_start)+'-'+str(x_end)+'_'+str(y_start)+'-'+str(y_offset)
-            coord = {'color':color, 'x_start':x_start, 'x_offset':x_offset, 'y_start':y_start, 'y_offset':y_offset}
+            rgb = color.split('(')[1].split(')') #extract rgb
+            coord = {'color':rgb[0], 'x_start':x_start, 'x_offset':x_offset, 'y_start':y_start, 'y_offset':y_offset}
             coords[group_key] = coord
 
         #save datas
@@ -1213,7 +1214,7 @@ def getCustomColors():
   dbcoords = db.get_customcolors(user_id, session['app_id'])
   if(dbcoords and dbcoords['coordinates']!='' and dbcoords['coordinates']!='{}'):
     response = app.response_class(
-      response=json.dumps(dbcoords['coordinates']),
+      response=dbcoords['coordinates'],
       mimetype='application/json'
     )
     return response

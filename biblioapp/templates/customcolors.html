@@ -44,8 +44,7 @@
               {% if coords['y_start'] <= line and line < (coords['y_start']+coords['y_offset'])  %}
                 {% set var = counter.append(1) %}              
   						  <li id="sep_{{ line+1 }}_{{ counter|length }}">{{ coords['x_start']+coords['x_offset'] }}</li>
-                {% set color = coords['color'].split('(')[1].split(')') %}
-                <input type="text" id="new_color_{{ line+1 }}_{{ counter|length }}" name="custom_color" value="{{ color[0] }}">
+                <input type="text" id="new_color_{{ line+1 }}_{{ counter|length }}" name="custom_color" value="{{ coords['color'] }}">
               {% endif %}    
   					{% endfor %}
           {% endif %}
