@@ -1203,7 +1203,21 @@ def customColors(app_id):
 
     return render_template('customcolors.html', user_login=flask_login.current_user.name, customcoords=customcoords, \
      module=module, shelf_infos=globalVars['arduino_map'])
-  abort(404)   
+  abort(404) 
+
+@app.route('/api/customcolors')
+@flask_login.login_required 
+def getCustomColors():
+  globalVars = initApp()
+  user_id = globalVars['arduino_map']['user_id']
+  dbcoords = db.get_customcolors(user_id, session['app_id'])
+  if(dbcoords and dbcoords['coordinates']!='' and dbcoords['coordinates']!='{}'):
+    response = app.response_class(
+      response=json.dumps(dbcoords['coordinates']),
+      mimetype='application/json'
+    )
+    return response
+  abort(404) 
 
 @app.route('/customeffects')
 @app.route('/api/customeffects')
