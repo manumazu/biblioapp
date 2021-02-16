@@ -68,6 +68,10 @@ def selectArduino():
         session['app_numshelf'] = int(request.form.get('numshelf'))
       flash('Bookshelf "{}"selected'.format(request.form.get('module_name')), 'info')
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
+  if request.method == 'GET':
+    if request.args.get('app_id'):
+      session['app_id'] = request.args.get('app_id')
+      return redirect(url_for('editArduino', app_id=session['app_id'], _scheme='https', _external=True))
   return render_template('modules.html', user_login=flask_login.current_user.name, modules=modules)
 
 @app.route("/module/<app_id>", methods=['GET', 'POST'])
@@ -1120,16 +1124,16 @@ def customCodeTemplate(template):
 def customColors(app_id):
   globalVars = initApp()
   user_id = globalVars['arduino_map']['user_id']
-  dbcoords = db.get_customcolors(user_id, app_id)
   module = db.get_arduino_map(flask_login.current_user.id, app_id)
   #print(module)
   if module:
-    session['app_id'] = module['id']
-    session['app_name'] = module['arduino_name']
+    #session['app_id'] = module['id']
+    #session['app_name'] = module['arduino_name']
     
     #parse coordinates from db
     customcoords = ''
-    if(dbcoords['coordinates']!=''):
+    dbcoords = db.get_customcolors(user_id, app_id)
+    if(dbcoords and dbcoords['coordinates']!=''):
       customcoords = json.loads(dbcoords['coordinates'])
     #print(customcoords)
 
@@ -1194,7 +1198,7 @@ def customColors(app_id):
 
         #save datas
         coordinates = json.dumps(coords)
-        #print(coordinates)        
+        print(coordinates)        
         db.set_customcolors(user_id, app_id, "test", coordinates)
 
     return render_template('customcolors.html', user_login=flask_login.current_user.name, customcoords=customcoords, \

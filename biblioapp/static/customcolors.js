@@ -199,6 +199,18 @@ $(document).ready(function() {
 	 	var elements = getSlideElements();
 	 	console.log(JSON.stringify(elements));
 
+	 	//check for color not defined
+		for (let index in elements) {
+			for (let key in elements[index]) {
+				let color = elements[index][key]['color'];
+				if(color=='rgb(undefined)' || color=='rgb()' || color=='') {
+					let num = parseInt(parseInt(index)+1);
+					alert('Error : color at slide number ' + num + ' is not set !');
+					return false;
+				}				
+			}
+		}
+
 		$.ajax({
 			dataType: 'json',
         	contentType: 'application/json',
@@ -212,29 +224,29 @@ $(document).ready(function() {
 		});
 	});	
 
-	/*$("#removeStaticPositions").on('click', function() {
+	$("#removeColorsPositions").on('click', function() {
 	 //'/module/<app_id>'
 	 	var res = confirm('Are you sure ?');
 	 	if (res) {
-		 	var elements = getSlideElements();
+		 	var elements = {};//
 		 	//console.log(elements);
 			$.ajax({
 				dataType: 'json',
 	        	contentType: 'application/json',
-				data: elements,
+				data: JSON.stringify(elements),
 			    type: 'POST',
-			    url: $("#formEditArduino").attr('action')+'?mode=remove',
+			    url: $("#formCustomColors").attr('action')+'?mode=remove',
 			    complete: function() {
 			    	$('#alertPreview').hide();
 			    	$('#alertSave').show();
 			    	//reload page
-			    	window.location = $("#formEditArduino").attr('action');	
+			    	window.location = $("#formCustomColors").attr('action');	
 			    }
 			});
 		}
 	});
 
-	$("#previewStaticPositions").on('click', function() {
+	/*$("#previewStaticPositions").on('click', function() {
 	 	var elements = getSlideElements();
 	 	//console.log(elements);
 
