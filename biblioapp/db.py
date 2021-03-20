@@ -689,6 +689,16 @@ def set_user_pwd(email, password):
   mysql['cursor'].close()
   mysql['conn'].close()
 
+def get_users():
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT id, email, firstname, lastname FROM biblio_user")
+  rows = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if rows:
+    return rows
+  return None  
+
 def set_customcode(user_id, app_id, code_id, title, description, published, customvars, customcode) :
   now = tools.getNow()
   mysql = get_db()

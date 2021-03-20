@@ -31,6 +31,8 @@ global arduino_name, user_login
 
 def initApp():
   user_login = False
+  arduino_map = None
+  arduino_name = None  
   if(flask_login.current_user.is_authenticated):
     user_login = flask_login.current_user.name  
     #prevent empty session for module : select first one
@@ -42,11 +44,11 @@ def initApp():
           session['app_name'] = module['arduino_name']
           flash('Bookshelf "{}"selected'.format(module['arduino_name']), 'info')
           break
-    arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
-    arduino_name = arduino_map['arduino_name']     
-  else:
-    arduino_map = None
-    arduino_name = None  
+      else:
+        session['app_id'] = 1
+    if 'app_id' in session and session['app_id'] != None:
+      arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
+      arduino_name = arduino_map['arduino_name']            
   return {'user_login':user_login,'arduino_map':arduino_map,'arduino_name':arduino_name}
 
 @app.route("/")
@@ -153,7 +155,8 @@ def newArduino(app_id = None):
       module = db.get_module(app_id)
     else:
       module = {}
-    user_id = globalVars['arduino_map']['user_id']
+    #user_id = globalVars['arduino_map']['user_id']
+    users = db.get_users()
     if request.method == 'POST':
       #print(request.form)
       data = {}
@@ -166,6 +169,7 @@ def newArduino(app_id = None):
       nb_cols = round((float(data['strip_length'])/leds_interval)+0.5) # nb_leds per strip
       data['leds_interval'] = math.floor(leds_interval*100)/100 # interval btw leds in mm
       data['nb_cols'] = nb_cols
+      data['id_user'] = request.form.get('user')
       #don't erease current BLE gatt 
       if request.form.get('module_id'):
         data['module_id'] = request.form.get('module_id')
@@ -173,17 +177,17 @@ def newArduino(app_id = None):
       else:
         data['id_ble'] = "xxxx" #set empty id_ble
       #save module, set user_app, and set id_ble
-      module = db.set_module(data)
-      if 'id' in module:
-          module = db.get_module(module['id'])
-          db.set_user_app(module['id_user'], module['id'])
+      new_module = db.set_module(data)
+      if 'id' in new_module:
+          db.set_user_app(data['id_user'], new_module['id'])
+          module = db.get_module(new_module['id'])
           if module['id_ble']=='xxxx':
             id_ble = tools.set_id_ble(module)
             db.update_id_ble(module['id'], id_ble)
-          return redirect(url_for('newArduino', _scheme='https', _external=True, app_id=module['id']))
+          return redirect(url_for('newArduino', _scheme='https', _external=True, app_id=new_module['id']))
     if request.args.get('module_id'):
       module = db.get_module(request.args.get('module_id'))
-    return render_template('module_admin.html', user_login=flask_login.current_user.name, module=module, \
+    return render_template('module_admin.html', user_login=flask_login.current_user.name, module=module, users=users, \
       shelf_infos=globalVars['arduino_map'])
   abort(404)
 

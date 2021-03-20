@@ -42,6 +42,23 @@
   			<form method="POST" action="{{ formUrl }}" id="formAdminArduino">
 
           <fieldset>
+
+            {% if 'id' in module %}
+                  <input type="hidden" name="user" value="{{ module['id_user'] }}"> 
+            {% else %}                              
+              <div class="form-group form-inline">
+                  <label for="ledspermeter" class="col-lg-2 control-label">Select user</label>
+                  <div class="col-lg-3">
+                  <select id="user" name="user">
+                    <option>Firstname Lastname</option>
+                    {% for user in users %}
+                       <option value="{{ user['id'] }}">{{ user['firstname'] }} {{ user['lastname'] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>        
+            {% endif %}
+
             <div class="form-group form-inline">
               <label for="module_name" class="col-lg-2 control-label">Bookshelf name</label>
       				<div class="col-lg-3">
