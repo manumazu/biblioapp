@@ -44,11 +44,10 @@ def initApp():
           session['app_name'] = module['arduino_name']
           flash('Bookshelf "{}"selected'.format(module['arduino_name']), 'info')
           break
-      else:
-        session['app_id'] = 1
     if 'app_id' in session and session['app_id'] != None:
       arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
-      arduino_name = arduino_map['arduino_name']            
+      if arduino_map != None:
+        arduino_name = arduino_map['arduino_name']            
   return {'user_login':user_login,'arduino_map':arduino_map,'arduino_name':arduino_name}
 
 @app.route("/")
