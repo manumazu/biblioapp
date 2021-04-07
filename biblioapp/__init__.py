@@ -851,7 +851,7 @@ def searchBookReference():
 
     '''Search books with google api'''  
     url = "https://www.googleapis.com/books/v1/volumes"
-    query = "?key=AIzaSyBVwKgWVqNaLwgceI_b3lSJJAGLw_uCDos&q="
+    query = "?key="+app.config['GOOGLE_BOOK_API_KEY']+"&q="
     '''search on api for form'''
     if request.method == 'POST':
       if 'isbn' in request.form and request.form['isbn']:
@@ -884,7 +884,6 @@ def searchBookReference():
       '''Search books with googleapis api'''
       if request.args.get('search_api')=='googleapis':
         query += "ISBN:\""+request.args.get('isbn')+"\""
-        print(url + query)
         r = requests.get(url + query)
         data = r.json() 
         if 'items' in data:
