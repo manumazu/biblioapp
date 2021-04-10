@@ -1,7 +1,8 @@
 from flaskext.mysql import MySQL
 import pymysql
-from biblioapp import app
-from biblioapp import tools
+from biblioapp import create_app, tools
+
+app = create_app()
 
 db = MySQL()
 db.init_app(app)
@@ -295,6 +296,25 @@ def set_request_remove(app_id) :
 
 
 ''' manage book '''
+
+def bookSave(book, user_id, tags = None):
+  bookId = db.set_book(book, user_id)
+  #manage tags + taxonomy
+  #author tags
+  authorTags = tools.getLastnameFirstname(book['authors'])
+  authorTagids = db.set_tags(authorTags,'Authors')
+  if len(authorTagids)>0:
+    db.set_tag_node(bookId, authorTagids)
+  #categories
+  if tags is not None :  
+    db.clean_tag_for_node(bookId['id'], 1) #clean tags categories  before update
+    catTagIds = db.set_tags(tags.split(','),'Categories')
+    if len(catTagIds)>0:
+      db.set_tag_node(bookId, catTagIds)
+      db.set_tag_user(user_id, catTagIds)
+  return bookId
+
+
 def get_bookapi(isbn, user_id):
   mysql = get_db()
   mysql['cursor'].execute("SELECT id FROM biblio_book WHERE `isbn`=%s and `id_user`=%s", (isbn, user_id))

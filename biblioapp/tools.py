@@ -1,5 +1,30 @@
+from flask import session
 from datetime import datetime
-from biblioapp import app, hashlib, base64
+from biblioapp import create_app, db, hashlib, base64
+import flask_login
+
+app = create_app()
+
+def initApp():
+  user_login = False
+  arduino_map = None
+  arduino_name = None  
+  if(flask_login.current_user.is_authenticated):
+    user_login = flask_login.current_user.name  
+    #prevent empty session for module : select first one
+    if 'app_id' not in session:
+      modules = db.get_arduino_for_user(flask_login.current_user.id) 
+      if modules:   
+        for module in modules:
+          session['app_id'] = module['id']
+          session['app_name'] = module['arduino_name']
+          flash('Bookshelf "{}"selected'.format(module['arduino_name']), 'info')
+          break
+    if 'app_id' in session and session['app_id'] != None:
+      arduino_map = db.get_arduino_map(flask_login.current_user.id, session['app_id'])
+      if arduino_map != None:
+        arduino_name = arduino_map['arduino_name']            
+  return {'user_login':user_login,'arduino_map':arduino_map,'arduino_name':arduino_name}
 
 def getYear(datestr):
   try:

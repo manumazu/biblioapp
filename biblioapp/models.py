@@ -1,7 +1,8 @@
-from biblioapp import app, db, tools, flask_login, login_manager, session, hashlib, redirect, url_for, request, jsonify, Response
+from biblioapp import create_app, db, tools, flask_login, login_manager, session, hashlib, redirect, url_for, request, jsonify, Response
 from time import time
 import jwt
 
+app = create_app()
 
 #users = {'foo@bar.tld': {'password': 'secret'}}
 #mandatory for flask_login 
