@@ -298,20 +298,20 @@ def set_request_remove(app_id) :
 ''' manage book '''
 
 def bookSave(book, user_id, tags = None):
-  bookId = db.set_book(book, user_id)
+  bookId = set_book(book, user_id)
   #manage tags + taxonomy
   #author tags
   authorTags = tools.getLastnameFirstname(book['authors'])
-  authorTagids = db.set_tags(authorTags,'Authors')
+  authorTagids = set_tags(authorTags,'Authors')
   if len(authorTagids)>0:
-    db.set_tag_node(bookId, authorTagids)
+    set_tag_node(bookId, authorTagids)
   #categories
   if tags is not None :  
-    db.clean_tag_for_node(bookId['id'], 1) #clean tags categories  before update
-    catTagIds = db.set_tags(tags.split(','),'Categories')
+    clean_tag_for_node(bookId['id'], 1) #clean tags categories  before update
+    catTagIds = set_tags(tags.split(','),'Categories')
     if len(catTagIds)>0:
-      db.set_tag_node(bookId, catTagIds)
-      db.set_tag_user(user_id, catTagIds)
+      set_tag_node(bookId, catTagIds)
+      set_tag_user(user_id, catTagIds)
   return bookId
 
 
