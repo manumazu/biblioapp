@@ -13,6 +13,7 @@ setup(
         'flask-mail',
         'pyjwt',
         'flask-session',
-        'flask-cors'
+        'flask-cors',
+        'pytest'
     ],
 )
