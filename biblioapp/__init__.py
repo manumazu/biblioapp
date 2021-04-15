@@ -14,8 +14,8 @@ def create_app():
   app.config.from_pyfile("../config.py")
   #override elements from environment settings
   for variable, value in os.environ.items():
-    if variable.startswith("MYSQL_"):
-      app.config[variable] = value
+    #if variable.startswith("MYSQL_"):
+    app.config[variable] = value
 
   #Session(app)
   sess = Session()
