@@ -307,7 +307,7 @@ CREATE TABLE `biblio_user_app` (
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`bibliobus`@`localhost` SQL SECURITY DEFINER */
+/*!50013  SQL SECURITY DEFINER */
 /*!50001 VIEW `biblio_search` AS select `p`.`id_app` AS `id_app`,`b`.`id` AS `id`,`b`.`title` AS `title`,`b`.`author` AS `author`,`b`.`editor` AS `editor`,`b`.`description` AS `description`,group_concat(' ',`t`.`tag` separator ',') AS `tags` from ((((`biblio_book` `b` left join `biblio_tag_node` `tn` on(`b`.`id` = `tn`.`id_node`)) join `biblio_tags` `t` on(`t`.`id` = `tn`.`id_tag`)) join `biblio_taxonomy` `taxo` on(`taxo`.`id` = `t`.`id_taxonomy`)) join `biblio_position` `p` on(`p`.`id_item` = `b`.`id` and `p`.`item_type` = 'book')) group by `b`.`id` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
