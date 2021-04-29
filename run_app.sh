@@ -3,7 +3,7 @@
 export FLASK_APP=biblioapp
 export FLASK_ENV=development
 if [ "$1" != "" ]; then
-	flask run --host='192.168.0.29' --cert=bibliobus.cert --key=bibliobus.key
+	flask run --host='192.168.0.33' --cert=bibliobus.cert --key=bibliobus.key
 else
-	flask run --host='192.168.0.29'
+	flask run --host='192.168.0.33'
 fi	

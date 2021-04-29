@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
+from flask import Flask, render_template, request, abort, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
 from flask_bootstrap import Bootstrap
 import flask_login, hashlib, base64, os

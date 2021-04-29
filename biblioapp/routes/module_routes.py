@@ -83,7 +83,7 @@ def set_routes_for_module(app):
   @flask_login.login_required
   def newArduino(app_id = None):
     globalVars = tools.initApp()
-    if flask_login.current_user.id == 'emmanuel.mazurier@gmail.com':
+    if flask_login.current_user.id == app.config['SHELF_ADMIN_EMAIL']:
       if app_id is not None:
         module = db.get_module(app_id)
       else:

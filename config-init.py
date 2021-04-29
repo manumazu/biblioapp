@@ -14,4 +14,6 @@ GOOGLE_BOOK_API_KEY = ''
 RECAPTCHA_SECRET = ''
 #must set a strong key chain to encode / decode jwt
 SECRET_KEY = ''
+#define email of account who is allowed to set up bibus modules 
+SHELF_ADMIN_EMAIL = ''
 

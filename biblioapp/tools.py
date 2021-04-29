@@ -1,4 +1,4 @@
-from flask import session
+from flask import session, flash
 from datetime import datetime
 from biblioapp import create_app, db, hashlib, base64
 import flask_login
