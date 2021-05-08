@@ -1,6 +1,6 @@
 import pytest, json, jwt
 from werkzeug.security import generate_password_hash, check_password_hash
-from biblioapp import models, create_app
+from biblioapp import models, tools, create_app
 
 def test_new_user():
     """
@@ -25,5 +25,17 @@ def test_new_token():
     flask_app = create_app()
     email = 'emmanuel.mazurier@gmail.com'
     new_token = models.get_token('test',email)
-    verif_token = jwt.decode(new_token, flask_app.config['SECRET_KEY'],algorithms=['HS256'])['test']
+    verif_token = jwt.decode(new_token, flask_app.config['SECRET_KEY'], algorithms=['HS256'])['test']
     assert verif_token == email
+    
+
+def test_bibus_encode():
+    data = {'id':1, 'arduino_name':'test module', 'id_ble':'bibus0001', 'nb_lines':3, 'nb_cols':62, 'strip_length':102.5, 'leds_interval':1.66, 'mood_color':'118,43,21'}
+    """
+    GIVEN a user_app structure
+    WHEN an id_ble is base64 encoded
+    THEN check id_ble string assertion with decoded data
+    """
+    uuid = tools.uuid_encode(data['id_ble'])
+    id_ble =  tools.uuid_decode(uuid)
+    assert id_ble.decode('utf-8') == data['id_ble']
