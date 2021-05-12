@@ -29,7 +29,7 @@ def set_routes_for_user(app):
             flash('User infos updated', 'success')
             return redirect(url_for('userInfos', _scheme='https', _external=True))
 
-    return render_template('user.html', user=user, user_login=flask_login.current_user.name)    
+    return render_template('user.html', user=user, user_login=flask_login.current_user.name) 
 
   '''
   Reset Password
@@ -149,6 +149,7 @@ def set_routes_for_user(app):
         return "ok"
     return "ko"
 
+  @app.route('/api/login', methods=['GET', 'POST'])
   @app.route('/login', methods=['GET', 'POST'])
   def login():
       if request.method == 'GET':
@@ -166,6 +167,14 @@ def set_routes_for_user(app):
           user.id = email
           user.name = exists['firstname'] 
           flask_login.login_user(user)
+          #return token and user infos when api exists in requested url
+          if 'api' in request.url:
+            token = models.get_token('guest',exists['email'])
+            data = [{'token': token, 'user': exists}]
+            return app.response_class(
+                response=json.dumps(data),
+                mimetype='application/json'
+            )
           return redirect(url_for('selectArduino', _scheme='https', _external=True))
 
       return 'Bad login'
