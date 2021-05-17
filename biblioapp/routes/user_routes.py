@@ -157,11 +157,17 @@ def set_routes_for_user(app):
           flash('Congratulation, your account is saved! You can login now', 'success')  
         return render_template('login.html')
 
-      email = request.form['email']
+      if request.json:
+        email = request.json['email']
+        pwd = request.json['password']
+      else:
+        email = request.form['email']
+        pwd = request.form['password']
+      
       exists = db.get_user(email)
       if exists is not None:
         #hash = generate_password_hash(exists['password'])
-        if check_password_hash(exists['password'],request.form['password']):
+        if check_password_hash(exists['password'],pwd):
 
           user = models.User()
           user.id = email
@@ -170,7 +176,10 @@ def set_routes_for_user(app):
           #return token and user infos when api exists in requested url
           if 'api' in request.url:
             token = models.get_token('guest',exists['email'])
-            data = [{'token': token, 'user': exists}]
+            modules = db.get_arduino_for_user(exists['email'])
+            user = {'email': exists['email'], 'firstname': exists['firstname'], \
+            'lastname': exists['lastname'], 'modules': modules}
+            data = [{'user': user, 'token': token}]
             return app.response_class(
                 response=json.dumps(data),
                 mimetype='application/json'

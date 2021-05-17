@@ -26,7 +26,7 @@ def get_arduino_map(user_email, app_id):
 
 def get_arduino_for_user(user_email):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT ba.*, bu.id as user_id FROM biblio_app ba \
+  mysql['cursor'].execute("SELECT ba.*, TO_BASE64(ba.id_ble) as id_ble_encode, bu.id as user_id FROM biblio_app ba \
     INNER JOIN biblio_user_app bua ON bua.id_app = ba.id \
     INNER JOIN biblio_user bu ON bu.id=bua.id_user \
     WHERE bu.email=%s", user_email)
