@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, abort, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
 from flask_bootstrap import Bootstrap
-import flask_login, hashlib, base64, os
+import flask_login, hashlib, base64, os, locale, glob
 from flask_session import Session
 from flask_cors import CORS
 
@@ -16,6 +16,22 @@ def create_app():
   for variable, value in os.environ.items():
     #if variable.startswith("MYSQL_"):
     app.config[variable] = value
+
+  #set language
+  app.available_locales = ['fr_FR','en_FR']
+  app.available_languages = {'fr':{'lang':'Français','icon':'fr'}, 'en':{'lang':'English','icon':'us'}}
+  app.default_language = 'fr'
+  app.languages = {}
+  languages = {}
+
+  #parse files located in language directory
+  language_list = glob.glob("biblioapp/language/*.json", recursive=False)
+  for lang in language_list:
+    filename = lang.split('/')
+    lang_code = filename[2].split('.')[0]
+    with open(lang, 'r', encoding='utf8') as file:
+      languages[lang_code] = json.loads(file.read())
+  app.languages = languages
 
   #Session(app)
   sess = Session()
