@@ -11,7 +11,10 @@ def set_routes_for_static_pages(app):
   def root():
     #detect language in header request
     browserLang = request.accept_languages.best_match(app.available_locales)
-    return redirect(url_for('presentation', language=browserLang.split('_')[0], _scheme='https', _external=True))
+    language = app.default_language
+    if browserLang is not None:
+      language = browserLang.split('_')[0]
+    return redirect(url_for('presentation', language=language, _scheme='https', _external=True))
 
   @app.route("/<language>")
   def presentation(language = 'fr'):
