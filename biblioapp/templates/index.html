@@ -38,66 +38,56 @@
   <!-- Content section -->
   <section class="py-5">
     <div class="container">
-      <h1>L'adressage d'objets, pourquoi faire ?</h1>
-      <p class="lead">Dans une économie de distribution mondialisée et numérisée, le recyclage et le réemploi d'objets sont devenus cruciaux pour les pratiques de consommation responsables.</p>
-      <p>En dématérialisant l'information de localisation, le partage et la diffusion des objets s'en trouvent fluidifiés et accessibles à tous pour favoriser le prêt et l'échange d'objets dans les pratiques de consommation courante.</p>
-      <p><strong>Biblio(bus)</strong> est un outil ludique et esthétique de mise en valeur des objets qui nous sont essentiels afin de les rendre importants aussi pour les autres.</p>
+      <h1>{{ adressing_title }}</h1>
+      <p class="lead">{{ adressing_subtitle }}</p>
+      <p>{{ adressing_desc_1 }}</p>
+      <p>{{ adressing_desc_2 }}</p>
     </div>
-  </section>
-
-  <!-- Content section -->
-  <section class="py-8">
-    <div class="container">
-      <h1>Bientôt l'application "Bibliobus serveur" sera un projet ouvert !</h1>
-      <p class="lead">Plus il y aura d'instances Bibliobus qui seront lancées, plus les possibilités de partage seront performantes.</p>
-      <p>Bibliobus se place dans un modèle d'architecture décentralisée et répartie afin de laisser le choix à ses utilisateurs de partager ou non leurs données plutôt que d'imposer des politques de confidentialité qui sont, dans le cadre d'une architecture centralisée, coûteuses en énergie, sources de détournement, et compliquées à mettre en oeuvre pour faire respecter les choix de l'utilisateur.  <br />L'application serveur sera accessible en téléchargement libre depuis le dépôt Docker Hub. En revanche, l'application mobile et le module bibus resteront encore dans le secret de fabrication...</p>
-    </div>
-  </section>  
+  </section> 
 
   <a name="videos">
-  <section class="py-5">
+  <section class="py-2">
     <div class="container">
       <h1>Démos</h1>
-      <p class="lead">L'application mobile "BiblioApp" permet de commander le système de localisation d'objets. Voici quelques vidéos sur le fonctionnement de l'appli et son interaction avec une bibliothèque équipée du système "Bibus" (visible en incrustration dans les vidéos).<p>
+      <p class="lead">{{ demo_subtitle }}<p>
       <ul class="list-group list-group-flush">
 
         <li class="list-group-item list-group-item-dark">
-          <h2 class="font-weight-light"><a href="javascript:videosPresentation('tutoCustomColors');" class="text-white">Tuto : comment personnaliser les couleurs de son étagère ?</a></h2> 
+          <h2 class="font-weight-light"><a href="javascript:videosPresentation('tutoCustomColors');" class="text-white">{{ video_colors_title }}</a></h2> 
           <div class="row">
             <div class="w-320">
               <a href="javascript:videosPresentation('tutoCustomColors');"><img src="/static/img/captvideo_tuto.jpg"></a>
             </div>
             <div class="col">
-                  <p>Comment ajouter des couleurs à une étagère et les faire jouer avec la musique ?</p>
+                  <p>{{ video_colors_desc_1 }}</p>
 
-                  <p>1- Paramétrage des couleurs dans l'application</br>
-                    Sur le serveur, utiliser l'outil d'édition des étagères pour paramétrer les séparations entre chaque couleur, et éditer les valeurs RGB à l'aide du mélangeur de couleurs.</p>
+                  <p>{{ video_colors_desc_2 }}</p>
+                  <!--Sur le serveur, utiliser l'outil d'édition des étagères pour paramétrer les séparations entre chaque couleur, et éditer les valeurs RGB à l'aide du mélangeur de couleurs.</p-->
 
-                  <p>2- Transfert des couleurs dans le module "Bibus"</br>
-                    Utiliser l'application "Biblio App" pour se connecter au module et activer "Upload and play colors". Les zones de couleurs sont transmises à la mémoire du module d'éclairage et le résultat s'affiche directement dans l'étagère.</p>
+                  <p>{{ video_colors_desc_3 }}</p>
+                  <!-- Utiliser l'application "Biblio App" pour se connecter au module et activer "Upload and play colors". Les zones de couleurs sont transmises à la mémoire du module d'éclairage et le résultat s'affiche directement dans l'étagère.</p-->
 
-                  <p>3- Jouer les couleurs avec de la musique</br>
-                    Pour allumer les couleurs personnalisées, il faut appuyer 2 fois sur le bouton du module.<br />
+                  <p>{{ video_colors_desc_4 }}</p>
+                  <!--Pour allumer les couleurs personnalisées, il faut appuyer 2 fois sur le bouton du module.<br />
                     Le capteur du module est  sensible aux variations d'une source sonore située à proximité. Il charge une librairie qui mesure le tempo et crée des oscillations sur l'éclairage en utilisant les couleurs personnalisées.
-                  </p>
+                  </p-->
 
             </div>
           </div>
         </li>  
 
         <li class="list-group-item list-group-item-dark">
-          <h2 class="font-weight-light"><a href="javascript:videosPresentation('listeContenus');" class="text-white">Les listes de contenu</a></h2> 
+          <h2 class="font-weight-light"><a href="javascript:videosPresentation('listeContenus');" class="text-white">{{ video_lists_title }}</a></h2> 
           <div class="row">
             <div class="w-320">
               <a href="javascript:videosPresentation('listeContenus');"><img src="/static/img/captvideo.jpg"></a>
             </div>
             <div class="col">
-                  <p>Liste des auteurs (liste par défaut) est une navigation alphabétique des initials de noms. On peut afficher ainsi facilement tous les livres d’un auteur, en bleu (couleur par défaut).</p>
-                  <p>Liste des catégories :<br/>
-                  Les catégories disposent de codes couleurs qu’on peut éditer via l’application de gestion de bibliothèque sur le serveur. Les livres d’une catégorie sont indiqués dans la bibliothèque par les leds avec le code couleur concerné, sinon en bleu ...</p>
+                <p>{{ video_lists_desc_1 }}</p>
+                <p>{{ video_lists_desc_2 }}</p>
             </div>
           </div>
-        </li>   
+        </li>
         
       
         <li class="list-group-item list-group-item-dark">
@@ -132,6 +122,16 @@
 
       </div>
   </section>
+
+
+  <!-- Content section -->
+  <section class="py-5">
+    <div class="container">
+      <h1>Bientôt l'application "Bibliobus serveur" sera un projet ouvert !</h1>
+      <p class="lead">Plus il y aura d'instances Bibliobus qui seront lancées, plus les possibilités de partage seront performantes.</p>
+      <p>Bibliobus se place dans un modèle d'architecture décentralisée et répartie afin de laisser le choix à ses utilisateurs de partager ou non leurs données plutôt que d'imposer des politques de confidentialité qui sont, dans le cadre d'une architecture centralisée, coûteuses en énergie, sources de détournement, et compliquées à mettre en oeuvre pour faire respecter les choix de l'utilisateur.  <br />L'application serveur sera accessible en téléchargement libre depuis le dépôt Docker Hub. En revanche, l'application mobile et le module bibus resteront encore dans le secret de fabrication...</p>
+    </div>
+  </section> 
 
   <!-- Footer -->
   <footer class="py-5 bg-dark">

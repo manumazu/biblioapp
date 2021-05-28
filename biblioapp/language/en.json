@@ -3,5 +3,18 @@
   "index_subtitle": "Biblio (bus) allows you to index, share, and locate things easily and which, moreover, is pretty.",
   "index_title_desc_1": "It is a lighting system for searching and locating, via a light signal, things arranged on a support.",
   "index_title_desc_2": "Based on a remotely searchable index and connected with a mobile application, it makes it possible to interrogate and illuminate a shelf in order to easily find or store things effectively.",
-  "index_title_small": "* wordplay for French word \"bibliothèque\" (\"library\" in English) and \"data bus\" in computers"
+  "index_title_small": "* wordplay for French word \"bibliothèque\" (\"library\" in English) and \"data bus\" in computers",
+  "adressing_title": "Addressing objects, what for ?",
+  "adressing_subtitle": "In a globalized and digitized distribution economy, recycling and reuse of objects has become crucial for responsible consumption practices.",
+  "adressing_desc_1": "Since location information is dematerialized, the sharing and dissemination of things are more fluid and accessible to all to promote the exchange of objects in everyday consumption practices.",
+  "adressing_desc_2": "Biblio(bus) is a fun and aesthetic tool for highlighting things that are essential to us in order to make them important for others as well.",
+  "demo_subtitle": "The \"BiblioApp\" mobile application is used to control the location system. Here are a few videos on how the app works and how it interacts with a library equipped with the \"Bibus\" system (visible in the inset in the videos).",
+  "video_colors_title": "Tutorial: Customize the colors of a \"Biblio(bus)\" module",
+  "video_colors_desc_1": "How to add colors to a shelf? And play them with the music?",
+  "video_colors_desc_2": "1- Color settings in the web application",
+  "video_colors_desc_3": "2 - Transfer of colors to the \" Bibus \" module",
+  "video_colors_desc_4": "3 - Play the colors with music",
+  "video_lists_title": "Content lists",
+  "video_lists_desc_1": "List of authors (default list) is a navigation in the alphabetical list of of names. You can easily display all the books of an author, in blue (default color).",
+  "video_lists_desc_2": "List of categories have custom colors that can be edited through the library management application on the server. Books in a category are indicated in the library by the LEDs with the relevant color code, otherwise in blue ... "
 }
