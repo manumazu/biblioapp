@@ -16,5 +16,10 @@
   "video_colors_desc_4": "3 - Play the colors with music",
   "video_lists_title": "Content lists",
   "video_lists_desc_1": "List of authors (default list) is a navigation in the alphabetical list of of names. You can easily display all the books of an author, in blue (default color).",
-  "video_lists_desc_2": "List of categories have custom colors that can be edited through the library management application on the server. Books in a category are indicated in the library by the LEDs with the relevant color code, otherwise in blue ... "
+  "video_lists_desc_2": "List of categories have custom colors that can be edited through the library management application on the server. Books in a category are indicated in the library by the LEDs with the relevant color code, otherwise in blue ... ",
+  "video_vocal_title": "Voice searches & actions",
+  "video_vocal_desc_1": "Voice search works like a keyword search. It makes it possible to extract the keywords to be processed from a standard sentence. There are 2 types of actions: “find” and “show”.",
+  "video_vocal_desc_2": "If I ask the app “find history books”, the result will be the list of items found for the keyword history (as if I had entered the keyword “history” in the search).",
+  "video_effects_title": "Light effects",
+  "video_effects_desc_1": "These are effects that are programmed into the arduino, but can be controlled from the mobile app. Custom colors can also be saved in the module memory from the web interface."
 }

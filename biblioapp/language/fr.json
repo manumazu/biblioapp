@@ -16,5 +16,10 @@
   "video_colors_desc_4": "3- Jouer les couleurs avec de la musique",
   "video_lists_title": "Les listes de contenu",
   "video_lists_desc_1": "Liste des auteurs (liste par défaut) est une navigation alphabétique des initials de noms. On peut afficher ainsi facilement tous les livres d’un auteur, en bleu (couleur par défaut).",
-  "video_lists_desc_2": "Liste des catégories disposent de codes couleurs qu’on peut éditer via l’application de gestion de bibliothèque sur le serveur. Les livres d’une catégorie sont indiqués dans la bibliothèque par les leds avec le code couleur concerné, sinon en bleu ..."
+  "video_lists_desc_2": "Liste des catégories disposent de codes couleurs qu’on peut éditer via l’application de gestion de bibliothèque sur le serveur. Les livres d’une catégorie sont indiqués dans la bibliothèque par les leds avec le code couleur concerné, sinon en bleu ...",
+  "video_vocal_title": "La commande vocale",
+  "video_vocal_desc_1": "La commande vocale fonctionne comme une recherche par mot clé. Elle permet d’extraire à partir d’une phrase type les mots clés à traiter. Il y a 2 types de commandes : “trouve” et “affiche”.",
+  "video_vocal_desc_2": "Si je demande à l'appli “trouve les livres d'histoire”, le résultat sera la liste des items trouvés pour le mot clé histoire (comme si j’avais saisi “histoire” dans la recherche).",
+  "video_effects_title": "Les effets lumineux",
+  "video_effects_desc_1": "Ce sont des effets qui sont programmés dans l’arduino, mais qu’on peut commander depuis l’appli mobile. On peut aussi enregistrer dans la mémoire du module les couleurs personnalisées depuis l'interface web."
 }

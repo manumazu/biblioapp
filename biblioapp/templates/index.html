@@ -91,27 +91,26 @@
         
       
         <li class="list-group-item list-group-item-dark">
-          <h2 class="font-weight-light"><a href="javascript:videosPresentation('commandeVocale');" class="text-white">La commande vocale</a></h2>
+          <h2 class="font-weight-light"><a href="javascript:videosPresentation('commandeVocale');" class="text-white">{{ video_vocal_title }}</a></h2>
         <div class="row">
           <div class="w-320">
             <a href="javascript:videosPresentation('commandeVocale');"><img src="/static/img/captvideo.jpg"></a>
           </div>
           <div class="col">
-            <p>La commande vocale fonctionne comme une recherche par mot clé. Elle permet d’extraire à partir d’une phrase type les mots clés à traiter. Il y a 2 types de commandes : “trouve” et “affiche”.</p> 
-            <p>Si je demande à l’appli “trouve les livres d'histoire”, le résultat  sera la liste des items trouvés pour le mot clé histoire (comme si j’avais saisi “histoire” dans la recherche).</p>
+            <p>{{ video_vocal_desc_1 }}</p> 
+            <p>{{ video_vocal_desc_2 }}</p>
             <p>... </p>
           </div>
         </div>  
         </li>
 
-        <li class="list-group-item list-group-item-dark"><h2 class="font-weight-light"><a href="javascript:videosPresentation('effetsLumineux');" class="text-white">Les effets lumineux</a></h2>
+        <li class="list-group-item list-group-item-dark"><h2 class="font-weight-light"><a href="javascript:videosPresentation('effetsLumineux');" class="text-white">{{ video_effects_title }}</a></h2>
         <div class="row">
           <div class="w-320">
             <a href="javascript:videosPresentation('effetsLumineux');"><img src="/static/img/captvideo.jpg"></a>
           </div>
           <div class="col">
-            <p>Ce sont des effets qui sont programmés dans l’arduino, mais qu’on peut commander depuis l’appli mobile. La différence entre le code personnalisé qu’on peut jouer depuis le serveur, et le code enregistré dans l’arduino est qu’ils ne sont pas de même nature. </p>
-            <p>Le premier est exécuté de manière séquentiel par l’appli mobile et envoyé sous forme de message à l’arduino, tandis que l’autre est exécuté par l’arduino permettant des effets plus puissants (comme le fade in / fade out).</p>
+            <p>{{ video_effects_desc_1 }}</p>
           </div>
         </div>  
         </li>        
