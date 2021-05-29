@@ -23,7 +23,7 @@ def set_routes_for_static_pages(app):
       userName=flask_login.current_user.name
     if language not in app.languages:
       language = 'fr'
-    #print(app.languages[language])      
+    #print(app.languages[language]) 
     return render_template('index.html', **app.languages[language], current_language=language, available_languages=app.available_languages, user_login=userName)
 
   @app.route('/privacy')
