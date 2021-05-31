@@ -143,6 +143,21 @@
 
 {% block scripts %}
   {{super()}}
+  <script type="text/javascript">
+  function videosPresentation(contentId) {
+      $("#videosPresentation .modal-dialog .modal-content").each( function(index) {
+        $(this).hide();
+      });
+      $("#videosPresentation").modal();
+      $("#"+contentId).show(); 
+
+      //force stop video on closing modal box
+      $('#'+contentId+' .close').click(function(){
+          var iframe = $('#'+contentId+' .modal-body .embedVideo')[0].contentWindow;
+          iframe.postMessage('{"event":"command","func":"'+'stopVideo'+   '","args":""}', '*');
+      });
+  }
+  </script>
   <script src="{{url_for('static', filename='app.js')}}"></script>
 {% endblock %}
 

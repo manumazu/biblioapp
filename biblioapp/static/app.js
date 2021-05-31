@@ -88,20 +88,6 @@ function colorEditor(dest = null) {
     }	    
 }
 
-function videosPresentation(contentId) {
-	$("#videosPresentation .modal-dialog .modal-content").each( function(index) {
-		$(this).hide();
-	});
-    $("#videosPresentation").modal();
-    $("#"+contentId).show(); 
-
-    //force stop video on closing modal box
-    $('#'+contentId+' .close').click(function(){
-    	var iframe = $('#'+contentId+' .modal-body .embedVideo')[0].contentWindow;
-    	iframe.postMessage('{"event":"command","func":"'+'stopVideo'+   '","args":""}', '*');
-	});
-}
-
 /*$('#videosPresentation .close').click(function(){
   $('.embedVideo').each(function(){
     $(this).stopVideo();
