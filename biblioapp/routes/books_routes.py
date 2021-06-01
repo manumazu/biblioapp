@@ -50,6 +50,18 @@ def set_routes_for_books(app):
           session=session, stats=stats, json_statics = statics)
     abort(404)
 
+  #get books list for given bookshelf uuid
+  @app.route("/api/bookshelf")
+  @flask_login.login_required
+  def apiBookShelf():
+    if('api' in request.path and 'uuid' in request.args):
+      globalVars = tools.initApp()
+      response = app.response_class(
+        response=json.dumps(globalVars),
+        mimetype='application/json'
+      )
+      return response
+
   @app.route("/ajax_set_bookshelf/", methods=['GET'])
   @flask_login.login_required
   def ajaxSetShelf(): 
