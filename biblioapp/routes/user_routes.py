@@ -11,6 +11,7 @@ def set_routes_for_user(app):
 
   from biblioapp import db, models, tools
 
+  @app.route("/api/user", methods=['GET', 'POST'])
   @app.route("/user", methods=['GET', 'POST'])
   @flask_login.login_required
   def userInfos():
@@ -28,6 +29,12 @@ def set_routes_for_user(app):
           else:
             flash('User infos updated', 'success')
             return redirect(url_for('userInfos', _scheme='https', _external=True))
+    if request.method == 'GET' and 'api' in request.path:
+      response = app.response_class(
+        response=json.dumps(user),
+        mimetype='application/json'
+      )
+      return response
 
     return render_template('user.html', user=user, user_login=flask_login.current_user.name) 
 
