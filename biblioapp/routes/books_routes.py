@@ -9,18 +9,26 @@ def set_routes_for_books(app):
 
   from biblioapp import db, models, tools
 
+  @app.route("/api/bookshelf")
   @app.route("/app/")
   @flask_login.login_required
   def myBookShelf():
     globalVars = tools.initApp()
+    apiCall = False
+
     if globalVars['arduino_map'] != None:
       app_id = globalVars['arduino_map']['id']
+
+      if 'api' in request.path and 'uuid' in request.args:
+        apiCall = True
+
       if 'app_numshelf' not in session:
         session['app_numshelf'] = 1
       shelfs = range(1,globalVars['arduino_map']['nb_lines']+1)
       elements = {}
       stats = {}
       statics = {}
+
       for shelf in shelfs:
         books = db.get_books_for_row(app_id, shelf) 
         statics[shelf] = db.get_static_positions(app_id, shelf)     
@@ -39,28 +47,28 @@ def set_routes_for_books(app):
             requested = db.get_request_for_position(app_id, row['position'], shelf) #get requested elements from server (mobile will be set via SSE)
             if requested:
               element[row['led_column']]['requested']=True
-          if statics[shelf]:
+
+          if statics[shelf] and apiCall == False:
             for static in statics[shelf]:
               element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
           elements[shelf] = sorted(element.items())
       bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
+
+      #return Json for API
+      if apiCall:
+        results = {'shelfInfos': globalVars['arduino_map'], 'storedBooks':elements}
+        response = app.response_class(
+          response=json.dumps(results),
+          mimetype='application/json'
+        )
+        return response
+
+      #return html    
       return render_template('bookshelf.html',user_login=globalVars['user_login'], tidybooks=elements, \
           bookstorange=bookstorange, lines=shelfs, shelf_infos=globalVars['arduino_map'], \
           nb_lines=globalVars['arduino_map']['nb_lines'], max_cols=globalVars['arduino_map']['nb_cols'], \
           session=session, stats=stats, json_statics = statics)
     abort(404)
-
-  #get books list for given bookshelf uuid
-  @app.route("/api/bookshelf")
-  @flask_login.login_required
-  def apiBookShelf():
-    if('api' in request.path and 'uuid' in request.args):
-      globalVars = tools.initApp()
-      response = app.response_class(
-        response=json.dumps(globalVars),
-        mimetype='application/json'
-      )
-      return response
 
   @app.route("/ajax_set_bookshelf/", methods=['GET'])
   @flask_login.login_required
