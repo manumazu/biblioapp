@@ -27,27 +27,31 @@ def request_loader(request):
     '''login via token for uuid'''
     exist = None
     token = None
-    if 'token' in request.args:
+    if request.args and 'token' in request.args:
         token = request.args.get('token')
-    if 'token' in request.form:
+    if request.form and 'token' in request.form:
         token = request.form.get('token')
-    if token:     
+    if request.json and 'token' in request.json:
+        token = request.json.get('token')
+    if token:
         #verify token for reset password
         if 'reset_password' in request.path:
             exist = verify_token('auth',token)
         #verify token for guest requests            
-        elif 'uuid' in request.view_args or 'uuid' in request.args or 'uuid' in request.form :
+        elif 'uuid' in request.view_args or 'uuid' in request.args or 'uuid' in request.form or 'uuid' in request.json :
             exist = verify_token('guest',token)
         if exist is None:
             return 
         #open session for mobile app request
-        if 'uuid' in request.view_args or 'uuid' in request.args or 'uuid' in request.form :
-            if 'uuid' in request.view_args:
+        if 'uuid' in request.view_args or 'uuid' in request.args or 'uuid' in request.form or 'uuid' in request.json :
+            if request.view_args and 'uuid' in request.view_args:
                 uuid = request.view_args.get('uuid')
-            if 'uuid' in request.args:
+            if request.args and 'uuid' in request.args:
                 uuid = request.args.get('uuid')
-            if 'uuid' in request.form:
-                uuid = request.form.get('uuid')                
+            if request.form and 'uuid' in request.form:
+                uuid = request.form.get('uuid') 
+            if request.json and 'uuid' in request.json:
+                uuid = request.json.get('uuid')                                
             uuid = tools.uuid_decode(uuid)
             #check arduino module for given user
             module = db.get_user_for_uuid(uuid)
