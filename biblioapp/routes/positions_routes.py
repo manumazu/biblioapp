@@ -269,10 +269,15 @@ def set_routes_for_positions(app):
       return response
 
 
+  @app.route('/api/sort', methods=['POST'])
   @app.route('/ajax_sort/', methods=['POST'])
   @flask_login.login_required
   def ajaxSort():
     globalVars = tools.initApp()
+    if request.json:
+      print(request.json)
+      return ""
+
     if request.method == 'POST' and session.get('app_id'):
      
       #save order for bookshelf
