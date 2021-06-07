@@ -274,16 +274,18 @@ def set_routes_for_positions(app):
   @flask_login.login_required
   def ajaxSort():
     globalVars = tools.initApp()
-    if request.json:
-      print(request.json)
-      return ""
+    book_ids = []
 
     if request.method == 'POST' and session.get('app_id'):
-     
-      #save order for bookshelf
-      if 'row' in request.form :
+  
+      if request.json and 'book_ids' in request.json:
+        book_ids = request.json['book_ids']
+        current_row = request.json['row']
+      elif 'row' in request.form:
         current_row = request.form['row'] 
         book_ids = request.form.getlist('book[]')
+
+      if len(book_ids) > 0:
         app_id = session.get('app_id')
         i=0
         sortable = []
