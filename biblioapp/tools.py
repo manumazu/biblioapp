@@ -224,7 +224,12 @@ def formatBookApi(api, data, isbn):
     if 'subtitle' in data['volumeInfo']:
       bookapi['title'] += ' - '+data['volumeInfo']['subtitle']
     bookapi['reference'] = data['id']
-    bookapi['isbn'] = isbn
+    if isbn is not None:
+      bookapi['isbn'] = isbn
+    else:
+      for Ids in data['volumeInfo']['industryIdentifiers']:
+        if Ids['type'] == "ISBN_13":
+          bookapi['isbn'] = Ids['identifier']
     bookapi['editor'] = data['volumeInfo']['publisher'] if 'publisher' in data['volumeInfo'] else ""
     bookapi['description'] = data['volumeInfo']['description'] if 'description' in data['volumeInfo'] else ""
     bookapi['pages'] = data['volumeInfo']['pageCount'] if 'pageCount' in data['volumeInfo'] else 0

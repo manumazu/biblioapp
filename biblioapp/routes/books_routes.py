@@ -355,8 +355,25 @@ def set_routes_for_books(app):
           query += "intitle:"+request.form['intitle']
         if 'query' in request.form:
           query += request.form['query']
+        #for bibliocli request
+        if request.json and 'title' in request.json:
+          query += "intitle:"+request.json['title']
+        
         r = requests.get(url + query)
         data = r.json()
+        #set response for api
+        if request.json and 'api' in request.path:
+          #print(data)
+          res = []          
+          if 'items' in data:
+            for item in data['items']:
+              res.append(tools.formatBookApi('googleapis', item, None))   
+          response = app.response_class(
+              response=json.dumps(res),
+              mimetype='application/json'
+          )
+          print(res)          
+          return response
         return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
           shelf_infos=globalVars['arduino_map'])
 
