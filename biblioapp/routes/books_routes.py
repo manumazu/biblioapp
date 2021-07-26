@@ -48,9 +48,8 @@ def set_routes_for_books(app):
             if requested:
               element[row['led_column']]['requested']=True
 
-          if statics[shelf] and apiCall == False:
-            for static in statics[shelf]:
-              element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
+          for static in statics[shelf]:
+            element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
           elements[shelf] = sorted(element.items())
       bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
 
