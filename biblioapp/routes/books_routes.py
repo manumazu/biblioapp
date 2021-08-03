@@ -55,7 +55,7 @@ def set_routes_for_books(app):
 
       #return Json for API
       if apiCall:
-        results = {'shelfInfos': globalVars['arduino_map'], 'storedBooks':elements}
+        results = {'shelfInfos': globalVars['arduino_map'], 'storedBooks':elements, 'statsBooks':stats}
         response = app.response_class(
           response=json.dumps(results),
           mimetype='application/json'
