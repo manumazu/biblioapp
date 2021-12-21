@@ -153,8 +153,16 @@
 
       //force stop video on closing modal box
       $('#'+contentId+' .close').click(function(){
-          var iframe = $('#'+contentId+' .modal-body .embedVideo')[0].contentWindow;
-          iframe.postMessage('{"event":"command","func":"'+'stopVideo'+   '","args":""}', '*');
+          let containerElement = document.getElementById(contentId);
+          let iframe_tag = containerElement.querySelector( 'iframe');
+          let video_tag = containerElement.querySelector( 'video' );
+          if ( iframe_tag) {
+              let iframeSrc = iframe_tag.src;
+              iframe_tag.src = iframeSrc; 
+          }
+          if ( video_tag) {
+              video_tag.pause();
+          }
       });
   }
   </script>
