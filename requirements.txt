@@ -19,5 +19,5 @@ PyMySQL==0.10.0
 requests==2.24.0
 six==1.15.0
 urllib3==1.26.5
-Werkzeug==2.0.2
+Werkzeug==2.2.3
 pytest
