@@ -103,7 +103,7 @@ def unauthorized_handler():
 #generate generic token 
 def get_token(role,email, expires_in=600):
     return jwt.encode({role: email, 'exp': time() + expires_in}, \
-        app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+        app.config['SECRET_KEY'], algorithm='HS256')
 
 #verify token
 def verify_token(role,token):
