@@ -10,6 +10,9 @@ RUN python -m pip install --upgrade pip
 RUN python -m venv venv
 RUN pip install -r requirements.txt
 RUN pip install gunicorn
+RUN pip install flask_wtf --upgrade
+RUN pip install flask_login --upgrade
+
 
 ENV FLASK_APP biblioapp
 
