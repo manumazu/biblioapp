@@ -61,7 +61,7 @@ def getLastnameFirstname(names):
 def uuid_decode(encode):
   try:
     decode = base64.b64decode(encode)
-    return decode
+    return decode.decode('utf-8')
   except ValueError:
     return False
 
