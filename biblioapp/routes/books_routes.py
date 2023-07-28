@@ -31,7 +31,7 @@ def set_routes_for_books(app):
 
       for shelf in shelfs:
         books = db.get_books_for_row(app_id, shelf) 
-        statics[shelf] = db.get_static_positions(app_id, shelf)     
+        statics[shelf] = db.get_static_positions(app_id, shelf)   
         if books:
           statBooks = db.stats_books(app_id, shelf)
           statPositions = db.stats_positions(app_id, shelf)
@@ -47,9 +47,10 @@ def set_routes_for_books(app):
             requested = db.get_request_for_position(app_id, row['position'], shelf) #get requested elements from server (mobile will be set via SSE)
             if requested:
               element[row['led_column']]['requested']=True
+          if statics[shelf]:
+            for static in statics[shelf]:
+              element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
 
-          for static in statics[shelf]:
-            element[static['led_column']] = {'item_type':static['item_type'],'id':None, 'position':static['position']}
           elements[shelf] = sorted(element.items())
       bookstorange = db.get_books_to_range(globalVars['arduino_map']['user_id']) #books without position
 
