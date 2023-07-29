@@ -356,13 +356,13 @@ def set_routes_for_books(app):
         if 'query' in request.form:
           query += request.form['query']
         #for bibliocli request
-        if request.json and 'title' in request.json:
+        if request.is_json and 'title' in request.json:
           query += "intitle:"+request.json['title']
         
         r = requests.get(url + query)
         data = r.json()
         #set response for api
-        if request.json and 'api' in request.path:
+        if request.is_json and 'api' in request.path:
           #print(data)
           res = []          
           if 'items' in data:

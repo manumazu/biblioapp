@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, abort, redirect, json, escape, session, url_for, jsonify, \
+from flask import Flask, render_template, request, abort, redirect, json, session, url_for, jsonify, \
 Response, send_from_directory
 from flask_bootstrap import Bootstrap
+from markupsafe import escape
 import flask_login, hashlib, base64, os, locale, glob
 from flask_session import Session
 from flask_cors import CORS

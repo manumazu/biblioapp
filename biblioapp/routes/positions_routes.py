@@ -278,7 +278,7 @@ def set_routes_for_positions(app):
 
     if request.method == 'POST' and session.get('app_id'):
   
-      if request.json and 'book_ids' in request.json:
+      if request.is_json and 'book_ids' in request.json:
         book_ids = request.json['book_ids']
         current_row = request.json['row']
       elif 'row' in request.form:
