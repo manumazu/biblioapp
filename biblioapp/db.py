@@ -212,6 +212,15 @@ def get_book(book_id, app_id) :
   if row:
     return row
 
+def get_book_not_ranged(book_id, user_id):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT * FROM biblio_book where id=%s and id_user=%s",(book_id, user_id))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+
 def del_book(book_id, user_id) :
   mysql = get_db()
   mysql['cursor'].execute("DELETE FROM biblio_book where id=%s and id_user=%s",(book_id, user_id))

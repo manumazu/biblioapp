@@ -201,7 +201,7 @@ def set_routes_for_books(app):
         )
         return response
 
-
+  # get book info from shelf list
   @app.route('/book/<book_id>')
   @app.route('/api/book/<book_id>')
   @flask_login.login_required
@@ -236,6 +236,25 @@ def set_routes_for_books(app):
         return render_template('book.html', user_login=globalVars['user_login'], book=book, \
             shelf_infos=globalVars['arduino_map'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
     abort(404)
+
+  # get book info from not ranged list
+  @app.route('/booknotranged/<book_id>')
+  @flask_login.login_required
+  def getBookNotRanged(book_id):
+    globalVars = tools.initApp()
+    if globalVars['arduino_map'] != None:
+      book = db.get_book_not_ranged(book_id, globalVars['arduino_map']['user_id'])
+      if book:
+        book['address']=None
+        book['hasRequest']=None
+        book['categories'] = []
+        tags = db.get_tag_for_node(book['id'], 1)#book tags for taxonomy categories
+        if tags:
+          for i in range(len(tags)):
+            book['categories'].append(tags[i]['tag'])
+        return render_template('book.html', user_login=globalVars['user_login'], book=book, \
+            shelf_infos=globalVars['arduino_map'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
+    abort(404)    
 
   #get list of borrowed books
   @app.route('/borrowed')
@@ -509,7 +528,7 @@ def set_routes_for_books(app):
   def bookDelete():
     globalVars = tools.initApp()
     book_id = request.form['id']
-    book = db.get_book(book_id, session.get('app_id'))
+    book = db.get_book_not_ranged(book_id, globalVars['arduino_map']['user_id'])
     if book: 
       db.clean_tag_for_node(book_id, 1)#clean tags for categories
       db.clean_tag_for_node(book_id, 2)#clean tags for authors
