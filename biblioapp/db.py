@@ -200,9 +200,12 @@ def stats_books(app_id, rownum):
   if row:
     return row  
 
-def get_book(book_id, user_id) :
+def get_book(book_id, app_id) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_book where id=%s and id_user=%s",(book_id, user_id))
+  mysql['cursor'].execute("SELECT * FROM biblio_book bb \
+    inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
+    inner join biblio_app app on bp.id_app=app.id \
+    where bb.id=%s and app.id=%s",(book_id, app_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
