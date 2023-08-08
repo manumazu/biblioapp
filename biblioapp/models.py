@@ -82,7 +82,7 @@ def request_loader(request):
         return user
     return 
 
-#@login_manager.unauthorized_handler
+@login_manager.unauthorized_handler
 def unauthorized_handler():
     #return 'Unauthorized'
     if 'token' in request.args:
