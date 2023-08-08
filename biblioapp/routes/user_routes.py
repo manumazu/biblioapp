@@ -164,7 +164,7 @@ def set_routes_for_user(app):
           flash('Congratulation, your account is saved! You can login now', 'success')  
         return render_template('login.html')
 
-      if request.json:
+      if request.is_json:
         email = request.json['email']
         pwd = request.json['password']
       else:

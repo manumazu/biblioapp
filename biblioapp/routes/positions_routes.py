@@ -107,7 +107,7 @@ def set_routes_for_positions(app):
     for node in nodes:
       address = db.get_position_for_book(session['app_id'], node['id_node'])
       if address:
-        book = db.get_book(node['id_node'], globalVars['arduino_map']['user_id'])
+        book = db.get_book(node['id_node'], session.get('app_id'))
       
         #manage request
         db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], \
@@ -278,7 +278,7 @@ def set_routes_for_positions(app):
 
     if request.method == 'POST' and session.get('app_id'):
   
-      if request.json and 'book_ids' in request.json:
+      if request.is_json and 'book_ids' in request.json:
         book_ids = request.json['book_ids']
         current_row = request.json['row']
       elif 'row' in request.form:
@@ -294,7 +294,7 @@ def set_routes_for_positions(app):
           if position:
             interval = position['range'] 
           else:
-            book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
+            book = db.get_book(book_id, app_id)
             interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
           i+=1   
           db.set_position(app_id, book_id, i, current_row, interval, 'book', 0) #reinit led column
@@ -324,7 +324,7 @@ def set_routes_for_positions(app):
       book_id = request.form.get('book_id')
       #leds_range = request.form.get('range')
       #update book width
-      book = db.get_book(book_id, globalVars['arduino_map']['user_id'])
+      book = db.get_book(book_id, session.get('app_id'))
       book_width = request.form.get('new_book_width')
       book['width'] = round(float(book_width))
       db.set_book(book, globalVars['arduino_map']['user_id'])
@@ -373,7 +373,7 @@ def set_routes_for_positions(app):
               if position:
                 interval = position['range'] 
               else:
-                book = db.get_book(item['id_item'], user_id)
+                book = db.get_book(item['id_item'], app_id)
                 interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
               i+=1   
               db.set_position(app_id, item['id_item'], i, position['row'], interval, 'book', 0) #reinit led column

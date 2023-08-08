@@ -9,7 +9,7 @@ Flask-Cors==3.0.9
 Flask-Login==0.5.0
 Flask-Mail==0.9.1
 Flask-MySQL==1.5.1
-Flask-Session==0.3.2
+Flask-Session==0.5
 idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.3

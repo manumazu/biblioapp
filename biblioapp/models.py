@@ -31,7 +31,7 @@ def request_loader(request):
         token = request.args.get('token')
     if request.form and 'token' in request.form:
         token = request.form.get('token')
-    if request.json and 'token' in request.json:
+    if request.is_json and 'token' in request.json:
         token = request.json.get('token')
     if token:
         #verify token for reset password
@@ -50,7 +50,7 @@ def request_loader(request):
                 uuid = request.args.get('uuid')
             if request.form and 'uuid' in request.form:
                 uuid = request.form.get('uuid') 
-            if request.json and 'uuid' in request.json:
+            if request.is_json and 'uuid' in request.json:
                 uuid = request.json.get('uuid')                                
             uuid = tools.uuid_decode(uuid)
             #check arduino module for given user
@@ -82,7 +82,7 @@ def request_loader(request):
         return user
     return 
 
-@login_manager.unauthorized_handler
+#@login_manager.unauthorized_handler
 def unauthorized_handler():
     #return 'Unauthorized'
     if 'token' in request.args:
@@ -103,7 +103,7 @@ def unauthorized_handler():
 #generate generic token 
 def get_token(role,email, expires_in=600):
     return jwt.encode({role: email, 'exp': time() + expires_in}, \
-        app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+        app.config['SECRET_KEY'], algorithm='HS256')
 
 #verify token
 def verify_token(role,token):

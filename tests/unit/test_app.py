@@ -38,4 +38,4 @@ def test_bibus_encode():
     """
     uuid = tools.uuid_encode(data['id_ble'])
     id_ble =  tools.uuid_decode(uuid)
-    assert id_ble.decode('utf-8') == data['id_ble']
+    assert id_ble == data['id_ble']
