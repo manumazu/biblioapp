@@ -393,7 +393,7 @@ def set_routes_for_books(app):
           print(res)          
           return response
         return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
-          shelf_infos=globalVars['arduino_map'])
+          shelf_infos=globalVars['arduino_map'], tools=tools)
 
       '''display classic form for edition'''
       if request.method == 'GET' and request.args.get('ref'):

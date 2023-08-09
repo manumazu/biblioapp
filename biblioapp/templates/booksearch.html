@@ -58,11 +58,11 @@
 		<input type="hidden" name="title" value="{{ field['volumeInfo']['title'] }} {{field['volumeInfo']['subtitle']}}">
 		<input type="hidden" name="editor" value="{{ field['volumeInfo']['publisher'] }}">
 		<input type="hidden" name="pages" value="{{ field['volumeInfo']['pageCount'] }}">
-		<input type="hidden" name="year" value="{{ field['volumeInfo']['publishedDate'] }}">
+		<input type="hidden" name="year" value="{{ tools.getYear(field['volumeInfo']['publishedDate']) }}">
 		<input type="hidden" name="description" value="{{field['volumeInfo']['description']}}">
 
 		<i><a href="{{ url_for('searchBookReference') }}?ref={{ field['id'] }}">{{ field['volumeInfo']['title'] }}</a> {{field['volumeInfo']['subtitle']}}</i> - 
-		{{ field['volumeInfo']['publisher'] }} ({{ field['volumeInfo']['publishedDate'] }}, {{ field['volumeInfo']['pageCount'] }}p)
+		{{ field['volumeInfo']['publisher'] }} ({{ tools.getYear(field['volumeInfo']['publishedDate']) }}, {{ field['volumeInfo']['pageCount'] }}p)
 
 		- {% if 'categories' in field['volumeInfo'] %}
 		    {% for category in field['volumeInfo']['categories'] %}

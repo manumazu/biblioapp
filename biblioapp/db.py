@@ -322,8 +322,8 @@ def set_request_remove(app_id) :
 
 ''' manage book '''
 
-def bookSave(book, user_id, tags = None):
-  bookId = set_book(book, user_id)
+def bookSave(book, user_id, app_id, tags = None):
+  bookId = set_book(book, user_id, app_id)
   #manage tags + taxonomy
   #author tags
   authorTags = tools.getLastnameFirstname(book['authors'])
@@ -336,7 +336,7 @@ def bookSave(book, user_id, tags = None):
     catTagIds = set_tags(tags.split(','),'Categories')
     if len(catTagIds)>0:
       set_tag_node(bookId, catTagIds)
-      set_tag_user(user_id, catTagIds)
+      set_tag_user(user_id, app_id, catTagIds)
   return bookId
 
 
@@ -350,7 +350,7 @@ def get_bookapi(isbn, user_id):
     return row
   return False
 
-def set_book(bookapi, user_id) :
+def set_book(bookapi, user_id, app_id) :
   hasBook = {}
   if 'id' in bookapi:
     mysql = get_db()
@@ -363,8 +363,8 @@ def set_book(bookapi, user_id) :
     hasBook['id'] = bookapi['id']    
   else:
     mysql = get_db()
-    mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, \
-      `reference`, `description`, `width`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, bookapi['isbn'], \
+    mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `id_app`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, \
+      `reference`, `description`, `width`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, app_id, bookapi['isbn'], \
         bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], bookapi['pages'], bookapi['reference'], \
         bookapi['description'], bookapi['width']))
     mysql['conn'].commit()
@@ -441,6 +441,14 @@ def set_borrow_book(app_id, item_id, mode) :
   mysql['conn'].close()
   return True
 
+# update app_id for books after position has moved or deleted
+def update_app_book(app_id, item_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_book SET id_app=%s WHERE id=%s", (app_id, item_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+
 def set_position(app_id, item_id, position, row, interval, item_type, led_column) :
   mysql = get_db()
   mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, \
@@ -450,6 +458,9 @@ def set_position(app_id, item_id, position, row, interval, item_type, led_column
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
+  #udpate app for book item
+  if item_type == 'book':
+    update_app_book(app_id, item_id)
   #print(mysql['cursor']._last_executed)
 
 def set_led_column(app_id, item_id, row, led_column) :
@@ -497,7 +508,10 @@ def del_item_position(app_id, item_id, item_type, numrow) :
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
-  #print(mysql['cursor']._last_executed)    
+  #print(mysql['cursor']._last_executed)
+  #udpate app for book item
+  if item_type == 'book':
+    update_app_book(None, item_id)  
   return True
 
 #get address for max position in all rows
@@ -687,12 +701,12 @@ def set_tag_node(node, tagIds):
   mysql['cursor'].close()
   mysql['conn'].close()
 
-def set_tag_user(user_id, tagIds):
+def set_tag_user(user_id, app_id, tagIds):
   mysql = get_db()
   #print(tagIds)
   for tag in tagIds:
-    mysql['cursor'].execute("INSERT INTO biblio_tag_user (`id_user`, `id_tag`) VALUES (%s, %s) ON DUPLICATE KEY UPDATE id_tag=%s", \
-    (user_id, tag['id'], tag['id']))
+    mysql['cursor'].execute("INSERT INTO biblio_tag_user (`id_user`, `id_app`, `id_tag`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE id_tag=%s", \
+    (user_id, app_id, tag['id'], tag['id']))
     mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()  

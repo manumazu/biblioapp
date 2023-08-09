@@ -294,7 +294,7 @@ def set_routes_for_positions(app):
           if position:
             interval = position['range'] 
           else:
-            book = db.get_book(book_id, app_id)
+            book = db.get_book_not_ranged(book_id, globalVars['arduino_map']['user_id'])
             interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
           i+=1   
           db.set_position(app_id, book_id, i, current_row, interval, 'book', 0) #reinit led column
@@ -327,7 +327,7 @@ def set_routes_for_positions(app):
       book = db.get_book(book_id, session.get('app_id'))
       book_width = request.form.get('new_book_width')
       book['width'] = round(float(book_width))
-      db.set_book(book, globalVars['arduino_map']['user_id'])
+      db.set_book(book, globalVars['arduino_map']['user_id'], session.get('app_id'))
       leds_range = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
       #update position
       column = request.form.get('column');
