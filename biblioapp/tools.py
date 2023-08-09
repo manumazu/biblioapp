@@ -80,7 +80,7 @@ def set_id_ble(module):
 
 def led_range(book, leds_interval):
   #compute interval with led strip spec
-  if book['width']!= None and book['width'] > 0:
+  if book['width'] and book['width'] > 0:
     book_width = book['width'] / 10 #convert mm to cm
     lrange = round(book_width/leds_interval)
   #compute range with book nb of pages

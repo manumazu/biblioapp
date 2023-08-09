@@ -63,12 +63,14 @@ $(document).ready(function() {
     ajax_postOrder(elements, this);
   });
 
-  $('#tags').tagEditor({
-      autocomplete: { delay: 0, position: { collision: 'flip' }, source: urlAjaxCategories },
-      forceLowercase: false,
-      placeholder: 'book categories',
-      initialTags: bookCategories
-    });
+  if(typeof urlAjaxCategories !== 'undefined') {
+    $('#tags').tagEditor({
+        autocomplete: { delay: 0, position: { collision: 'flip' }, source: urlAjaxCategories },
+        forceLowercase: false,
+        placeholder: 'book categories',
+        initialTags: bookCategories
+      });
+  }
 
     //search book to be permuted with
     $( "#keyword" ).autocomplete({
