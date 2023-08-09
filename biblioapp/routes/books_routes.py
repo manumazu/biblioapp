@@ -30,7 +30,7 @@ def set_routes_for_books(app):
       statics = {}
 
       for shelf in shelfs:
-        books = db.get_books_for_row(app_id, shelf) 
+        books = db.get_books_for_row(app_id, shelf)
         statics[shelf] = db.get_static_positions(app_id, shelf)   
         if books:
           statBooks = db.stats_books(app_id, shelf)
@@ -382,7 +382,6 @@ def set_routes_for_books(app):
         data = r.json()
         #set response for api
         if request.is_json and 'api' in request.path:
-          #print(data)
           res = []          
           if 'items' in data:
             for item in data['items']:
@@ -403,7 +402,10 @@ def set_routes_for_books(app):
         if ref != 'new':
           r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
           data = r.json()
-          book = data['volumeInfo']    
+          #book = data['volumeInfo']
+          book = tools.formatBookApi('googleapis', data, None)
+          book['imageLinks'] = data['volumeInfo']['imageLinks']
+          book['categories'] = data['volumeInfo']['categories']  
         return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
             shelf_infos=globalVars['arduino_map'])
 
@@ -445,13 +447,12 @@ def set_routes_for_books(app):
   @flask_login.login_required
   def bookReferencer():
     globalVars = tools.initApp()
-
     '''save classic data from form'''
     if request.method == 'POST':
       book = tools.formatBookApi('localform', request.form, request.form['isbn'])  
       if 'id' in request.form:
         book['id'] = request.form['id']
-      db.bookSave(book, globalVars['arduino_map']['user_id'], request.form['tags'])
+      db.bookSave(book, globalVars['arduino_map']['user_id'], None, request.form['tags'])
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
       #return render_template('bookreferencer.html', user_login=globalVars['user_login'])    
 
@@ -484,7 +485,7 @@ def set_routes_for_books(app):
         message = {'result':'error', 'message':'This book is already in your shelfs'}
       #add new book
       else:
-        bookId = db.bookSave(book, globalVars['arduino_map']['user_id'])
+        bookId = db.bookSave(book, globalVars['arduino_map']['user_id'], None)
         #force position in current app
         forcePosition = request.args.get('forcePosition')
         if forcePosition == 'true':
@@ -500,7 +501,7 @@ def set_routes_for_books(app):
             newLedNum = 0   
           #adjust new led column with static element
           statics = db.get_static_positions(session.get('app_id'),newPos) 
-          if statics:         
+          if statics:      
             for static in statics:
              if int(newLedNum) == int(static['led_column']):
               newLedNum += static['range']               
