@@ -80,7 +80,7 @@
 	   {% for book in bookstorange %}
 	     <li id="book_{{book['id']}}" class="ui-state-default coverbook">
 		    <span class="badge badge-dark badge-pill del">X</span>
-        <p><a href="{{ url_for('getBookNotRanged',book_id=book['id']) }}">{{ book['author'] }} <br /> <strong>{{ book['title'] }}</strong></a></p>
+        <p><a href="{{ url_for('getBook',book_id=book['id']) }}">{{ book['author'] }} <br /> <strong>{{ book['title'] }}</strong></a></p>
 	     </li>
 	   {% endfor %}
     	{% endif %}

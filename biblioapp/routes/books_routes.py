@@ -154,7 +154,7 @@ def set_routes_for_books(app):
       if nodes:
           #for node in nodes:
           for i in range(len(nodes)):
-              book = db.get_book(nodes[i]['id_node'], session.get('app_id'))
+              book = db.get_book(nodes[i]['id_node'], session.get('app_id'), globalVars['arduino_map']['user_id'])
               books.append(book)
               app_modules = db.get_arduino_for_user(flask_login.current_user.id)
               for module in app_modules:
@@ -208,7 +208,7 @@ def set_routes_for_books(app):
   def getBook(book_id):
     globalVars = tools.initApp()
     if globalVars['arduino_map'] != None:
-      book = db.get_book(book_id, session.get('app_id'))
+      book = db.get_book(book_id, session.get('app_id'), globalVars['arduino_map']['user_id'])
       if book:
         book['address']=None
         book['hasRequest']=None
@@ -235,26 +235,7 @@ def set_routes_for_books(app):
           return response      
         return render_template('book.html', user_login=globalVars['user_login'], book=book, \
             shelf_infos=globalVars['arduino_map'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
-    abort(404)
-
-  # get book info from not ranged list
-  @app.route('/booknotranged/<book_id>')
-  @flask_login.login_required
-  def getBookNotRanged(book_id):
-    globalVars = tools.initApp()
-    if globalVars['arduino_map'] != None:
-      book = db.get_book_not_ranged(book_id, globalVars['arduino_map']['user_id'])
-      if book:
-        book['address']=None
-        book['hasRequest']=None
-        book['categories'] = []
-        tags = db.get_tag_for_node(book['id'], 1)#book tags for taxonomy categories
-        if tags:
-          for i in range(len(tags)):
-            book['categories'].append(tags[i]['tag'])
-        return render_template('book.html', user_login=globalVars['user_login'], book=book, \
-            shelf_infos=globalVars['arduino_map'], biblio_nb_rows=globalVars['arduino_map']['nb_lines'])
-    abort(404)    
+    abort(404)  
 
   #get list of borrowed books
   @app.route('/borrowed')
@@ -270,7 +251,7 @@ def set_routes_for_books(app):
       if addresses:
           #for address in addresses:
           for i in range(len(addresses)):
-            book = db.get_book(addresses[i]['id_item'], session.get('app_id'))
+            book = db.get_book(addresses[i]['id_item'], session.get('app_id'), globalVars['arduino_map']['user_id'])
             books.append(book)
             hasRequest = db.get_request_for_position(session.get('app_id'), addresses[i]['position'], addresses[i]['row'])
             books[i]['address'] = addresses[i]
@@ -561,7 +542,7 @@ def set_routes_for_books(app):
             tag_color = tag['color']
 
           for i in range(len(results)):
-            book = db.get_book(results[i]['id'], session.get('app_id'))
+            book = db.get_book(results[i]['id'], session.get('app_id'), globalVars['arduino_map']['user_id'])
             books.append(book)
             app_modules = db.get_arduino_for_user(flask_login.current_user.id)
             for module in app_modules:

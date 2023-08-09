@@ -200,15 +200,17 @@ def stats_books(app_id, rownum):
   if row:
     return row  
 
-def get_book(book_id, app_id) :
-  mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_book bb \
-    inner join biblio_position bp on bp.id_item=bb.id and bp.item_type='book'\
-    inner join biblio_app app on bp.id_app=app.id \
-    where bb.id=%s and app.id=%s",(book_id, app_id))
-  row = mysql['cursor'].fetchone()
-  mysql['cursor'].close()
-  mysql['conn'].close()
+def get_book(book_id, app_id, user_id) :
+  hasPosition = get_position_for_book(app_id, book_id)
+  if hasPosition:
+    mysql = get_db()
+    mysql['cursor'].execute("SELECT * FROM biblio_book bb \
+      where bb.id=%s and bb.id_app=%s",(book_id, app_id))
+    row = mysql['cursor'].fetchone()
+    mysql['cursor'].close()
+    mysql['conn'].close()
+  else:
+     row = get_book_not_ranged(book_id, user_id)
   if row:
     return row
 
