@@ -541,12 +541,12 @@ def get_tag_for_node(id_node, id_taxonomy):
     return row
   return False
 
-def get_node_for_tag(id_tag, id_user):
+def get_node_for_tag(id_tag, id_app):
   mysql = get_db()
   mysql['cursor'].execute("SELECT id_node FROM biblio_tag_node btn \
     INNER JOIN biblio_tags bt ON bt.id = btn.id_tag \
     INNER JOIN biblio_book bb ON btn.id_node = bb.id \
-    WHERE btn.id_tag=%s and btn.node_type='book' and bb.id_user=%s", (id_tag, id_user))
+    WHERE btn.id_tag=%s and btn.node_type='book' and bb.id_app=%s", (id_tag, id_app))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -644,10 +644,10 @@ def set_color_for_tag(id_user, id_tag, color):
   mysql['conn'].close()
   return True
 
-def get_tag_by_id(tag_id, user_id):
+def get_tag_by_id(tag_id, app_id):
   mysql = get_db()
   mysql['cursor'].execute("SELECT bt.id, bt.tag, btu.color, bt.id_taxonomy FROM biblio_tags bt \
-    LEFT JOIN biblio_tag_user btu ON bt.id = btu.id_tag and btu.id_user=%s \
+    LEFT JOIN biblio_tag_user btu ON bt.id = btu.id_tag and btu.id_app=%s \
     WHERE id=%s", (user_id, tag_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()

@@ -87,8 +87,8 @@ def set_routes_for_positions(app):
   @flask_login.login_required
   def locateBooksForTag(tag_id, methods=['GET', 'POST']):
     globalVars = tools.initApp()
-    nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['user_id'])
-    tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['user_id'])
+    nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['app_id'])
+    tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['app_id'])
     if tag['color'] is not None:
       colors = tag['color'].split(",")
       tag['red'] = colors[0]
