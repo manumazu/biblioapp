@@ -144,7 +144,7 @@ def set_routes_for_books(app):
     globalVars = tools.initApp()
     if globalVars['arduino_map'] != None:
       nodes = db.get_node_for_tag(tag_id, session.get('app_id'))
-      tag = db.get_tag_by_id(tag_id, session.get('app_id'))   
+      tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['user_id'])   
       data = {}
       books = []
       data['list_title'] = tag['tag']

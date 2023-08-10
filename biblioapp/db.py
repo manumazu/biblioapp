@@ -338,7 +338,7 @@ def bookSave(book, user_id, app_id, tags = None):
     catTagIds = set_tags(tags.split(','),'Categories')
     if len(catTagIds)>0:
       set_tag_node(bookId, catTagIds)
-      set_tag_user(user_id, app_id, catTagIds)
+      set_tag_user(user_id, catTagIds)
   return bookId
 
 
@@ -644,11 +644,11 @@ def set_color_for_tag(id_user, id_tag, color):
   mysql['conn'].close()
   return True
 
-def get_tag_by_id(tag_id, app_id):
+def get_tag_by_id(tag_id, user_id):
   mysql = get_db()
   mysql['cursor'].execute("SELECT bt.id, bt.tag, btu.color, bt.id_taxonomy FROM biblio_tags bt \
-    LEFT JOIN biblio_tag_user btu ON bt.id = btu.id_tag and btu.id_app=%s \
-    WHERE id=%s", (app_id, tag_id))
+    LEFT JOIN biblio_tag_user btu ON bt.id = btu.id_tag and btu.id_user=%s \
+    WHERE id=%s", (user_id, tag_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -703,12 +703,12 @@ def set_tag_node(node, tagIds):
   mysql['cursor'].close()
   mysql['conn'].close()
 
-def set_tag_user(user_id, app_id, tagIds):
+def set_tag_user(user_id, tagIds):
   mysql = get_db()
   #print(tagIds)
   for tag in tagIds:
-    mysql['cursor'].execute("INSERT INTO biblio_tag_user (`id_user`, `id_app`, `id_tag`) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE id_tag=%s", \
-    (user_id, app_id, tag['id'], tag['id']))
+    mysql['cursor'].execute("INSERT INTO biblio_tag_user (`id_user`, `id_tag`) VALUES (%s, %s) ON DUPLICATE KEY UPDATE id_tag=%s", \
+    (user_id, tag['id'], tag['id']))
     mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()  
