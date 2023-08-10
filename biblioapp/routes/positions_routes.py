@@ -87,8 +87,8 @@ def set_routes_for_positions(app):
   @flask_login.login_required
   def locateBooksForTag(tag_id, methods=['GET', 'POST']):
     globalVars = tools.initApp()
-    nodes = db.get_node_for_tag(tag_id, globalVars['arduino_map']['app_id'])
-    tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['app_id'])
+    nodes = db.get_node_for_tag(tag_id, session.get('app_id'))
+    tag = db.get_tag_by_id(tag_id, session.get('app_id'))
     if tag['color'] is not None:
       colors = tag['color'].split(",")
       tag['red'] = colors[0]
@@ -104,19 +104,20 @@ def set_routes_for_positions(app):
       client = 'mobile'
 
     positions = []
-    for node in nodes:
-      address = db.get_position_for_book(session['app_id'], node['id_node'])
-      if address:
-        book = db.get_book(node['id_node'], session.get('app_id'), globalVars['arduino_map']['user_id'])
+    if nodes:
+      for node in nodes:
+        address = db.get_position_for_book(session['app_id'], node['id_node'])
+        if address:
+          book = db.get_book(node['id_node'], session.get('app_id'), globalVars['arduino_map']['user_id'])
       
-        #manage request
-        db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], \
-          address['led_column'], 'book', client, action, tag_id, tag['color'])
+          #manage request
+          db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], \
+            address['led_column'], 'book', client, action, tag_id, tag['color'])
 
-        if tag['color'] is None:
-          tag['color'] = ''
+          if tag['color'] is None:
+            tag['color'] = ''
 
-        positions.append({'item':book['title'], 'action':action, 'row':address['row'], 'led_column':address['led_column'], \
+          positions.append({'item':book['title'], 'action':action, 'row':address['row'], 'led_column':address['led_column'], \
           'interval':address['range'], 'id_tag':tag_id, 'color':tag['color'], 'id_node':node['id_node'], 'client':client})
 
     '''get elements for block build'''

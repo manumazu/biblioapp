@@ -648,7 +648,7 @@ def get_tag_by_id(tag_id, app_id):
   mysql = get_db()
   mysql['cursor'].execute("SELECT bt.id, bt.tag, btu.color, bt.id_taxonomy FROM biblio_tags bt \
     LEFT JOIN biblio_tag_user btu ON bt.id = btu.id_tag and btu.id_app=%s \
-    WHERE id=%s", (user_id, tag_id))
+    WHERE id=%s", (app_id, tag_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
