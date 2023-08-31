@@ -184,6 +184,7 @@ def formatBookApi(api, data, isbn):
   if api == 'localform':
     authors = data.getlist('authors[]')
     bookapi['authors'] = authors
+    authors = authors[:3]
     bookapi['author'] = ', '.join(authors)
     bookapi['title'] = data['title']
     bookapi['reference'] = data['reference']
@@ -203,6 +204,7 @@ def formatBookApi(api, data, isbn):
       for author in data['authors']:
         authors.append(author['name'])
     bookapi['authors'] = authors
+    authors = authors[:3]
     bookapi['author'] = ', '.join(authors)
     bookapi['title'] = data['title']
     if 'subtitle' in data:
@@ -213,12 +215,13 @@ def formatBookApi(api, data, isbn):
     bookapi['description'] = data['note'] if 'note' in data else ""
     bookapi['pages'] = data['number_of_pages'] if 'number_of_pages' in data else 0
     bookapi['year'] = getYear(data['publish_date']) if 'publish_date' in data else ""
-
+    
   elif api == 'googleapis':
     authors = []
     if 'authors' in data['volumeInfo']:
       authors = data['volumeInfo']['authors']
     bookapi['authors'] = authors
+    authors = authors[:3]
     bookapi['author'] = ', '.join(authors)
     bookapi['title'] = data['volumeInfo']['title']
     if 'subtitle' in data['volumeInfo']:
