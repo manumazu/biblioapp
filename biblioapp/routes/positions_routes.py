@@ -210,6 +210,40 @@ def set_routes_for_positions(app):
       return Response(resp, mimetype='text/event-stream')    
     #abort(404)
 
+  #record requests sent from bibliogame application
+  @app.route('/request', methods=['POST'])
+  @app.route('/api/request', methods=['POST'])
+  @flask_login.login_required
+  def setRequestForModule():
+    globalVars = tools.initApp()
+    if request.is_json:
+      jsonr = request.get_json()
+      #print(jsonr)
+      blocks = tools.build_block_position(jsonr, 'add')
+      #print(blocks)
+      for block in blocks:
+        #print(block['nodes'])
+        if type(block['nodes']) is list:
+          for node in block['nodes']:
+            #print(node)
+            db.set_request(session['app_id'], node, block['row'], block['index'], \
+              block['interval'], block['start'], 'book', block['client'], block['action'], \
+              block['id_tag'], block['color']);
+            
+        #{'action': 'add', 'row': 1, 'index': 1, 'start': 1, 'color': '255, 102, 0', 'id_tag': None, 'interval': 3, 'nodes': [None], 'client': 'server'}
+        #[{"action":"add","client":"server","color":"255, 102, 0","id_tag":null,"index":1,"interval":3,"nodes":[null],"row":1,"start":1},
+        #{"action":"add","client":"server","color":"153, 51, 153","id_tag":null,"index":4,"interval":3,"nodes":[null],"row":1,"start":4}]
+        #app_id, node_id, row, column, interval, led_column, node_type, client, action, tag_id = None, color = None
+        #db.set_request(session['app_id'], block['nodes'][0], block['row'], block['index'], \
+        #  block['interval'], block['start'], 'book', block['client'], block['action'], \
+        #  block['id_tag'], block['color']);
+      response = app.response_class(
+        response=json.dumps(blocks),
+        mimetype='application/json'
+      )
+      return response
+    abort(404)       
+
   #remove all request from arduino for current module
   @app.route('/api/reset', methods=['GET'])
   @flask_login.login_required

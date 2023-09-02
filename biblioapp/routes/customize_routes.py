@@ -9,25 +9,6 @@ def set_routes_for_customization(app):
 
   from biblioapp import db, models, tools
 
-
-  #set request from bibliogame application
-  @app.route('/request', methods=['POST'])
-  @app.route('/api/request', methods=['POST'])
-  @flask_login.login_required
-  def setRequestForModule():
-    globalVars = tools.initApp()
-    if request.is_json:
-      jsonr = request.get_json()
-      print(jsonr)
-      response = {}
-      app.response_class(
-        response=json.dumps(jsonr),
-        mimetype='application/json'
-      )
-      return response
-    abort(404)    
-
-
   @app.route('/customcodes', methods=['GET', 'POST'])
   @app.route('/api/customcodes', methods=['GET', 'POST'])
   @flask_login.login_required
