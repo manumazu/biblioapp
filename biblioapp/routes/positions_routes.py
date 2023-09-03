@@ -226,17 +226,10 @@ def set_routes_for_positions(app):
         if type(block['nodes']) is list:
           for node in block['nodes']:
             #print(node)
-            db.set_request(session['app_id'], node, block['row'], block['index'], \
-              block['interval'], block['start'], 'book', block['client'], block['action'], \
+            #app_id, node_id, row, column, interval, led_column, node_type, client, action, tag_id = None, color = None
+            db.set_request(session['app_id'], node, block['row'], block['start'], \
+              block['interval'], block['index'], 'book', block['client'], block['action'], \
               block['id_tag'], block['color']);
-            
-        #{'action': 'add', 'row': 1, 'index': 1, 'start': 1, 'color': '255, 102, 0', 'id_tag': None, 'interval': 3, 'nodes': [None], 'client': 'server'}
-        #[{"action":"add","client":"server","color":"255, 102, 0","id_tag":null,"index":1,"interval":3,"nodes":[null],"row":1,"start":1},
-        #{"action":"add","client":"server","color":"153, 51, 153","id_tag":null,"index":4,"interval":3,"nodes":[null],"row":1,"start":4}]
-        #app_id, node_id, row, column, interval, led_column, node_type, client, action, tag_id = None, color = None
-        #db.set_request(session['app_id'], block['nodes'][0], block['row'], block['index'], \
-        #  block['interval'], block['start'], 'book', block['client'], block['action'], \
-        #  block['id_tag'], block['color']);
       response = app.response_class(
         response=json.dumps(blocks),
         mimetype='application/json'
