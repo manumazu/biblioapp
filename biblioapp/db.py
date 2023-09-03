@@ -278,9 +278,9 @@ def set_request(app_id, node_id, row, column, interval, led_column, node_type, c
   mysql = get_db()
   mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `id_node`, `node_type`, `row`, `column`, `range`, \
     `led_column`, `client`, `action`, `id_tag`, `color`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) \
-    ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s, `led_column`=%s, `client`=%s, `action`=%s", (app_id, node_id, node_type,\
+    ON DUPLICATE KEY UPDATE `date_add`=%s, `range`=%s, `led_column`=%s, `client`=%s, `action`=%s, `color`=%s", (app_id, node_id, node_type,\
      row, column, interval, led_column, client, action, tag_id, color, now.strftime("%Y-%m-%d %H:%M:%S"), interval, led_column, \
-     client, action))
+     client, action, color))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
