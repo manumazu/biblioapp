@@ -174,9 +174,9 @@ def set_routes_for_positions(app):
               'led_column':data['led_column'], 'interval':data['range'], 'id_tag':data['id_tag'], \
               'color':data['color'], 'id_node':data['id_node'], 'client':data['client']})
             
-            #flag sent nodes for mobile
-            if source == 'mobile':
-              db.set_request_sent(session['app_id'], data['id_node'], 1)
+          #flag sent nodes for SSE requests in mobile App
+          if source == 'mobile':
+            db.set_request_sent(session['app_id'], data['id_node'], 1)
               
         #arrange positions inside blocks for books request
         if has_nodes:
