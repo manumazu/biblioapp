@@ -156,21 +156,32 @@ def set_routes_for_positions(app):
         datas_add = db.get_request_for_mobile(session['app_id'], 'add', 0)
       else:
         datas_add = db.get_request(session['app_id'], 'add')
-      if datas_add:      
-        for data in datas_add:
+      if datas_add:    
+        has_nodes = 0 # used for gaming   
+        for i, data in enumerate(datas_add):
+
+          has_nodes += data['id_node']
 
           if data['color'] is None:
             data['color'] = ''
 
-          positions_add.append({'action':data['action'], 'row':data['row'], 'led_column':data['led_column'], \
-          'interval':data['range'], 'id_tag':data['id_tag'], 'color':data['color'], 'id_node':data['id_node'], \
-          'client':data['client']})
-          #flag sent nodes for mobile
-          if source == 'mobile':
-            db.set_request_sent(session['app_id'], data['id_node'], 1)
-
-        positions_add.sort(key=tools.sortPositions)
-        blocks = tools.build_block_position(positions_add, 'add')
+          #build simple requests blocks for gaming
+          if data['id_node'] == 0: 
+            blocks.append({'action':data['action'], 'row':data['row'], 'index':i, 'start':data['led_column'], 'color':data['color'], 'id_tag':data['id_tag'],'interval':data['range'], 'nodes':[0], 'client':data['client']})
+          #build position array for books requests
+          else:
+            positions_add.append({'action':data['action'], 'row':data['row'], \
+              'led_column':data['led_column'], 'interval':data['range'], 'id_tag':data['id_tag'], \
+              'color':data['color'], 'id_node':data['id_node'], 'client':data['client']})
+            
+            #flag sent nodes for mobile
+            if source == 'mobile':
+              db.set_request_sent(session['app_id'], data['id_node'], 1)
+              
+        #arrange positions inside blocks for books request
+        if has_nodes:
+          positions_add.sort(key=tools.sortPositions)          
+          blocks = tools.build_block_position(positions_add, 'add')
 
       positions_remove = []  
       datas_remove = db.get_request(session['app_id'], 'remove')
@@ -207,7 +218,10 @@ def set_routes_for_positions(app):
         resp +="\nid: 0"
         resp += "\nretry: 5000"
       resp += "\n\n"
-      return Response(resp, mimetype='text/event-stream')    
+      return Response(resp, mimetype='text/event-stream') 
+
+      #response = app.response_class(response=json.dumps(blocks),mimetype='application/json')
+      #return response   
     #abort(404)
 
   #record requests sent from bibliogame application
@@ -218,17 +232,14 @@ def set_routes_for_positions(app):
     globalVars = tools.initApp()
     if request.is_json:
       jsonr = request.get_json()
-      #print(jsonr)
       blocks = tools.build_block_position(jsonr, 'add')
       #print(blocks)
       for block in blocks:
-        #print(block['nodes'])
         if type(block['nodes']) is list:
           for node in block['nodes']:
-            #print(node)
             #app_id, node_id, row, column, interval, led_column, node_type, client, action, tag_id = None, color = None
             db.set_request(session['app_id'], node, block['row'], block['start'], \
-              block['interval'], block['index'], 'book', block['client'], block['action'], \
+              block['interval'], block['start'], 'book', block['client'], block['action'], \
               block['id_tag'], block['color']);
       response = app.response_class(
         response=json.dumps(blocks),
