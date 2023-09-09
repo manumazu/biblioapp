@@ -156,6 +156,7 @@ def set_routes_for_positions(app):
         datas_add = db.get_request_for_mobile(session['app_id'], 'add', 0)
       else:
         datas_add = db.get_request(session['app_id'], 'add')
+      
       if datas_add:    
         has_nodes = 0 # used for gaming   
         for i, data in enumerate(datas_add):
@@ -178,11 +179,12 @@ def set_routes_for_positions(app):
           if source == 'mobile':
             db.set_request_sent(session['app_id'], data['id_node'], 1)
               
-        #arrange positions inside blocks for books request
+        #arrange positions inside blocks for books request + manage remove
         if has_nodes:
           positions_add.sort(key=tools.sortPositions)          
-          blocks = tools.build_block_position(positions_add, 'add')
+          blocks += tools.build_block_position(positions_add, 'add')
 
+      #removing requests for nodes
       positions_remove = []  
       datas_remove = db.get_request(session['app_id'], 'remove')
       resp = "event: ping\n"

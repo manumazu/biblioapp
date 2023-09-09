@@ -119,24 +119,23 @@ def build_block_position(positions, action):
     if int(pos['led_column']) == int(positions[i-1]['led_column'] + positions[i-1]['interval']) \
     and pos['color'] == positions[i-1]['color'] and pos['row'] == positions[i-1]['row'] : 
 
-      firstElem = positions[i-1]
+      prevItem = positions[i-1]
 
-      #store node ids inside 1 block
-      if firstElem['id_node'] not in blockelem:
-        blockelem.append(firstElem['id_node'])
+      #store node ids inside list
       if pos['id_node'] not in blockelem:        
         blockelem.append(pos['id_node'])
 
       #remove block first element from isolated list
-      if firstElem['id_node'] in uniqelem:
-        uniqelem.remove(firstElem['id_node'])
+      idx = prevItem['id_node'] if prevItem['id_node'] > 0 else (prevItem['row']+prevItem['led_column']+prevItem['interval'])
+      if idx in uniqelem:
+        uniqelem.remove(idx)
 
       #build block element : get first position and agragate intervals
       cpt+=1
-      blockend += firstElem['interval']
+      blockend += prevItem['interval']
       if cpt==1:
-        block = {'action':action, 'row':pos['row'], 'index':i, 'start':firstElem['led_column'], 'color':pos['color'], \
-        'id_tag':pos['id_tag'],}
+        block = {'action':action, 'row':pos['row'], 'index':i, 'start':prevItem['led_column'], \
+        'color':pos['color'], 'id_tag':pos['id_tag'],}
       block.update({'interval':blockend+pos['interval'], 'nodes':blockelem, 'client':pos['client']})
 
       #populate blocks list
@@ -151,15 +150,20 @@ def build_block_position(positions, action):
       blockend = 0
       cpt = 0
 
-      #store isolated elements
-      uniqelem.append(pos['id_node'])
+      #store isolated elements: node_id for books, position for gaming
+      idx = pos['id_node'] if pos['id_node'] > 0 else (pos['row']+pos['led_column']+pos['interval'])
+      uniqelem.append(idx)
   
   #loop 2 : build response for isolated elements
-  for i, pos in enumerate(positions): 
-    for id_node in uniqelem:
-      if id_node == pos['id_node']:
-        blocks.append({'action':action, 'row':pos['row'], 'index':i, 'start':pos['led_column'], 'id_tag':pos['id_tag'], \
-          'color':pos['color'], 'interval':pos['interval'], 'nodes':[id_node], 'client':pos['client']})
+  for i, pos in enumerate(positions):
+    idx = pos['id_node'] if pos['id_node'] > 0 else (pos['row']+pos['led_column']+pos['interval'])
+    for j in uniqelem:
+      if j == idx:
+        blocks.append({'action':action, 'row':pos['row'], 'index':i, 'start':pos['led_column'], \
+          'id_tag':pos['id_tag'], 'color':pos['color'], 'interval':pos['interval'], \
+          'nodes':[pos['id_node']], 'client':pos['client']})
+  
+  #print(blocks)
 
   #reset order for blocks:
   if(action=='remove'):
