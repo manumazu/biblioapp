@@ -289,7 +289,7 @@ def set_request(app_id, node_id, row, column, interval, led_column, node_type, c
 def set_request_sent(app_id, node_id, sent) :
   mysql = get_db()
   mysql['cursor'].execute("UPDATE biblio_request SET `sent`=%s WHERE `id_app`=%s and `id_node`=%s \
-    and `node_type` in ('book', 'static')", (sent, app_id, node_id))
+    and `node_type` in ('book', 'static', 'reset')", (sent, app_id, node_id))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -315,7 +315,18 @@ def set_request_remove(app_id) :
   now = tools.getNow()
   mysql = get_db()
   mysql['cursor'].execute("UPDATE biblio_request SET `action`='remove', `client`='mobile', `date_add`=%s WHERE `id_app`=%s \
-    and action='add'", (now.strftime("%Y-%m-%d %H:%M:%S"), app_id))
+    and action IN ('add', 'reset')", (now.strftime("%Y-%m-%d %H:%M:%S"), app_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True  
+
+def set_reset_request(app_id):
+  now = tools.getNow()
+  mysql = get_db()
+  mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `id_node`, `node_type`, `row`, `column`, `range`, \
+    `led_column`, `client`, `action`) VALUES (%s, 0, 'reset', 0, 0, 0, 0, 'server', 'reset') ON DUPLICATE KEY UPDATE `date_add`=%s, `sent`=0", \
+      (app_id, now.strftime("%Y-%m-%d %H:%M:%S")))
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()

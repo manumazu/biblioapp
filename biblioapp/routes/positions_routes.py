@@ -187,7 +187,7 @@ def set_routes_for_positions(app):
       #removing requests for nodes
       positions_remove = []  
       datas_remove = db.get_request(session['app_id'], 'remove')
-      resp = "event: ping\n"
+      #resp = "event: ping\n"
       if datas_remove:
         #soft remove   
         for data in datas_remove:
@@ -197,14 +197,29 @@ def set_routes_for_positions(app):
           'interval':data['range'], 'id_tag':'', 'color':'', 'id_node':data['id_node'], 'client':data['client']})
 
         positions_remove.sort(key=tools.sortPositions)
-        blocks += tools.build_block_position(positions_remove, 'remove')
+        blocks += tools.build_block_position(positions_remove, 'remove')   
 
         #hard remove 
         for data in datas_remove:
           diff = tools.seconds_between_now(data['date_add'])
           #wait for other clients before remove
           if diff > 3:
-            db.del_request(session['app_id'], data['led_column'], data['row'])      
+            db.del_request(session['app_id'], data['led_column'], data['row']) 
+
+      #reset requests 
+      reset_requests = []  
+      reset = db.get_request_for_mobile(session['app_id'], 'reset', 0)
+      #resp = "event: ping\n"
+      if reset:
+        #soft remove   
+        for data in reset:
+          #send remove for mobile only when request come from server 
+          if (source == 'mobile' and data['client']=='server') or (source == 'server'):
+            blocks.append({'action':data['action'], 'client':data['client']})   
+
+           #flag sent nodes for SSE requests in mobile App
+          if source == 'mobile':
+            db.set_request_sent(session['app_id'], 0, 1)
           
       #print(blocks)
 
@@ -254,11 +269,29 @@ def set_routes_for_positions(app):
   @app.route('/api/reset', methods=['GET'])
   @flask_login.login_required
   def setResetForModule():
-    globalVars = tools.initApp()  
+    globalVars = tools.initApp()
     if globalVars['arduino_map'] != None:
-      data = db.set_request_remove(session['app_id'])#force remove for all module's request
+      data = db.set_request_remove(session['app_id'])
       response = app.response_class(
             response=json.dumps(data),
+            mimetype='application/json'
+      )
+      return response
+    abort(404)
+
+  #add reset request for server demand
+  @app.route('/api/reset', methods=['POST'])
+  @flask_login.login_required
+  def askResetForModule():
+    globalVars = tools.initApp()
+    if globalVars['arduino_map'] != None:
+      if request.is_json:
+        jsonr = request.get_json()
+        #print(jsonr)
+        if jsonr[0] and jsonr[0]['action']=='reset':
+          db.set_reset_request(session['app_id']);
+      response = app.response_class(
+            response=json.dumps(True),
             mimetype='application/json'
       )
       return response
