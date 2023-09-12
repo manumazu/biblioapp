@@ -9,6 +9,8 @@ def set_routes_for_positions(app):
 
   from biblioapp import db, models, tools
 
+  #used when no color is customized : blue
+  color_default = '51, 102, 255'
 
   '''
   manage location requests
@@ -22,7 +24,7 @@ def set_routes_for_positions(app):
     globalVars = tools.initApp()
     action = 'add'
     positions = []
-    color = ''
+    color = color_default #default blue color
     app_id = session['app_id']
     book_id = None
     address = None
@@ -89,11 +91,14 @@ def set_routes_for_positions(app):
     globalVars = tools.initApp()
     nodes = db.get_node_for_tag(tag_id, session.get('app_id'))
     tag = db.get_tag_by_id(tag_id, globalVars['arduino_map']['user_id'])
+
     if tag['color'] is not None:
       colors = tag['color'].split(",")
       tag['red'] = colors[0]
       tag['green'] = colors[1]
       tag['blue'] = colors[2]
+    else:
+      tag['color'] = color_default
 
     action = 'add'
     if('action' in request.args):#for add or remove
@@ -114,8 +119,8 @@ def set_routes_for_positions(app):
           db.set_request(session['app_id'], node['id_node'], address['row'], address['position'], address['range'], \
             address['led_column'], 'book', client, action, tag_id, tag['color'])
 
-          if tag['color'] is None:
-            tag['color'] = ''
+          #if tag['color'] is None:
+          #  tag['color'] = color_default
 
           positions.append({'item':book['title'], 'action':action, 'row':address['row'], 'led_column':address['led_column'], \
           'interval':address['range'], 'id_tag':tag_id, 'color':tag['color'], 'id_node':node['id_node'], 'client':client})
@@ -164,7 +169,7 @@ def set_routes_for_positions(app):
           has_nodes += data['id_node']
 
           if data['color'] is None:
-            data['color'] = ''
+            data['color'] = color_default
 
           #build simple requests blocks for gaming
           if data['id_node'] == 0: 
