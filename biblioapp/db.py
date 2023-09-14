@@ -311,6 +311,14 @@ def clean_request(app_id) :
   mysql['conn'].close()
   return True
 
+def clean_request_game(app_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("DELETE FROM biblio_request where id_app=%s and id_node=0 and action='add'",(app_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True  
+
 def set_request_remove(app_id) :
   now = tools.getNow()
   mysql = get_db()
@@ -327,6 +335,14 @@ def set_reset_request(app_id):
   mysql['cursor'].execute("INSERT INTO biblio_request (`id_app`, `id_node`, `node_type`, `row`, `column`, `range`, \
     `led_column`, `client`, `action`) VALUES (%s, 0, 'reset', 0, 0, 0, 0, 'server', 'reset') ON DUPLICATE KEY UPDATE `date_add`=%s, `sent`=0", \
       (app_id, now.strftime("%Y-%m-%d %H:%M:%S")))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return True
+
+def del_reset_request(app_id) :
+  mysql = get_db()
+  mysql['cursor'].execute("DELETE FROM biblio_request where id_app=%s and `action`='reset'",(app_id)) 
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()

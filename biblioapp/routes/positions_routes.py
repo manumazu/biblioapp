@@ -220,11 +220,10 @@ def set_routes_for_positions(app):
         for data in reset:
           #send remove for mobile only when request come from server 
           if (source == 'mobile' and data['client']=='server') or (source == 'server'):
-            blocks.append({'action':data['action'], 'client':data['client']})   
-
-           #flag sent nodes for SSE requests in mobile App
-          if source == 'mobile':
-            db.set_request_sent(session['app_id'], 0, 1)
+            blocks.append({'action':data['action'], 'client':data['client']})
+        # clean reset request sent            
+        if source == 'mobile':
+          db.del_reset_request(session['app_id']) 
           
       #print(blocks)
 
@@ -284,8 +283,8 @@ def set_routes_for_positions(app):
       return response
     abort(404)
 
-  #add reset request for server demand
-  @app.route('/api/reset', methods=['POST'])
+  #add reset request for server demand and remove all gaming requests
+  @app.route('/api/reset-game', methods=['POST'])
   @flask_login.login_required
   def askResetForModule():
     globalVars = tools.initApp()
@@ -294,7 +293,8 @@ def set_routes_for_positions(app):
         jsonr = request.get_json()
         #print(jsonr)
         if jsonr[0] and jsonr[0]['action']=='reset':
-          db.set_reset_request(session['app_id']);
+          db.set_reset_request(session['app_id'])
+          db.clean_request_game(session['app_id'])
       response = app.response_class(
             response=json.dumps(True),
             mimetype='application/json'
