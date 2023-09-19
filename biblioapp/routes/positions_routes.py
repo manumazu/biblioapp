@@ -157,13 +157,13 @@ def set_routes_for_positions(app):
         
       positions_add = []
       blocks = []
+      has_nodes = 0 # used for gaming
       if source == 'mobile':
         datas_add = db.get_request_for_mobile(session['app_id'], 'add', 0)
       else:
         datas_add = db.get_request(session['app_id'], 'add')
       
-      if datas_add:    
-        has_nodes = 0 # used for gaming   
+      if datas_add:   
         for i, data in enumerate(datas_add):
 
           has_nodes += data['id_node']
@@ -226,14 +226,17 @@ def set_routes_for_positions(app):
           db.del_reset_request(session['app_id']) 
           
       #print(blocks)
-
+      
+      # decrease delay for gaming
+      delay = 2000 if has_nodes > 0 else 500
+      
       #set message for SSE
       resp = "event: ping\n"
       if len(blocks) > 0:        
         json_dump = json.dumps(blocks)
         resp += "data: "+json_dump
         resp += "\nid: "+hashlib.md5(json_dump.encode("utf-8")).hexdigest()
-        resp += "\nretry: 2000"
+        resp += "\nretry: "+delay
       else:
         resp += "\ndata: {}"
         resp +="\nid: 0"
