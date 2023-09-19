@@ -228,7 +228,7 @@ def set_routes_for_positions(app):
       #print(blocks)
       
       # decrease delay for gaming
-      delay = 2000 if has_nodes > 0 else 500
+      delay = "2000" if has_nodes > 0 else "500"
       
       #set message for SSE
       resp = "event: ping\n"
