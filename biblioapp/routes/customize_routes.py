@@ -17,7 +17,7 @@ def set_routes_for_customization(app):
     if globalVars['arduino_map'] != None:
       #print(codes)
       #send json when token mode
-      if('api' in request.path and 'token' in request.args):
+      if('api' in request.path and 'token' in request.args and request.method == 'GET'):
         codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], True)
         data = {}
         data['list_title'] = 'Your codes for ' + session['app_name']
@@ -37,14 +37,20 @@ def set_routes_for_customization(app):
       if request.method == 'POST':
         if request.is_json:
             jsonr = request.get_json()
-            #print(json)
+            #print(jsonr[0]['customvars'])
             db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
               jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
             #print(request.data.decode())
+            if('api' in request.path):
+              response = app.response_class(
+                response=json.dumps([True]),
+                mimetype='application/json'
+              )
+              return response
       codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'])
       maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']      
-      return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, json=json, \
-        max_leds=maxLeds, shelf_infos=globalVars['arduino_map'])
+      return render_template('customcodes.html', user_login=globalVars['user_login'], customcodes=codes, \
+        json=json, max_leds=maxLeds, shelf_infos=globalVars['arduino_map'])
     abort(404)
 
   @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
