@@ -38,12 +38,13 @@ def set_routes_for_customization(app):
         if request.is_json:
             jsonr = request.get_json()
             #print(jsonr[0]['customvars'])
-            db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
+            code_id = db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
               jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
+            data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id['id'])
             #print(request.data.decode())
             if('api' in request.path):
               response = app.response_class(
-                response=json.dumps([True]),
+                response=json.dumps({'title':data['title'], 'customcode':data['customcode'].decode(), 'code_id':code_id['id']}),
                 mimetype='application/json'
               )
               return response
@@ -63,7 +64,7 @@ def set_routes_for_customization(app):
       if request.method == 'POST':
         if request.is_json:
             jsonr = request.get_json()
-            db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], jsonr['description'], \
+            code_id = db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], jsonr['description'], \
              jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
 
       data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
@@ -73,7 +74,7 @@ def set_routes_for_customization(app):
         #send json when token mode
         if('api' in request.path and 'token' in request.args):
           response = app.response_class(
-            response=json.dumps({'title':data['title'], 'customecode':data['customcode'].decode()}),
+            response=json.dumps({'title':data['title'], 'customcode':data['customcode'].decode(), 'code_id':code_id}),
             mimetype='application/json'
           )
           return response

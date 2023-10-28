@@ -800,14 +800,17 @@ def set_customcode(user_id, app_id, code_id, title, description, published, cust
     mysql['cursor'].execute("INSERT INTO biblio_customcode (`id_app`, `id_user`, `title`, `description`, `published`, \
       `customvars`, `customcode`, `position`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (app_id, user_id, title, description, \
         published, customvars, customcode, position))
+    mysql['conn'].commit()
+    mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
+    code_id = mysql['cursor'].fetchone()
   else :
     mysql['cursor'].execute("UPDATE biblio_customcode SET `id_app`=%s, `title`=%s, `description`=%s, `published`=%s, \
       `customvars`=%s, `customcode`=%s, `date_upd`=%s WHERE id=%s", (app_id, title, description, published, customvars, customcode, \
         now.strftime("%Y-%m-%d %H:%M:%S"), code_id))
-  mysql['conn'].commit()
+    mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
-  return True
+  return code_id
 
 def get_customcode(user_id, app_id, code_id) :
   mysql = get_db()
