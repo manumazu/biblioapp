@@ -834,10 +834,10 @@ def get_customcodes(user_id, app_id, published_only = False) :
   mysql = get_db()
   if published_only == True :
     mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd, published FROM biblio_customcode \
-    where id_user=%s and id_app=%s and published=1 order by `position`", (user_id, app_id))    
+    where id_user=%s and id_app=%s and published=1 and description='blockly workspace' order by `position`", (user_id, app_id))    
   else :
     mysql['cursor'].execute("SELECT id, title, description, customvars, date_add, date_upd, published FROM biblio_customcode \
-    where id_user=%s and id_app=%s order by `position`", (user_id, app_id))
+    where id_user=%s and id_app=%s and description='blockly workspace' order by `position`", (user_id, app_id))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()
   mysql['conn'].close()

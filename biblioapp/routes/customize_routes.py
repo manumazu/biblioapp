@@ -18,7 +18,7 @@ def set_routes_for_customization(app):
       #print(codes)
       #send json when token mode
       if('api' in request.path and 'token' in request.args and request.method == 'GET'):
-        codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], True)
+        codes = db.get_customcodes(globalVars['arduino_map']['user_id'], session['app_id'], False)
         data = {}
         data['list_title'] = 'Your codes for ' + session['app_name']
         token = models.get_token('guest',flask_login.current_user.id)
@@ -38,8 +38,9 @@ def set_routes_for_customization(app):
         if request.is_json:
             jsonr = request.get_json()
             #print(jsonr[0]['customvars'])
+            #json.dumps()
             code_id = db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], None, jsonr['title'], jsonr['description'], \
-              jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
+              jsonr['published'], jsonr['customvars'], jsonr['customcode'])
             data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id['id'])
             #print(request.data.decode())
             if('api' in request.path):
@@ -65,7 +66,7 @@ def set_routes_for_customization(app):
         if request.is_json:
             jsonr = request.get_json()
             code_id = db.set_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id, jsonr['title'], jsonr['description'], \
-             jsonr['published'], json.dumps(jsonr['customvars']), jsonr['customcode'])
+             jsonr['published'], jsonr['customvars'], jsonr['customcode'])
 
       data = db.get_customcode(globalVars['arduino_map']['user_id'], session['app_id'], code_id)
       customvars = ''
