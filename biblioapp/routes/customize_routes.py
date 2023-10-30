@@ -75,7 +75,7 @@ def set_routes_for_customization(app):
         #send json when token mode
         if('api' in request.path and 'token' in request.args):
           response = app.response_class(
-            response=json.dumps({'title':data['title'], 'customcode':data['customcode'].decode(), 'code_id':code_id}),
+            response=json.dumps({'title':data['title'], 'customcode':data['customcode'].decode(), 'customvars': data['customvars'], 'code_id':code_id}),
             mimetype='application/json'
           )
           return response
