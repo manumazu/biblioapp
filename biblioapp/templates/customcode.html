@@ -12,49 +12,31 @@
 {% endblock %}
 
 {% block content %}
-	<div class="container">
-		
-	<h1 class="mt-5 text-white font-weight-light">Display leds on your way !</h1>
-
-	<p>Learn how programming with your leds : each step of your code can be easily controlled on the strips.</p>
-
-	<div class="jumbotron">
-	  
-	{%if customvars['template']=='timer' %}
-
-	  {% include '_customcode_timer.html' %}
-
-	{%elif customvars['template']=='wait' %}
-
-	  {% include '_customcode_wait.html' %}
-
-	{%elif customvars['template']=='effect' %}
-
-	  {% include '_customcode_effect.html' %}	  
-
-	{% else %}
-	  
-	  {% include '_customcode_sample.html' %}
-	
-	{% endif %}
-	
-
-	<!-- version currently saved -->
-	<pre id="customCodeCurrent" class="text-white-50 bg-dark p-3 mt-3 customcode-{{ customvars['template'] }}">
-{{ customcode }}
-	</pre>
-
-	</div>
-
-	{{ super() }}
-	</div>
+      <div id="title-header"></div>
+      <div id="output"></div>  
+      <div id="pageContainer">
+        <div id="blocklyDiv"></div>
+        <div id="outputPane">
+          <pre id="generatedCode"><code></code></pre>
+          <button id="stepcode" class="button" style="background-color: #FFCC00;">EXPLAIN + TRY</button>
+          <button id="stopcode" class="button" style="background-color: #555555;color:white;">STOP</button>
+          <button id="runcode" class="button" style="background-color: #4CAF50;">RUN CODE</button>
+          <button id="savecode" class="button" style="background-color: #008CBA;">SAVE CODE</button>
+          <button id="reset" class="button" style="background-color: #f44336;">RESET ALL</button>
+        </div>
+      </div>
 {% endblock %}
 
 {% block scripts %}
   {{super()}}
   <script src="{{url_for('static', filename='app.js')}}"></script>
-   <script type="text/javascript">var max_leds = '{{ max_leds }}';</script>
-   <script src="{{url_for('static', filename='customcodes.js')}}" async=""></script>
+  <script defer="defer" src="{{url_for('static', filename='bibliogame.js', version='2311011138')}}"></script>
+  <script type="text/javascript">
+   	var app_maxLedsStrip = {{ max_leds_strip }};
+    var app_baseUrl = 'https://{{ api_hostname }}/api';
+    var app_uuid = '{{ uuid_encoded }}';
+    var app_code_id = {{ code_id }};	
+  </script>
 {% endblock %}
 
 {% endblock %}

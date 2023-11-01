@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
+from urllib.parse import urlparse
 import flask_login, hashlib, math
 
 '''
@@ -80,9 +81,12 @@ def set_routes_for_customization(app):
           )
           return response
         maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']
-        return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
-          customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects(), \
-          shelf_infos=globalVars['arduino_map'])
+        print(urlparse(request.base_url).hostname)
+        return render_template('customcode.html', user_login=globalVars['user_login'], max_leds_strip=globalVars['arduino_map']['nb_cols'], \
+          uuid_encoded=tools.uuid_encode(globalVars['arduino_map']['id_ble']), api_hostname=urlparse(request.base_url).hostname, code_id=code_id)
+        #return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
+        #  customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects(), \
+        #  shelf_infos=globalVars['arduino_map'])
     abort(404)
 
   @app.route('/customcodedelete/', methods=['POST'])
