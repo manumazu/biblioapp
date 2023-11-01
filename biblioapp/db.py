@@ -812,6 +812,16 @@ def set_customcode(user_id, app_id, code_id, title, description, published, cust
   mysql['conn'].close()
   return code_id
 
+def publish_customcode(code_id, published):
+  now = tools.getNow()
+  mysql = get_db()
+  mysql['cursor'].execute("UPDATE biblio_customcode SET `published`=%s, `date_upd`=%s WHERE id=%s", \
+    (published, now.strftime("%Y-%m-%d %H:%M:%S"), code_id))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  return published
+
 def get_customcode(user_id, app_id, code_id) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT * FROM biblio_customcode where id_user=%s and id_app=%s and id=%s", \

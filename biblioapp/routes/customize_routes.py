@@ -57,8 +57,8 @@ def set_routes_for_customization(app):
     abort(404)
 
   @app.route('/customcode/', methods=['GET', 'POST'])
-  @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
   @app.route('/api/customcode/<code_id>', methods=['GET', 'POST'])
+  @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
   @flask_login.login_required
   def customCode(code_id = None):
     globalVars = tools.initApp()
@@ -92,6 +92,19 @@ def set_routes_for_customization(app):
         #return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
         #  customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects(), \
         #  shelf_infos=globalVars['arduino_map'])
+    abort(404)
+
+  @app.route('/api/customcodepublish/<code_id>', methods=['POST'])
+  @flask_login.login_required
+  def customCodePubish(code_id):
+    if request.is_json:
+      jsonr = request.get_json()
+      published = db.publish_customcode(code_id, jsonr['publish'])
+      response = app.response_class(
+            response=json.dumps({'published':published}),
+            mimetype='application/json'
+          )
+      return response
     abort(404)
 
   @app.route('/customcodedelete/', methods=['POST'])
