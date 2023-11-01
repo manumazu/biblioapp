@@ -56,10 +56,11 @@ def set_routes_for_customization(app):
         json=json, max_leds=maxLeds, shelf_infos=globalVars['arduino_map'])
     abort(404)
 
+  @app.route('/customcode/', methods=['GET', 'POST'])
   @app.route('/customcode/<code_id>', methods=['GET', 'POST'])
   @app.route('/api/customcode/<code_id>', methods=['GET', 'POST'])
   @flask_login.login_required
-  def customCode(code_id):
+  def customCode(code_id = None):
     globalVars = tools.initApp()
     if globalVars['arduino_map'] != None:
       #manage post data from json request
@@ -81,8 +82,12 @@ def set_routes_for_customization(app):
           )
           return response
         maxLeds = globalVars['arduino_map']['nb_cols']*globalVars['arduino_map']['nb_lines']
-        print(urlparse(request.base_url).hostname)
-        return render_template('customcode.html', user_login=globalVars['user_login'], max_leds_strip=globalVars['arduino_map']['nb_cols'], \
+      else:
+        if('api' in request.path and 'token' in request.args):
+          abort(404)
+        else:          
+          code_id = 'null'
+      return render_template('customcode.html', user_login=globalVars['user_login'], max_leds_strip=globalVars['arduino_map']['nb_cols'], \
           uuid_encoded=tools.uuid_encode(globalVars['arduino_map']['id_ble']), api_hostname=urlparse(request.base_url).hostname, code_id=code_id)
         #return render_template('customcode.html', user_login=globalVars['user_login'], customcode=data['customcode'].decode(), \
         #  customvars=customvars, data=data, max_leds=maxLeds, effects=tools.get_leds_effects(), \
