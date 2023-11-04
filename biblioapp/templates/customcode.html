@@ -12,7 +12,10 @@
 {% endblock %}
 
 {% block content %}
-      <div id="title-header"></div>
+      <div id="title-header">
+        <div id="title" style="display:inline-block"></div>
+        <button id="publishcode" class="button publish" style="float: right; width: 150px; color: #fff;">Publish</button>
+      </div>
       <div id="output"></div>  
       <div id="pageContainer">
         <div id="blocklyDiv"></div>
@@ -30,7 +33,7 @@
 {% block scripts %}
   {{super()}}
   <script src="{{url_for('static', filename='app.js')}}"></script>
-  <script defer="defer" src="{{url_for('static', filename='bibliogame.js', version='23110111853')}}"></script>
+  <script defer="defer" src="{{url_for('static', filename='bibliogame.js', version='2311041805')}}"></script>
   <script type="text/javascript">
    	var app_maxLedsStrip = {{ max_leds_strip }};
     var app_baseUrl = 'https://{{ api_hostname }}/api';
