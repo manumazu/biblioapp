@@ -1,0 +1,37 @@
+			    <tr class="table-secondary{% if customcode['published']==0 %} text-muted{% endif %}">
+			      <td width="5%"><a href="{{ url_for('customCode', code_id=customcode['id']) }}">#{{ customcode['id'] }}</a></td>
+			      <td width="15%"><a href="{{ url_for('customCode', code_id=customcode['id']) }}">{{ customcode['title'] }}</td>
+			      <!--td>{{ customcode['description'] }}</td-->
+			      <td width="80%">
+			      {% if customcode['customvars'] %}
+				      {% set customvars = json.loads(customcode['customvars']) %}
+				      
+				      {% for iteration in customvars %}
+				      	{% set loopNumber = iteration.split('_') %}
+					    {% if loop.index < 6 %}					    	
+					      	<strong>Loop {{loopNumber[1]}}</strong>
+						    {% for delay in customvars[iteration] %}
+						      <table width="100%">
+						      {% if customvars[iteration][delay]|length > 0 %}
+						       <tr><td width="65">
+						      	 Delay {{ delay|int/1000 }}s						       	
+						       </td>  
+						       <td>	
+						      	{% for strip in customvars[iteration][delay] %}						   
+						      	  {% for block in strip  %}
+						      	   <div class="{{ block.row }}" style="background-color: rgb( {{ block.color }} );width: {{ block.interval*15 }}px; display: inline-block;">&nbsp;</div> 
+						      	  {% endfor %}
+						      	  <br/>						   
+						      	{% endfor %}
+						       </td></tr>
+						      {% endif %}
+						      </table>
+						    {% endfor %}						 
+						  {% else %}
+							Loop {{loopNumber[1]}} [...]
+						  {% endif %}
+				      {% endfor %}
+			      {% endif %}
+			  	  </td>
+			  	  <td width="10%">{{ customcode['date_upd'].strftime('%Y-%m-%d') }}
+			    </tr>

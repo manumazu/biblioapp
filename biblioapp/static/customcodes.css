@@ -30,4 +30,22 @@
 	#btn-customcode_publish {
 		z-index: 100;
 	}
+
+	.strip_1 {
+	   position: relative;
+	   overflow: scroll;
+	   margin-bottom: 1px;
+	}
+
+	.strip_2 {
+	   position: relative;
+	   overflow: scroll;
+	   margin-bottom: 1px;
+	}
+
+	.strip_3 {
+	   position: relative;
+	   overflow: scroll;
+	   margin-bottom: 1px;
+	}
 }
