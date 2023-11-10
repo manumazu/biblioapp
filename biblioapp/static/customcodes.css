@@ -25,7 +25,11 @@
 		/*bottom: 540px;*/
 		left: 20px;
 		width: 610px;
-	}		
+	}
+
+	#pageContainer, #outputPane button {
+		color:black;
+	}
 
 	#btn-customcode_publish {
 		z-index: 100;
