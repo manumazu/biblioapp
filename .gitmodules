@@ -1,0 +1,3 @@
+[submodule "biblioapp/static/vendor/bibliogame"]
+	path = biblioapp/static/vendor/bibliogame
+	url = git@github.com:manumazu/bibliogame.git
