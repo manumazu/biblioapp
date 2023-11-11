@@ -41,6 +41,7 @@
 			      <!--th scope="col">Description</th-->
 			      <th scope="col">Preview</th>
 			      <th scope="col">Updated</th>
+			      <th scope="col">Delete</th>
 			    </tr>
 			</thead>
 			<tbody>
@@ -61,6 +62,7 @@
 			      <!--th scope="col">Description</th-->
 			      <th scope="col">Preview</th>
 			      <th scope="col">Updated</th>
+			      <th scope="col">Delete</th>
 			    </tr>
 			</thead>
 			<tbody>
@@ -85,12 +87,12 @@
 
 {% block scripts %}
   {{super()}}
-   <!--script src="{{url_for('static', filename='customcodes.js')}}" async=""></script-->
+   <script src="{{url_for('static', filename='customcodes.js', version='2311111831')}}" async=""></script>
    <script src="{{url_for('static', filename='app.js')}}"></script>
    <script>
    	  var max_leds = '{{ max_leds }}';
 
-	  $( function() {
+	  /*$( function() {
 
 	  	$('#save-order').hide();
 
@@ -108,7 +110,7 @@
 	  	//console.log('elements', elements);
 	 	elements = elements+'&customcode=1';    
 		ajax_postOrder(elements, this);
-	  });
+	  });*/
 
    </script>   
 {% endblock %}

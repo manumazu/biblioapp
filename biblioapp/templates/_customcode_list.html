@@ -35,5 +35,11 @@
 				      {% endfor %}
 			      {% endif %}
 			  	  </td>
-			  	  <td width="10%">{{ customcode['date_upd'].strftime('%Y-%m-%d') }}
+			  	  <td width="10%">{{ customcode['date_upd'].strftime('%Y-%m-%d') }}</td>
+			  	  <td>
+			  	  	<form method="post" action="/customcodedelete/" class="form-horizontal" id="del-customcode" onsubmit="return checkPublished({{ customcode['published'] }});">
+						<input type="hidden" name="id" value="{{ customcode['id'] }}">
+						<input type="submit" value="Delete code" class="btn btn-danger">
+					</form>
+			  	  </td>
 			    </tr>
