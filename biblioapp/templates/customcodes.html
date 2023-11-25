@@ -91,27 +91,6 @@
    <script src="{{url_for('static', filename='app.js')}}"></script>
    <script>
    	  var max_leds = '{{ max_leds }}';
-
-	  /*$( function() {
-
-	  	$('#save-order').hide();
-
-	    $( "#code-sortable tbody" ).sortable({
-	    	stop: function(e, ui) {
-			    $('#save-order').removeClass('btn-success');
-			    $('#save-order').text('Save changes');	    		
-	    		$('#save-order').show();
-	    	}
-	    })
-	  });
-
-	  $('#save-order').on('click', function() {
-	  	var elements = $( "#code-sortable tbody" ).sortable('serialize');
-	  	//console.log('elements', elements);
-	 	elements = elements+'&customcode=1';    
-		ajax_postOrder(elements, this);
-	  });*/
-
    </script>   
 {% endblock %}
 

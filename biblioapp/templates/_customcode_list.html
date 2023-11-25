@@ -4,10 +4,9 @@
 			      <!--td>{{ customcode['description'] }}</td-->
 			      <td width="80%" style="padding: 5px;">
 			      {% if customcode['customvars'] %}
-				      {% set customvars = json.loads(customcode['customvars']) %}
-				      
-				      {% for iteration in customvars %}
-
+				    {% set customvars = json.loads(customcode['customvars']) %}
+				      <!-- parse ledsarray to display customcode interpretation -->
+				    {% for iteration in customvars %}
 				      	{% set loopNumber = iteration.split('_') %}
 					    {% if loop.index < 6 %}					    	
 					      	<strong>Loop {{loopNumber[1]}}</strong>
@@ -28,11 +27,10 @@
 						      {% endif %}
 						      </table>
 						    {% endfor %}						 
-						  {% else %}
+						{% else %}
 							Loop {{loopNumber[1]}} [...]
-						  {% endif %}
-
-				      {% endfor %}
+						{% endif %}
+				    {% endfor %}
 			      {% endif %}
 			  	  </td>
 			  	  <td width="10%">{{ customcode['date_upd'].strftime('%Y-%m-%d') }}</td>
