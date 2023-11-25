@@ -16,4 +16,6 @@ RECAPTCHA_SECRET = ''
 SECRET_KEY = ''
 #define email of account who is allowed to set up bibus modules 
 SHELF_ADMIN_EMAIL = ''
-
+#for updload images
+UPLOAD_FOLDER = 'static/upload'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
