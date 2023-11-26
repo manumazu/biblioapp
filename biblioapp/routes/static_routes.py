@@ -91,7 +91,7 @@ def set_routes_for_static_pages(app):
             msg = refresh_diapo_olivier()
             print(msg)
             return rendered
-        flash('Unable to rename file', 'warning')
+        flash('Format de fichier non autorisé', 'warning')
         return redirect(request.url)
     return render_template('oliv_form.html')
 
