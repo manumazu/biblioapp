@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 		<meta description="Drones Park, réalisation vidéo avec drones">
 
-		<title>Drones Park - Bienvenue !</title>
+		<title>In Oliv's Memory</title>
 
 		<link rel="stylesheet" href="../dist/reset.css">
 		<link rel="stylesheet" href="../dist/reveal.css">
@@ -16,12 +16,32 @@
 	</head>
 	<body>
 		<div class="reveal">
+
 			<div class="slides">
+
+				<section id="home">
+					<div class="r-hstack">
+						<span style="font-size: 60px;">À la mémoire d'Olivier Victorri</span>
+					</div>
+					<hr>
+					<p style="font-size: 32px">
+						Olivier nous a quitté le 24 novembre 2023 à l'âge de 51 ans. <br/>
+						Nous ne l'oublierons pas. Ce diaporama en est le témoin.
+					</p>
+					<hr>
+					<p style="font-size: 24px">
+						Si vous souhaitez alimenter ce diaporama avec vos souvenirs, <a href="https://bibliob.us/olivier">rendez-vous ici pour transférer vos photos avec Olivier</a>. Le diaporama sera rafraîchi dans un délai de 5 minutes maxi.
+						<br/>
+						<span style="font-size: 32px">Sinon, "slidez" l'écran.</span>
+					</p>
+				</section>
+
 				{% for image in imageInfos %}
 
 					{% set path = image['path'] %}
 					{% set description = image['description'][0] %}
 					{% set filename = image['filename'] %}
+					{% set date = image['date'] %}
 
 					{% include '_albumOliv.html' %}
 

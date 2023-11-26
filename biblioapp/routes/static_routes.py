@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
-import flask_login, os, glob
+import flask_login, os, glob, time, datetime
 from PIL import Image
 from werkzeug.utils import secure_filename
             
@@ -87,32 +87,43 @@ def set_routes_for_static_pages(app):
             #render partial album
             relative_img_path = os.path.join(app.config['UPLOAD_FOLDER'], 'photos', 'resize', filename)
             rendered = render_template('diaporamaOliv_partial.html', path = relative_img_path, description = desc)
-            
-            #generate full album 
-            files_list = glob.glob(upload_dir+'/*.txt')
-            album_array = []
-            # retrieve info
-            for file_name in files_list:
-              with open(os.path.join(upload_dir, file_name), 'r') as f:
-                img_desc = f.readlines()
-                f.close()
-              img_path = file_name.replace('.txt','')
-              img_path = img_path.replace(upload_dir, '../images/photos/resize')
-              img_name = img_path.replace('../images/photos/resize/', '')
-              img_infos = {'description':img_desc, 'path':img_path, 'filename':img_name}
-              album_array.append(img_infos)
-            #print(album_array)
-            #save html render in album file
-            render_album = render_template('diaporamaOliv.html', imageInfos = album_array)
-            pathHTML = os.path.join(upload_dir, 'full_album.html')
-            fileHTML = open(pathHTML, "w")
-            fileHTML.writelines(render_album)
-            fileHTML.close()
-            #display partial album
+            #generate full album
+            msg = refresh_diapo_olivier()
+            print(msg)
             return rendered
         flash('Unable to rename file', 'warning')
         return redirect(request.url)
     return render_template('oliv_form.html')
+
+  @app.route('/olivier-refresh', methods=['GET'])
+  def refresh_diapo_olivier():
+    #generate full album 
+    upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
+    files_list = glob.glob(upload_dir+'/*.txt')
+    album_array = []
+    # retrieve info
+    for file_name in files_list:
+      file_path = os.path.join(upload_dir, file_name)
+      with open(file_path, 'r') as f:
+        img_desc = f.readlines()
+        f.close()
+      modified = os.path.getmtime(file_path)
+      year,month,day,hour,minute,second=time.localtime(modified)[:-3]
+      img_date = "%02d/%02d/%d %02d:%02d:%02d"%(day,month,year,hour,minute,second)
+      print(img_date)
+      img_path = file_name.replace('.txt','')
+      img_path = img_path.replace(upload_dir, '../images/photos/resize')
+      img_name = img_path.replace('../images/photos/resize/', '')
+      img_infos = {'description':img_desc, 'path':img_path, 'filename':img_name, 'date':img_date}
+      album_array.append(img_infos)
+    #print(album_array)
+    #save html render in album file
+    render_album = render_template('diaporamaOliv.html', imageInfos = album_array)
+    pathHTML = os.path.join(upload_dir, 'full_album.html')
+    fileHTML = open(pathHTML, "w")
+    fileHTML.writelines(render_album)
+    fileHTML.close()
+    return f"{len(files_list)} slides generated"
 
   def allowed_file(filename):
     return '.' in filename and \
