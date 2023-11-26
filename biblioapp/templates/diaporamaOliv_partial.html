@@ -9,9 +9,12 @@
 {% block content %}
 	<div class="container">
 
-		<h1>In memory of Oliv'</h1>
+		<h1 class="mt-5 text-white font-weight-light">Merci !</h1>
+		<p> Dans moins de 5 minutes, votre photo sera visible dans le diaporama souvenir d'Olivier <a href="https://www.dronespark.fr/olivier/">www.dronespark.fr/olivier/</a> <br />
+			<a href="{{ url_for('diapo_olivier') }}"><button class="btn btn-info">Uploader une nouvelle photo</button></a>
+		</p>
 
-		<a href="{{ url_for('diapo_olivier') }}"><button class="btn btn-info">Uploader une nouvelle photo</button></a>
+		<h1>In memory of Oliv'</h1>
 
 		<img src="{{ path }}">
 		<br/>

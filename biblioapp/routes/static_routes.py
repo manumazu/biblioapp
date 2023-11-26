@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
 import flask_login, os, glob
+from PIL import Image
 from werkzeug.utils import secure_filename
+            
 
 '''
 Static pages
@@ -69,12 +71,21 @@ def set_routes_for_static_pages(app):
             #save image 
             full_path_img = os.path.join(upload_dir, 'photos', filename)
             file1.save(full_path_img)
+            
+            #resize image
+            img = Image.open(full_path_img)
+            width, height = img.size
+            ratio = width/height
+            img_resized = img.resize((900,int(900/ratio))) if(ratio > 0) else img.resize((600,int(600/ratio)))
+            img_resized_path = os.path.join(upload_dir, 'photos', 'resize', filename)
+            img_resized.save(img_resized_path)
+            
             #save descrition
             descFile = open(os.path.join(upload_dir, filename+'.txt'), 'w')
             descFile.writelines(desc)
             descFile.close()
             #render partial album
-            relative_img_path = os.path.join(app.config['UPLOAD_FOLDER'], 'photos', filename)
+            relative_img_path = os.path.join(app.config['UPLOAD_FOLDER'], 'photos', 'resize', filename)
             rendered = render_template('diaporamaOliv_partial.html', path = relative_img_path, description = desc)
             
             #generate full album 
@@ -86,11 +97,11 @@ def set_routes_for_static_pages(app):
                 img_desc = f.readlines()
                 f.close()
               img_path = file_name.replace('.txt','')
-              img_path = img_path.replace(upload_dir, '../images/photos')
-              img_name = img_path.replace('../images/photos/', '')
+              img_path = img_path.replace(upload_dir, '../images/photos/resize')
+              img_name = img_path.replace('../images/photos/resize/', '')
               img_infos = {'description':img_desc, 'path':img_path, 'filename':img_name}
               album_array.append(img_infos)
-            print(album_array)
+            #print(album_array)
             #save html render in album file
             render_album = render_template('diaporamaOliv.html', imageInfos = album_array)
             pathHTML = os.path.join(upload_dir, 'full_album.html')
