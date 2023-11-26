@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
-import flask_login, os
+import flask_login, os, glob
 from werkzeug.utils import secure_filename
 
 '''
@@ -46,8 +46,8 @@ def set_routes_for_static_pages(app):
   def assetlinks():
     return send_from_directory(app.static_folder, 'assetlinks.json') 
 
-  @app.route('/oliv', methods=['GET', 'POST'])
-  def upload_file():
+  @app.route('/olivier', methods=['GET', 'POST'])
+  def diapo_olivier():
     if request.method == 'POST':
         if 'file1' not in request.files:
             flash('Veuillez sélectionner un dossier')
@@ -63,7 +63,10 @@ def set_routes_for_static_pages(app):
         if file1 and allowed_file(file1.filename):
             filename = secure_filename(file1.filename)
             upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER']) 
-            #save image
+            count_img = os.listdir(upload_dir+'/photos')
+            nb_img = len(count_img)
+            filename =  str(nb_img) + '_' + filename
+            #save image 
             full_path_img = os.path.join(upload_dir, 'photos', filename)
             file1.save(full_path_img)
             #save descrition
@@ -72,15 +75,29 @@ def set_routes_for_static_pages(app):
             descFile.close()
             #render partial album
             relative_img_path = os.path.join(app.config['UPLOAD_FOLDER'], 'photos', filename)
-            rendered = render_template('_albumOliv.html', path = relative_img_path, description = desc)
+            rendered = render_template('diaporamaOliv_partial.html', path = relative_img_path, description = desc)
+            
+            #generate full album 
+            files_list = glob.glob(upload_dir+'/*.txt')
+            album_array = []
+            # retrieve info
+            for file_name in files_list:
+              with open(os.path.join(upload_dir, file_name), 'r') as f:
+                img_desc = f.readlines()
+                f.close()
+              img_path = file_name.replace('.txt','')
+              img_path = img_path.replace(upload_dir, '../images/photos')
+              img_name = img_path.replace('../images/photos/', '')
+              img_infos = {'description':img_desc, 'path':img_path, 'filename':img_name}
+              album_array.append(img_infos)
+            print(album_array)
             #save html render in album file
-            files = os.listdir(upload_dir)
-            print(files)
+            render_album = render_template('diaporamaOliv.html', imageInfos = album_array)
             pathHTML = os.path.join(upload_dir, 'full_album.html')
             fileHTML = open(pathHTML, "w")
-            fileHTML.writelines(rendered)
+            fileHTML.writelines(render_album)
             fileHTML.close()
-            #display partial album       
+            #display partial album
             return rendered
         flash('Unable to rename file', 'warning')
         return redirect(request.url)

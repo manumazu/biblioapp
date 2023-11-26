@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %}Oliv{% endblock %}
+{% block styles %}
+    {{super()}}
+{% endblock %}
+
+{% block body %}
+
+{% block content %}
+	<div class="container">
+
+		<h1>In memory of Oliv'</h1>
+
+		<a href="{{ url_for('diapo_olivier') }}"><button class="btn btn-info">Uploader une nouvelle photo</button></a>
+
+		<img src="{{ path }}">
+		<br/>
+		{{ description }}
+
+	</div>
+{% endblock %}
+
+{% endblock %}
