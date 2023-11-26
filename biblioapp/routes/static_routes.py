@@ -108,9 +108,9 @@ def set_routes_for_static_pages(app):
         img_desc = f.readlines()
         f.close()
       modified = os.path.getmtime(file_path)
-      year,month,day,hour,minute,second=time.localtime(modified)[:-3]
+      year,month,day,hour,minute,second=time.gmtime(modified)[:-3]
       img_date = "%02d/%02d/%d %02d:%02d:%02d"%(day,month,year,hour,minute,second)
-      print(img_date)
+      #print(img_date)
       img_path = file_name.replace('.txt','')
       img_path = img_path.replace(upload_dir, '../images/photos/resize')
       img_name = img_path.replace('../images/photos/resize/', '')
