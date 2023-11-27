@@ -32,7 +32,7 @@
 					<p style="font-size: 24px">
 						Si vous souhaitez alimenter ce diaporama avec vos souvenirs, <a href="https://bibliob.us/olivier">rendez-vous ici pour transférer vos photos avec Olivier</a>. Le diaporama sera rafraîchi dans un délai de 5 minutes maxi.
 						<br/>
-						<span style="font-size: 32px">Sinon, "slidez" l'écran.</span>
+						<span style="font-size: 24px">Sinon, "slidez" l'écran, ou appuyez sur les flêches ou la touche [ESC]</span>
 					</p>
 				</section>
 
@@ -42,6 +42,7 @@
 					{% set description = image['description'][0] %}
 					{% set filename = image['filename'] %}
 					{% set date = image['date'] %}
+					{% set force_img_height = image['force_height'] %}
 
 					{% include '_albumOliv.html' %}
 

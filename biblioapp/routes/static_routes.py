@@ -76,7 +76,7 @@ def set_routes_for_static_pages(app):
             img = Image.open(full_path_img)
             width, height = img.size
             ratio = width/height
-            img_resized = img.resize((900,int(900/ratio))) if(ratio > 0) else img.resize((600,int(600/ratio)))
+            img_resized = img.resize((900,int(900/ratio))) if(ratio > 1) else img.resize((600,int(600/ratio)))
             img_resized_path = os.path.join(upload_dir, 'photos', 'resize', filename)
             img_resized.save(img_resized_path)
             
@@ -114,9 +114,15 @@ def set_routes_for_static_pages(app):
       img_path = file_name.replace('.txt','')
       img_path = img_path.replace(upload_dir, '../images/photos/resize')
       img_name = img_path.replace('../images/photos/resize/', '')
-      img_infos = {'description':img_desc, 'path':img_path, 'filename':img_name, 'date':img_date}
+      # check ratio for forcing height
+      img = Image.open(os.path.join(upload_dir,'photos','resize',img_name))
+      width, height = img.size
+      ratio = width/height
+      force_height = False if ratio > 1 else True  
+      # store infos in array
+      img_infos = {'description':img_desc, 'path':img_path, 'filename':img_name, 'date':img_date, 'force_height':force_height}
       album_array.append(img_infos)
-    #print(album_array)
+    print(album_array)
     #save html render in album file
     render_album = render_template('diaporamaOliv.html', imageInfos = album_array)
     pathHTML = os.path.join(upload_dir, 'full_album.html')
