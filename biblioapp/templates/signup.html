@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block title %}Signup{% endblock %}
+
 {% block styles %}
     {{super()}}
 {% endblock %}
@@ -79,8 +80,8 @@
 {% endblock %}
 
 {% block scripts %}
-  {{super()}}
   <script src="https://www.google.com/recaptcha/api.js"></script>  
+  {{super()}}
   <script src="{{url_for('static', filename='signup.js')}}"></script>
   <script src="{{url_for('static', filename='app.js')}}"></script>
 {% endblock %}

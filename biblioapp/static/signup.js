@@ -18,6 +18,7 @@ function onSubmit(token) {
 
     ajax_validRecaptcha(token).then(function(res, e)
     {
+    	//console.log('captchares: ',res);
     	if(res=='ok') {
     		captchaOk = true;
     		$('#recaptchaHelp').hide();

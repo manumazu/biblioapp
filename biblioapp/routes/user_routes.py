@@ -148,11 +148,13 @@ def set_routes_for_user(app):
   def verifRecaptcha():
     import requests
     recaptcha_response = request.form.get('token')
+    #print('token',recaptcha_response)
     secretKey = app.config['RECAPTCHA_SECRET']
     r = requests.post("https://www.google.com/recaptcha/api/siteverify?secret="+secretKey+"&response="+recaptcha_response)
     data = r.json()
+    #print(data)
     if 'success' in data:
-      if data['score'] >= 0.5: 
+      if data['score'] >= 0.8 and data['action'] == 'submit': 
         return "ok"
     return "ko"
 
