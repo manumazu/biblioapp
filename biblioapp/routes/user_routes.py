@@ -118,8 +118,12 @@ def set_routes_for_user(app):
   '''
   Authentication
   '''
-  @app.route('/signup', methods=['GET', 'POST'])
+  @app.route('/signup', methods=['GET'])
   def signUp():
+    return render_template('signup.html')
+
+  @app.route('/signupdata', methods=['POST'])
+  def signUpData():
     if request.method == 'POST':
       firstname=request.form.get('ufirstname')
       lastname=request.form.get('ulastname')
@@ -142,7 +146,7 @@ def set_routes_for_user(app):
         mimetype='application/json'
       )
       return response
-    return render_template('signup.html')
+    return redirect(url_for('login', _scheme='https', _external=True))      
 
   @app.route('/ajax_recaptcha/', methods=['GET', 'POST'])
   def verifRecaptcha():

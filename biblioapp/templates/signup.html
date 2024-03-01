@@ -16,7 +16,7 @@
 	<h1 class="mt-5 text-white font-weight-light">Sign up ...</h1>
 	<h2>... and turn on your bookshelf !</h2>
 
-	<form action="{{ url_for('signUp') }}" method="POST" class="form-horizontal" id="form-signUp">
+	<form method="POST" class="form-horizontal" id="form-signUp">
 
 		<div class="form-group row">
 			<label for="ufirstname" class="col-sm-2 col-form-label">Firstname</label> 
@@ -64,10 +64,11 @@
 		</div>
 
 		<div class="form-group row">
-			<button class="g-recaptcha btn btn-info" 
+			<button class="g-recaptcha btn btn-info" id="btn-signUp" 
 		        data-sitekey="6Lc6WKMZAAAAACRIRR1m9NsbUgSDILhhKdKOfXrZ" 
 		        data-callback='onSubmit' 
-		        data-action='submit'>Submit</button>
+		        data-action='submit'
+		        data-target="{{ url_for('signUpData') }}">Submit</button>
 			<div class="col-sm-4">
 		        <small id="recaptchaHelp" class="text-danger" style="display: none">
 		          reCaptcha is not valid, try submit form again.
@@ -82,7 +83,7 @@
 {% block scripts %}
   <script src="https://www.google.com/recaptcha/api.js"></script>  
   {{super()}}
-  <script src="{{url_for('static', filename='signup.js')}}"></script>
+  <script src="{{url_for('static', filename='signup.js', version='2403011425')}}"></script>
   <script src="{{url_for('static', filename='app.js')}}"></script>
 {% endblock %}
 

@@ -36,7 +36,7 @@ function onSubmit(token) {
 
 
 		if(allowSubmit) { //start submit
-			var url = $("#form-signUp").attr('action');
+			var url = $("#btn-signUp").attr('data-target');
 			submitForm(url);
 			//console.log('captchaOk', captchaOk, 'pwdOk', pwdOk);
 		}    	
