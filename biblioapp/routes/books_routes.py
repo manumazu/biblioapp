@@ -371,7 +371,7 @@ def set_routes_for_books(app):
               response=json.dumps(res),
               mimetype='application/json'
           )
-          print(res)          
+          #print(res)          
           return response
         return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
           shelf_infos=globalVars['arduino_map'], tools=tools)
@@ -383,10 +383,12 @@ def set_routes_for_books(app):
         if ref != 'new':
           r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
           data = r.json()
-          #book = data['volumeInfo']
           book = tools.formatBookApi('googleapis', data, None)
-          book['imageLinks'] = data['volumeInfo']['imageLinks']
-          book['categories'] = data['volumeInfo']['categories']  
+          #print(book)
+          if 'imageLinks' in data['volumeInfo']:
+            book['imageLinks'] = data['volumeInfo']['imageLinks']
+          if 'categories' in data['volumeInfo']:
+            book['categories'] = data['volumeInfo']['categories']  
         return render_template('booksearch.html', user_login=globalVars['user_login'], book=book, ref=ref, \
             shelf_infos=globalVars['arduino_map'])
 
@@ -398,6 +400,7 @@ def set_routes_for_books(app):
           query += "ISBN:\""+request.args.get('isbn')+"\""
           r = requests.get(url + query)
           data = r.json() 
+          #print(url + query)
           if 'items' in data:
             for item in data['items']:
               res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn')))

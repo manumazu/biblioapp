@@ -234,15 +234,27 @@ def formatBookApi(api, data, isbn):
     if isbn is not None:
       bookapi['isbn'] = isbn
     else:
-      for Ids in data['volumeInfo']['industryIdentifiers']:
-        if Ids['type'] == "ISBN_13":
-          bookapi['isbn'] = Ids['identifier']
+      if 'industryIdentifiers' in data['volumeInfo']:
+        for Ids in data['volumeInfo']['industryIdentifiers']:
+          if Ids['type'] == "ISBN_13":
+            bookapi['isbn'] = Ids['identifier']
     bookapi['editor'] = data['volumeInfo']['publisher'] if 'publisher' in data['volumeInfo'] else ""
     bookapi['description'] = data['volumeInfo']['description'] if 'description' in data['volumeInfo'] else ""
     bookapi['pages'] = data['volumeInfo']['pageCount'] if 'pageCount' in data['volumeInfo'] else 0
-    bookapi['year'] = getYear(data['volumeInfo']['publishedDate']) if 'publishedDate' in data['volumeInfo'] else "" 
+    bookapi['year'] = getYear(data['volumeInfo']['publishedDate']) if 'publishedDate' in data['volumeInfo'] else ""
+    if 'dimensions' in data['volumeInfo'] and 'thickness' in data['volumeInfo']['dimensions']:
+      width = data['volumeInfo']['dimensions']['thickness']
+      converter = 10 if width.find('cm') else 1 # convert dimension from cm to mm
+      bookapi['width'] = str2int(width)*converter
 
-  return bookapi  
+  return bookapi
+
+def str2int(str):
+  import re
+  res = re.findall(r'\b\d+\b', str)
+  if len(res):
+    return float(".".join(res))
+  return False
 
 def get_leds_effects():
   return [ 'rainbow', 'rainbowWithGlitter', 'confetti', 'sinelon' , 'juggle', 'bpm', 'snowSparkle', 'fadeOut' ]
