@@ -13,6 +13,9 @@ RUN pip install gunicorn
 RUN pip install flask_wtf --upgrade
 RUN pip install flask_login --upgrade
 
+#used for OCR via Vertexai : need the volume "bibliobus-ocr-ia" (see docker-compose)
+RUN pip install --upgrade google-cloud-aiplatform gcloud auth login
+
 
 ENV FLASK_APP biblioapp
 
