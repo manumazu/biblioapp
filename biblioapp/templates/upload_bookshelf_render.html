@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Index Bookshelf{% endblock %}
+{% block styles %}
+    {{super()}}
+{% endblock %}
+
+{% block body %}
+
+{% block navbar %}
+    {{super()}}
+{% endblock %}
+
+
+{% block content %}
+	<div class="container">
+
+		<h1 class="mt-5 text-white font-weight-light">Merci !</h1>
+		<p> Dans quelques secondes, votre photo sera indexée <br />
+			<a href="{{ url_for('upload_bookshelf') }}"><button class="btn btn-info">Uploader une nouvelle photo</button></a>
+		</p>
+
+		<img src="{{ path }}">
+
+	</div>
+{% endblock %}
+
+{% endblock %}

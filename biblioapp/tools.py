@@ -272,3 +272,7 @@ def drawline(line, x, y, xoffset, nb_leds, color):
   for j in range(maxled-xoffset):
     leds[j] = color;
   return leds
+
+def allowed_file(filename):
+  return '.' in filename and \
+    filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']

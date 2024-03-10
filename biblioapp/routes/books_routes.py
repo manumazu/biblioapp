@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
-import flask_login, hashlib
+import flask_login, hashlib, os
+from PIL import Image
+from werkzeug.utils import secure_filename
 
 '''
 Manage bookshelf, books, tags, search in shelves
@@ -581,3 +583,52 @@ def set_routes_for_books(app):
     )
     return response  
 
+  #upload users's  bookshelves pictures and start OCR with IA on it
+  @app.route('/upload_bookshelf', methods=['GET', 'POST'])
+  @flask_login.login_required
+  def upload_bookshelf():
+    globalVars = tools.initApp()
+    if request.method == 'POST':
+        if 'shelf_img' not in request.files:
+            flash('Veuillez sélectionner un dossier')
+            return redirect(request.url)
+        shelf_img = request.files['shelf_img']
+        if shelf_img.filename == '':
+            flash('Aucun fichier sélectionné', 'warning')
+            return redirect(request.url)
+        if shelf_img and tools.allowed_file(shelf_img.filename):
+            filename = secure_filename(shelf_img.filename)
+            upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), 'photos')
+            #create user dir if not exists
+            user_dir = os.path.join(app.root_path, upload_dir)
+            if not os.path.exists(user_dir):
+              os.makedirs(user_dir)
+            #count_img = os.listdir(upload_dir+'/photos')
+            #nb_img = len(count_img)
+            #filename =  str(nb_img) + '_' + filename
+            
+            #save image 
+            full_path_img = os.path.join(user_dir, filename)
+            shelf_img.save(full_path_img)
+            
+            #resize image
+            img = Image.open(full_path_img)
+            width, height = img.size
+            ratio = width/height
+            img_resized = img.resize((2000,int(2000/ratio))) if(ratio > 1) else img.resize((1500,int(1500/ratio)))
+            resize_dir = os.path.join(user_dir, 'resize')
+            if not os.path.exists(resize_dir):
+              os.makedirs(resize_dir)
+            img_resized_path = os.path.join(resize_dir, filename)
+            img_resized.save(img_resized_path)
+            
+            #render partial album
+            relative_img_path = os.path.join(upload_dir, 'resize', filename)
+            ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
+            ocr_analyze = os.system("cd " + ocr_path + " && ./ocr_wrapper.sh " + os.path.join(app.root_path, relative_img_path))
+            print(ocr_analyze)
+            rendered = render_template('upload_bookshelf_render.html', path = relative_img_path)
+            return rendered
+        flash('Format de fichier non autorisé', 'warning')
+        return redirect(request.url)
+    return render_template('upload_bookshelf.html')
