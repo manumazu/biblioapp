@@ -588,6 +588,7 @@ def set_routes_for_books(app):
   @flask_login.login_required
   def upload_bookshelf():
     globalVars = tools.initApp()
+    print(globalVars)
     if request.method == 'POST':
         if 'shelf_img' not in request.files:
             flash('Veuillez sélectionner un dossier')
@@ -603,9 +604,13 @@ def set_routes_for_books(app):
             user_dir = os.path.join(app.root_path, upload_dir)
             if not os.path.exists(user_dir):
               os.makedirs(user_dir)
-            #count_img = os.listdir(upload_dir+'/photos')
-            #nb_img = len(count_img)
-            #filename =  str(nb_img) + '_' + filename
+            
+            #order file list
+            count_img = os.listdir(user_dir)
+            nb_img = len(count_img)
+            if nb_img == 0:
+              nb_img = 1
+            filename = str(nb_img) + '_' + filename
             
             #save image 
             full_path_img = os.path.join(user_dir, filename)
@@ -622,12 +627,22 @@ def set_routes_for_books(app):
             img_resized_path = os.path.join(resize_dir, filename)
             img_resized.save(img_resized_path)
             
-            #render partial album
+            #get uploaded image list
+            img_list = os.listdir(resize_dir)
+            img_list = sorted(img_list)
+            dir_list = []
+            for img in img_list:
+              relative_img_path = os.path.join(upload_dir, 'resize', img)
+              dir_list.append({"path":relative_img_path, "filename":img})
+            print(dir_list)  
+            
+            #render images list
             relative_img_path = os.path.join(upload_dir, 'resize', filename)
-            ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
-            ocr_analyze = os.system("cd " + ocr_path + " && ./ocr_wrapper.sh " + os.path.join(app.root_path, relative_img_path))
-            print(ocr_analyze)
-            rendered = render_template('upload_bookshelf_render.html', path = relative_img_path)
+            #execute ocr analyze 
+            #ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
+            #ocr_analyze = os.system("cd " + ocr_path + " && ./ocr_wrapper.sh " + os.path.join(app.root_path, relative_img_path))
+            #print(ocr_analyze)
+            rendered = render_template('upload_bookshelf_render.html', img_paths = dir_list, module_name=globalVars['arduino_map']['arduino_name'], user_login=globalVars['user_login'])
             return rendered
         flash('Format de fichier non autorisé', 'warning')
         return redirect(request.url)
