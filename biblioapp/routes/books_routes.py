@@ -588,8 +588,39 @@ def set_routes_for_books(app):
   @flask_login.login_required
   def upload_bookshelf():
     globalVars = tools.initApp()
-    print(globalVars)
+    #print(globalVars)
+    
+    if request.method == 'GET':
+
+        # display uploaded pictures for current bookshelf and shelf number
+        if 'numshelf' in request.args: 
+          numshelf = request.args.get('numshelf')
+          upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf, 'resize')
+          full_path_dir = os.path.join(app.root_path, upload_dir)
+          #get uploaded image list
+          if os.path.isdir(full_path_dir) is False:
+            abort(404)
+          img_list = os.listdir(full_path_dir)
+          img_list = sorted(img_list)
+          dir_list = []
+          for img in img_list:
+            relative_img_path = os.path.join(upload_dir, img)
+            dir_list.append({"path":relative_img_path, "filename":img})
+            #print(dir_list) 
+            #execute ocr analyze 
+            #ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
+            #ocr_analyze = os.system("cd " + ocr_path + " && ./ocr_wrapper.sh " + os.path.join(app.root_path, relative_img_path))
+            #print(ocr_analyze)    
+          rendered = render_template('upload_bookshelf_render.html', img_paths = dir_list, numshelf = numshelf, module_name=globalVars['arduino_map']['arduino_name'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
+          return rendered
+      
+        # dislay upload form
+        else:
+          return render_template('upload_bookshelf.html', nb_lines=globalVars['arduino_map']['nb_lines'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
+    
+    # manage post pictures + resize
     if request.method == 'POST':
+
         if 'shelf_img' not in request.files:
             flash('Veuillez sélectionner un dossier')
             return redirect(request.url)
@@ -597,7 +628,10 @@ def set_routes_for_books(app):
         if shelf_img.filename == '':
             flash('Aucun fichier sélectionné', 'warning')
             return redirect(request.url)
-        if shelf_img and tools.allowed_file(shelf_img.filename) and 'shelf' in request.form:
+        if tools.allowed_file(shelf_img.filename) is False:
+          flash('Format de fichier non autorisé', 'warning')
+          return redirect(request.url)
+        if shelf_img and 'shelf' in request.form:
             filename = secure_filename(shelf_img.filename)
             numshelf = str(request.form['shelf'])
             upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf)
@@ -628,23 +662,4 @@ def set_routes_for_books(app):
             img_resized_path = os.path.join(resize_dir, filename)
             img_resized.save(img_resized_path)
             
-            #get uploaded image list
-            img_list = os.listdir(resize_dir)
-            img_list = sorted(img_list)
-            dir_list = []
-            for img in img_list:
-              relative_img_path = os.path.join(upload_dir, 'resize', img)
-              dir_list.append({"path":relative_img_path, "filename":img})
-            print(dir_list)  
-            
-            #render images list
-            relative_img_path = os.path.join(upload_dir, 'resize', filename)
-            #execute ocr analyze 
-            #ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
-            #ocr_analyze = os.system("cd " + ocr_path + " && ./ocr_wrapper.sh " + os.path.join(app.root_path, relative_img_path))
-            #print(ocr_analyze)
-            rendered = render_template('upload_bookshelf_render.html', img_paths = dir_list, numshelf = numshelf, module_name=globalVars['arduino_map']['arduino_name'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
-            return rendered
-        flash('Format de fichier non autorisé', 'warning')
-        return redirect(request.url)
-    return render_template('upload_bookshelf.html', nb_lines=globalVars['arduino_map']['nb_lines'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
+            return redirect(request.url + '?numshelf=' + numshelf)
