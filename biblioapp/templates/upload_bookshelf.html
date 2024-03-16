@@ -2,6 +2,7 @@
 {% block title %}Index Bookshelf{% endblock %}
 {% block styles %}
     {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='range.css')}}">
 {% endblock %}
 
 {% block body %}
@@ -11,6 +12,7 @@
 {% endblock %}
 
 {% block content %}
+
 	<div class="container">
 
 		<h1 class="mt-5 text-white font-weight-light">Indexez votre bibliothèque grâce à l'IA</h1>
@@ -22,7 +24,15 @@
 		<div class="jumbotron">
 			<form method="post" enctype="multipart/form-data">
 				<fieldset>
-         			<div class="form-group row">
+					<div class="form-group">
+						<label for="shelf">Select a shelf to index :</label> 
+						<select name="shelf">
+							{% for line in range(nb_lines) %}
+								<option value="{{(line+1)}}">shelf {{(line+1)}}</option>
+							{% endfor %}
+						</select>
+					</div>
+         	<div class="form-group row">
          				<label for="shelf_img" class="col-form-label">Photo (format JPG, le fichier sera redimensionné)</label> 
       					<input type="file" name="shelf_img" class="form-control">
       				</div>

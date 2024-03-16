@@ -597,9 +597,10 @@ def set_routes_for_books(app):
         if shelf_img.filename == '':
             flash('Aucun fichier sélectionné', 'warning')
             return redirect(request.url)
-        if shelf_img and tools.allowed_file(shelf_img.filename):
+        if shelf_img and tools.allowed_file(shelf_img.filename) and 'shelf' in request.form:
             filename = secure_filename(shelf_img.filename)
-            upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), 'photos')
+            numshelf = str(request.form['shelf'])
+            upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf)
             #create user dir if not exists
             user_dir = os.path.join(app.root_path, upload_dir)
             if not os.path.exists(user_dir):
@@ -642,8 +643,8 @@ def set_routes_for_books(app):
             #ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
             #ocr_analyze = os.system("cd " + ocr_path + " && ./ocr_wrapper.sh " + os.path.join(app.root_path, relative_img_path))
             #print(ocr_analyze)
-            rendered = render_template('upload_bookshelf_render.html', img_paths = dir_list, module_name=globalVars['arduino_map']['arduino_name'], user_login=globalVars['user_login'])
+            rendered = render_template('upload_bookshelf_render.html', img_paths = dir_list, numshelf = numshelf, module_name=globalVars['arduino_map']['arduino_name'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
             return rendered
         flash('Format de fichier non autorisé', 'warning')
         return redirect(request.url)
-    return render_template('upload_bookshelf.html')
+    return render_template('upload_bookshelf.html', nb_lines=globalVars['arduino_map']['nb_lines'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
