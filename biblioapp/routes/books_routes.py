@@ -663,3 +663,18 @@ def set_routes_for_books(app):
             img_resized.save(img_resized_path)
             
             return redirect(request.url + '?numshelf=' + numshelf)
+
+  #used for ocr indexation
+  @app.route('/ajax_ocr/', methods=['POST'])
+  @flask_login.login_required
+  def ajaxOcr():
+    globalVars = tools.initApp()
+    if request.method == 'POST' and session.get('app_id'):
+      pictures = request.form.getlist('img[]')
+      for path in pictures:
+        print(path)
+      response = app.response_class(
+        response=json.dumps(pictures),
+        mimetype='application/json'
+      )
+      return response
