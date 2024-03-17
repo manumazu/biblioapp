@@ -606,11 +606,7 @@ def set_routes_for_books(app):
           for img in img_list:
             relative_img_path = os.path.join(upload_dir, img)
             dir_list.append({"path":relative_img_path, "filename":img})
-            #print(dir_list) 
-            #execute ocr analyze 
-            #ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
-            #ocr_analyze = os.system("cd " + ocr_path + " && ./ocr_wrapper.sh " + os.path.join(app.root_path, relative_img_path))
-            #print(ocr_analyze)    
+            #print(dir_list)   
           rendered = render_template('upload_bookshelf_render.html', img_paths = dir_list, numshelf = numshelf, module_name=globalVars['arduino_map']['arduino_name'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
           return rendered
       
@@ -671,10 +667,38 @@ def set_routes_for_books(app):
     globalVars = tools.initApp()
     if request.method == 'POST' and session.get('app_id'):
       pictures = request.form.getlist('img[]')
+      numshelf = request.form.get('numshelf')
+      # rebuild local path for img
+      upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf) #, 'resize')
+      if not os.path.exists(upload_dir):
+        abort(404)
+      
+      # execute ocr analyze 
+      output = []
       for path in pictures:
-        print(path)
+        res = ocrAnalyse(os.path.join(upload_dir, path))
+        output.append(res)
+      
       response = app.response_class(
-        response=json.dumps(pictures),
+        response=json.dumps(output),
         mimetype='application/json'
       )
       return response
+
+  # use subprocess to gemeni ocr analyse
+  def ocrAnalyse(img_path):
+    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "authors": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "authors": "Hannah Arendt", "editor": "None"}]}')
+
+    ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
+    #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()
+    import subprocess
+    ocr_output = subprocess.check_output("cd " + ocr_path + " && ./ocr_wrapper.sh " + img_path, shell=True)
+    #print(ocr_output)
+    try :
+      ocr_analyse = json.loads(ocr_output)
+      output = {'success':True, 'response':ocr_analyse}
+    except Exception as e:
+      print(e)
+      output = {'success':False, 'response':str(e)}
+    print(output)
+    return output

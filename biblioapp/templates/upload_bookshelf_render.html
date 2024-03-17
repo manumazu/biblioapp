@@ -24,11 +24,12 @@
 			<div class="form-group row">
 			{% for img in img_paths %}
 			<div class="form-check">
-				<input name="shelf-pictures" class="form-check-input" type="checkbox" value="{{ img['path'] }}" id="{{ img['filename'] }}"><img src="{{ img['path'] }}" height="200px">
+				<input name="shelf-pictures" class="form-check-input" type="checkbox" value="{{ img['filename'] }}" id="{{ img['filename'] }}"><img src="{{ img['path'] }}" height="200px">
 			</div>
 			{% endfor %}
 			</div>
 		</fieldset>
+		<input type="hidden" name="numshelf" id="numshelf" value="{{ numshelf }}">
 		</form>
 		<button class="btn btn-info" id="start-ocr">Start indexation</button>
 		
@@ -37,7 +38,7 @@
 
 {% block scripts %}
 {{super()}}
-  <script src="{{url_for('static', filename='ocr.js', version='2403162340')}}"></script>
+  <script src="{{url_for('static', filename='ocr.js', version='2403171611')}}"></script>
 {% endblock %}
 
 {% endblock %}
