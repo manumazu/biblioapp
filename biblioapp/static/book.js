@@ -63,7 +63,7 @@ $(document).ready(function() {
     ajax_postOrder(elements, this);
   });
 
-  if(typeof urlAjaxCategories !== 'undefined') {
+  if(typeof(urlAjaxCategories) !== 'undefined') {
     $('#tags').tagEditor({
         autocomplete: { delay: 0, position: { collision: 'flip' }, source: urlAjaxCategories },
         forceLowercase: false,

@@ -360,11 +360,12 @@ def set_routes_for_books(app):
         #for bibliocli request
         if request.is_json and 'title' in request.json:
           query += "intitle:"+request.json['title']
-        
+        #print(query)
+
         r = requests.get(url + query)
         data = r.json()
         #set response for api
-        if request.is_json and 'api' in request.path:
+        if 'api' in request.path and (request.is_json or 'is_ocr' in request.form):
           res = []          
           if 'items' in data:
             for item in data['items']:
@@ -373,7 +374,7 @@ def set_routes_for_books(app):
               response=json.dumps(res),
               mimetype='application/json'
           )
-          #print(res)          
+          #print(res)
           return response
         return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
           shelf_infos=globalVars['arduino_map'], tools=tools)
@@ -661,7 +662,7 @@ def set_routes_for_books(app):
             return redirect(request.url + '?numshelf=' + numshelf)
 
   #used for ocr indexation
-  @app.route('/ajax_ocr/', methods=['POST'])
+  @app.route('/api/ajax_ocr/', methods=['POST'])
   @flask_login.login_required
   def ajaxOcr():
     globalVars = tools.initApp()
@@ -673,7 +674,7 @@ def set_routes_for_books(app):
       if not os.path.exists(upload_dir):
         abort(404)
       
-      # execute ocr analyze 
+      # execute ocr analyze foreach image checked
       output = []
       for path in pictures:
         res = ocrAnalyse(os.path.join(upload_dir, path))
