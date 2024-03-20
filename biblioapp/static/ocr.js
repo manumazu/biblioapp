@@ -52,11 +52,12 @@ async function ajax_postOcr(elements, button) {
   })
 }
 
-function searchBook(book) {
+// search isbn, ref ... of ocr books with api 
+function searchBook(search) {
   var elem = [];
-  elem.push('intitle='+book.title)
-  elem.push('inauthor='+book.authors)
-  elem.push('inpublisher='+book.editor)
+  elem.push('intitle='+search.title)
+  elem.push('inauthor='+search.authors)
+  elem.push('inpublisher='+search.editor)
   params = elem.join('&');
   params += '&is_ocr=1';
   //params = JSON.stringify(elem);
@@ -66,7 +67,32 @@ function searchBook(book) {
       type: 'POST',
       url: '/api/booksearch/',
       complete: function(res) {
-        console.log(res.responseText)
+        //console.log(res.responseText)
+        var results = $.parseJSON(res.responseText);
+        let first = 0;
+        for(let i = 0; i < results.length; i++) {
+          let result = results[i]
+          let title = result.title
+          let regex = new RegExp( search.title, 'gi' );
+          let found = title.match(regex);
+          //console.log(found)
+          if(found && found.length > 0) {
+            first++
+            //take the first of the result list only
+            if(first == 1) {
+              console.log('-----FOUND-----')
+              console.log('Author', result.author)
+              console.log('Title', result.title)
+              console.log('Ref', result.reference)
+            }
+          }
+        }
+        // manage ocr books not found    
+        if(first == 0) {
+          console.log('-----NOT FOUND !!-----')
+          console.log('Author', search.authors)
+          console.log('Title', search.title)
+        }
       }
     })
   })
