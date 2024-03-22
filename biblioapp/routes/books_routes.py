@@ -3,6 +3,7 @@ Response, send_from_directory
 import flask_login, hashlib, os
 from PIL import Image
 from werkzeug.utils import secure_filename
+from unidecode import unidecode
 
 '''
 Manage bookshelf, books, tags, search in shelves
@@ -662,26 +663,61 @@ def set_routes_for_books(app):
       pictures = request.form.getlist('img[]')
       numshelf = request.form.get('numshelf')
       # rebuild local path for img
-      upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf) #, 'resize')
+      upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf)#, 'resize')
       if not os.path.exists(upload_dir):
         abort(404)
       
       # execute ocr analyze foreach image checked
-      output = []
+      output = {}
+      import re
       for path in pictures:
         res = ocrAnalyse(os.path.join(upload_dir, path))
-        output.append(res)
+        print(res)
+        searchresult = {}
+        if 'success' in res and res['success']:
+          #start book indexation
+          books = res['response']
+          found = []
+          notfound = []          
+          for ocrbook in books:
+            #print(ocrbook['title'])
+            query = "intitle:"+ocrbook['title']
+            if ocrbook['authors'] is not None and ocrbook['authors']!= "":
+              query+="+inauthor:"+ocrbook['authors']
+            data = tools.searchBookApi(query, 'googleapis')
+            if 'items' in data:
+              cpt = 0
+              for item in data['items']:
+                searchedbook = tools.formatBookApi('googleapis', item, None)
+                print(searchedbook['title'])
+                sanitize_1 = unidecode(ocrbook['title']).lower()
+                sanitize_2 = unidecode(searchedbook['title']).lower()
+                compare = re.search(sanitize_1, sanitize_2, re.IGNORECASE)
+                if compare and compare.start() == 0:
+                  cpt += 1
+                  if cpt == 1:
+                    found.append(searchedbook)
+                    #print(compare, compare.start())
+              # no search result is found
+              if cpt == 0:
+                notfound.append(ocrbook)
+          searchresult.update({'found':found})
+          searchresult.update({'notfound':notfound})
+          #print(searchresult)
+        output.update(searchresult)
       
+      # display result
       response = app.response_class(
-        response=json.dumps(output),
+        response=json.dumps({'success': True, 'result':output}),
         mimetype='application/json'
       )
       return response
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
-    return json.loads('{"success": 1, "response": [{"title": "LES QUATRE ACCORDS TOLTEQUES", "authors": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
-    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "authors": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "authors": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "authors": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "authors": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "authors": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "authors": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "authors": "Platon", "editor": ""}, {"title": "L\'existentialisme", "authors": "Sartre", "editor": "lexique des sciences sociales"}]}')
+    return json.loads('{"success": 1, "response": [{"title": "Histoire de la Peinture", "authors": "R. Cogniat", "editor": ""}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "libres du savoir numerique", "authors": "Blondeau & F. Latrive", "editor": "l\'éclat"}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "authors": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "authors": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "authors": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "authors": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "authors": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "authors": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "authors": "Platon", "editor": ""}, {"title": "L\'existentialisme", "authors": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "authors": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
     #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()
@@ -694,5 +730,5 @@ def set_routes_for_books(app):
     except Exception as e:
       print(e)
       output = {'success':False, 'response':str(e)}
-    print(output)
+    #print(output)
     return output

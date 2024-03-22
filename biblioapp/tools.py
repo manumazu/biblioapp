@@ -293,4 +293,3 @@ def drawline(line, x, y, xoffset, nb_leds, color):
 def allowed_file(filename):
   return '.' in filename and \
     filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-

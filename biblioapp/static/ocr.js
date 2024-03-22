@@ -29,8 +29,8 @@ async function ajax_postOcr(elements, button) {
       complete: function(res) {
         //console.log(res.responseText);
         var json=$.parseJSON(res.responseText);
-        for(let i = 0; i < json.length; i++) {
-          result = json[i];
+        //for(let i = 0; i < json.length; i++) {
+          result = json; //json[i];
           //console.log(result);
           if(result.success == true) {
             $(button).text("Start indexation");
@@ -38,7 +38,8 @@ async function ajax_postOcr(elements, button) {
             //parse response and search by title
             var books = result.response;
             for(let i = 0; i < books.length; i++) {
-              searchBook(books[i])
+              //searchBook(books[i])
+              console.log(books[i])
             }
           }
           else {
@@ -46,7 +47,7 @@ async function ajax_postOcr(elements, button) {
             $(button).removeClass('btn-warning');
             $(button).addClass('btn-danger');
           }
-        }
+        //}
       }
     });
   })
@@ -73,7 +74,8 @@ function searchBook(search) {
         for(let i = 0; i < results.length; i++) {
           let result = results[i]
           let title = result.title
-          let regex = new RegExp( search.title, 'gi' );
+          let s = "regex\\d";
+          let regex = new RegExp( search.title, 'myiu' );
           let found = title.match(regex);
           //console.log(found)
           if(found && found.length > 0) {
