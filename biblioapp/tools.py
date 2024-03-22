@@ -182,6 +182,23 @@ def sortPositions(address):
 def sortCoords(coords):
   return coords[0]
 
+# Search books with open api
+def searchBookApi(query, api, ref = None):
+  import requests
+  if api == 'googleapis':
+    url = "https://www.googleapis.com/books/v1/volumes?key="+app.config['GOOGLE_BOOK_API_KEY']+"&q="
+  if api == 'openlibrary':
+    url = "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys="
+  if ref is not None:
+    url = "https://www.googleapis.com/books/v1/volumes/"
+    query = ref
+
+  data = {}
+  r = requests.get(url + query)
+  data = r.json()
+  print(query)
+  return data
+
 def formatBookApi(api, data, isbn):
   bookapi = {}
 
@@ -276,3 +293,4 @@ def drawline(line, x, y, xoffset, nb_leds, color):
 def allowed_file(filename):
   return '.' in filename and \
     filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+

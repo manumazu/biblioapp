@@ -339,15 +339,11 @@ def set_routes_for_books(app):
   @app.route('/api/booksearch/', methods=['GET', 'POST'])
   @flask_login.login_required
   def searchBookReference():
-    import requests
-    globalVars = tools.initApp()
-    if globalVars['arduino_map'] != None:
-      data={}
 
-      '''Search books with google api'''  
-      url = "https://www.googleapis.com/books/v1/volumes"
-      query = "?key="+app.config['GOOGLE_BOOK_API_KEY']+"&q="
-      '''search on api for form'''
+    globalVars = tools.initApp()
+    if globalVars['arduino_map'] != None:   
+      # search on api for form
+      query = ""
       if request.method == 'POST':
         if 'isbn' in request.form and request.form['isbn']:
           query += "ISBN:\""+request.form['isbn']+"\"&"
@@ -360,12 +356,11 @@ def set_routes_for_books(app):
         #for bibliocli request
         if request.is_json and 'title' in request.json:
           query += "intitle:"+request.json['title']
-        #print(query)
+        
+        data = tools.searchBookApi(query, 'googleapis')
 
-        r = requests.get(url + query)
-        data = r.json()
         #set response for api
-        if 'api' in request.path and (request.is_json or 'is_ocr' in request.form):
+        if 'api' in request.path and request.is_json:
           res = []          
           if 'items' in data:
             for item in data['items']:
@@ -382,10 +377,10 @@ def set_routes_for_books(app):
       '''display classic form for edition'''
       if request.method == 'GET' and request.args.get('ref'):
         ref = request.args.get('ref')
+        # get book reference informations
         book = {}
         if ref != 'new':
-          r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
-          data = r.json()
+          data = tools.searchBookApi(None, 'googleapis', ref)
           book = tools.formatBookApi('googleapis', data, None)
           #print(book)
           if 'imageLinks' in data['volumeInfo']:
@@ -400,20 +395,17 @@ def set_routes_for_books(app):
         res = []
         '''Search books with googleapis api'''
         if request.args.get('search_api')=='googleapis':
-          query += "ISBN:\""+request.args.get('isbn')+"\""
-          r = requests.get(url + query)
-          data = r.json() 
-          #print(url + query)
+          query = "ISBN:\""+request.args.get('isbn')+"\""
+          data = tools.searchBookApi(query, 'googleapis')
+          #print(data)
           if 'items' in data:
             for item in data['items']:
               res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn')))
 
         '''Search books with openlibrary api'''
         if request.args.get('search_api')=='openlibrary':
-          url = "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys="
           query = "ISBN:"+request.args.get('isbn')
-          r = requests.get(url + query)
-          data = r.json()
+          data = tools.searchBookApi(query, 'openlibrary')
           #print(data)      
           if query in data:
             res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'))]  
@@ -688,7 +680,8 @@ def set_routes_for_books(app):
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
-    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "authors": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "authors": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "authors": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "authors": "Sartre", "editor": ""}]}')
+    return json.loads('{"success": 1, "response": [{"title": "LES QUATRE ACCORDS TOLTEQUES", "authors": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "authors": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "authors": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "authors": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "authors": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "authors": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "authors": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "authors": "Platon", "editor": ""}, {"title": "L\'existentialisme", "authors": "Sartre", "editor": "lexique des sciences sociales"}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
     #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()
