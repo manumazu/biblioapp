@@ -1,7 +1,9 @@
 from flask import session, flash
 from datetime import datetime
 from biblioapp import create_app, db, hashlib, base64
+from unidecode import unidecode
 import flask_login
+import re
 
 app = create_app()
 
@@ -182,6 +184,40 @@ def sortPositions(address):
 def sortCoords(coords):
   return coords[0]
 
+# use api books to retrieve books for a list
+def searchApiBooksForOcr(books):
+  searchresult = {}
+  found = []
+  notfound = []          
+  for ocrbook in books:
+    # book must have title to perform search
+    if 'title' not in ocrbook:
+      notfound.append(ocrbook)
+    else:
+      query = "intitle:"+ocrbook['title']
+      if ocrbook['authors'] is not None and ocrbook['authors']!= "":
+        query+="+inauthor:"+ocrbook['authors']
+      data = searchBookApi(query, 'googleapis')
+      if 'items' in data:
+        cpt = 0
+        for item in data['items']:
+          searchedbook = formatBookApi('googleapis', item, None)
+          test = match_words(ocrbook['title'], searchedbook['title'])
+          # take the first result only
+          if test:
+            cpt += 1
+            if cpt == 1:
+              found.append(searchedbook)
+        # no result is matching
+        if cpt == 0:
+          notfound.append(ocrbook)
+      # no search result is found
+      else:
+        notfound.append(ocrbook)
+  searchresult.update({'found':found})
+  searchresult.update({'notfound':notfound})
+  return searchresult
+
 # Search books with open api
 def searchBookApi(query, api, ref = None):
   import requests
@@ -196,7 +232,7 @@ def searchBookApi(query, api, ref = None):
   data = {}
   r = requests.get(url + query)
   data = r.json()
-  print(query)
+  #print(query)
   return data
 
 def formatBookApi(api, data, isbn):
@@ -293,3 +329,17 @@ def drawline(line, x, y, xoffset, nb_leds, color):
 def allowed_file(filename):
   return '.' in filename and \
     filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+def match_words(words, string):
+  w = unidecode(words).lower()
+  s = unidecode(string).lower()
+  # search words inside string
+  compare = re.search(re.escape(w), s, re.IGNORECASE)
+  if compare and compare.start() == 0:
+    return True
+  else:
+    # search string inside words
+    compare = re.search(re.escape(s), w, re.IGNORECASE)
+    if compare and compare.start() == 0:
+      return True
+  return False
