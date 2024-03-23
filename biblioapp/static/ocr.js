@@ -14,89 +14,69 @@ $('#start-ocr').on('click', async function() {
 
 });
 
-async function ajax_postOcr(elements, button) {
+function waitingText(button, seconds) {
+  var str = ".";
+  if(!seconds)
+    clearTimeout();
+  else {
+    for(let i=0; i<seconds; i++) {
+      var timeoutID = window.setTimeout(function(){
+          str+=".";
+          //console.log(str);
+          $(button).text("Indexation in process "+str);
+      }, i * 1000);
+    }
+    console.log(timeoutID);
+    return timeoutID;
+  }
+}
+
+async function ajax_postOcr(images, button) {
  /*row = element.split('_')[1];
  order = $(element).sortable('serialize');*/
- console.log(elements);
+ console.log(images);
  $(button).text("Indexation in process ...");
+ //const timeoutID = waitingText(button, 20);
  $(button).removeClass('btn-danger');
  $(button).addClass('btn-warning');
  return new Promise((resolve, reject) => {
    $.ajax({
-      data: elements,
+      data: images,
       type: 'POST',
       url: '/api/ajax_ocr/',
       complete: function(res) {
         //console.log(res.responseText);
-        var json=$.parseJSON(res.responseText);
-        //for(let i = 0; i < json.length; i++) {
-          result = json; //json[i];
-          //console.log(result);
-          if(result.success == true) {
-            $(button).text("Start indexation");
-            $(button).removeClass('btn-warning');
-            //parse response and search by title
-            var books = result.response;
-            for(let i = 0; i < books.length; i++) {
-              //searchBook(books[i])
-              console.log(books[i])
-            }
-          }
-          else {
-            $(button).text("Indexation Error");
-            $(button).removeClass('btn-warning');
-            $(button).addClass('btn-danger');
-          }
-        //}
+        var result=$.parseJSON(res.responseText);
+        if(result.success == true) {
+          //waitingText(button, 0);
+          //clearTimeout(timeoutID);
+          $(button).text("Start indexation");
+          $(button).removeClass('btn-warning');
+          //parse response and search by title
+          console.log("ocr books found:", result.ocr_nb_books);
+          displayOcrResult(result.response['found'], 'ocrResultFound');
+          displayOcrResult(result.response['notfound'], 'ocrResultNotFound');
+        }
+        else {
+          $(button).text("Indexation Error");
+          $(button).removeClass('btn-warning');
+          $(button).addClass('btn-danger');
+        }
       }
     });
   })
 }
 
-// search isbn, ref ... of ocr books with api 
-function searchBook(search) {
-  var elem = [];
-  elem.push('intitle='+search.title)
-  elem.push('inauthor='+search.authors)
-  elem.push('inpublisher='+search.editor)
-  params = elem.join('&');
-  params += '&is_ocr=1';
-  //params = JSON.stringify(elem);
-  return new Promise((resolve, reject) => {
-   $.ajax({
-      data: params,
-      type: 'POST',
-      url: '/api/booksearch/',
-      complete: function(res) {
-        //console.log(res.responseText)
-        var results = $.parseJSON(res.responseText);
-        let first = 0;
-        for(let i = 0; i < results.length; i++) {
-          let result = results[i]
-          let title = result.title
-          let s = "regex\\d";
-          let regex = new RegExp( search.title, 'myiu' );
-          let found = title.match(regex);
-          //console.log(found)
-          if(found && found.length > 0) {
-            first++
-            //take the first of the result list only
-            if(first == 1) {
-              console.log('-----FOUND-----')
-              console.log('Author', result.author)
-              console.log('Title', result.title)
-              console.log('Ref', result.reference)
-            }
-          }
-        }
-        // manage ocr books not found    
-        if(first == 0) {
-          console.log('-----NOT FOUND !!-----')
-          console.log('Author', search.authors)
-          console.log('Title', search.title)
-        }
-      }
-    })
-  })
+function displayOcrResult(books, destination) {
+  $('#'+destination+' ul').empty();
+  //display book list 
+  if(books.length) {
+    $('#'+destination).show();
+    for(let i = 0; i < books.length; i++) {
+      //console.log(books[i])
+      $("#"+destination+" ul").append('<li>'+books[i]['title']+', '+books[i]['author']+'</li>');
+    }
+  }
 }
+
 

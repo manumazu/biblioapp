@@ -678,7 +678,7 @@ def set_routes_for_books(app):
             # start api search for ocr books
             searchresult = tools.searchApiBooksForOcr(res['response'])
             #print(searchresult)
-            output = {'success': True, 'result':searchresult}
+            output = {'success': True, 'response':searchresult, 'ocr_nb_books':len(res['response'])}
       # display result
       response = app.response_class(
         response=json.dumps(output),
@@ -688,8 +688,8 @@ def set_routes_for_books(app):
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
-    #return json.loads('{"success": 1, "response": [{"title": "Le banquet - Phèdre", "authors": "Platon", "editor": ""}]}')
-    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "authors": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "authors": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "authors": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "authors": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "authors": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "authors": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "authors": "Platon", "editor": ""}, {"title": "L\'existentialisme", "authors": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "authors": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
+    return json.loads('{"success": 1, "response": [{"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
     #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()

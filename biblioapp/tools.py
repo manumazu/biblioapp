@@ -195,8 +195,8 @@ def searchApiBooksForOcr(books):
       notfound.append(ocrbook)
     else:
       query = "intitle:"+ocrbook['title']
-      if ocrbook['authors'] is not None and ocrbook['authors']!= "":
-        query+="+inauthor:"+ocrbook['authors']
+      if ocrbook['author'] is not None and ocrbook['author']!= "":
+        query+="+inauthor:"+ocrbook['author']
       data = searchBookApi(query, 'googleapis')
       if 'items' in data:
         cpt = 0
