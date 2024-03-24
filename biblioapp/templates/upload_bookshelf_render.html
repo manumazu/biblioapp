@@ -33,25 +33,14 @@
 		</form>
 		<button class="btn btn-info" id="start-ocr">Start indexation</button>
 
-		<div id="ocrResultFound" style="display:none;">
-			<hr/>
-			<h2>Books found</h2>
-			<ul></ul>
-		</div>
-
-		<div id="ocrResultNotFound" style="display:none;">
-			<hr/>
-			<h2>Books not found</h2>
-			<ul></ul>
-		</div>
-
+		<div id="ocrResult"></div>
 		
 	</div>
 {% endblock %}
 
 {% block scripts %}
 {{super()}}
-  <script src="{{url_for('static', filename='ocr.js', version='2403232320')}}"></script>
+  <script src="{{url_for('static', filename='ocr.js', version='2403241117')}}"></script>
 {% endblock %}
 
 {% endblock %}

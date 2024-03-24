@@ -14,29 +14,23 @@ $('#start-ocr').on('click', async function() {
 
 });
 
-function waitingText(button, seconds) {
-  var str = ".";
-  if(!seconds)
-    clearTimeout();
-  else {
-    for(let i=0; i<seconds; i++) {
-      var timeoutID = window.setTimeout(function(){
-          str+=".";
-          //console.log(str);
-          $(button).text("Indexation in process "+str);
-      }, i * 1000);
+function waitingButton(button, seconds) {
+    var str = ".";
+    function run() {
+      str+=".";
+      $(button).text("Indexation in process "+str);
+      if(str.length > 20)
+        str = '.';
     }
-    console.log(timeoutID);
-    return timeoutID;
-  }
+    return setInterval(run, 500);
 }
 
 async function ajax_postOcr(images, button) {
  /*row = element.split('_')[1];
  order = $(element).sortable('serialize');*/
  console.log(images);
- $(button).text("Indexation in process ...");
- //const timeoutID = waitingText(button, 20);
+ $(button).text("Indexation in process");
+ const timer = waitingButton(button, 20);
  $(button).removeClass('btn-danger');
  $(button).addClass('btn-warning');
  return new Promise((resolve, reject) => {
@@ -47,20 +41,32 @@ async function ajax_postOcr(images, button) {
       complete: function(res) {
         //console.log(res.responseText);
         var result=$.parseJSON(res.responseText);
-        if(result.success == true) {
-          //waitingText(button, 0);
-          //clearTimeout(timeoutID);
-          $(button).text("Start indexation");
-          $(button).removeClass('btn-warning');
-          //parse response and search by title
-          console.log("ocr books found:", result.ocr_nb_books);
-          displayOcrResult(result.response['found'], 'ocrResultFound');
-          displayOcrResult(result.response['notfound'], 'ocrResultNotFound');
-        }
-        else {
-          $(button).text("Indexation Error");
-          $(button).removeClass('btn-warning');
-          $(button).addClass('btn-danger');
+        clearInterval(timer);
+        $(button).text("Start indexation");
+        $(button).removeClass('btn-warning');
+        $('#ocrResult').empty();
+        //display results      
+        for(let i=0; i<result.length; i++) 
+        {
+          if(result[i].success == true) {
+            //parse search response
+            if(result[i].response['found'].length > 0) {
+              $('#ocrResult').append('<div id="ocrResultFound"><hr><h2>Books found for image ' + (i+1) + '</h2><ul></ul></div>');
+              displayOcrResult(result[i].response['found'], 'ocrResultFound');
+            }
+            if(result[i].response['notfound'].length > 0) {
+              $('#ocrResult').append('<div id="ocrResultNotFound"><hr><h2>Books not found for image ' + (i+1) + '</h2><ul></ul></div>');
+              displayOcrResult(result[i].response['notfound'], 'ocrResultNotFound');
+            }
+            //display ocr analyse total found
+            console.log("ocr books found:", result[i].ocr_nb_books);
+          }
+          else {
+            $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + (i+1) + '</h2><p>' + result[i].response + '</p></div>');
+            /*$(button).text("Indexation Error");
+            $(button).removeClass('btn-warning');
+            $(button).addClass('btn-danger');*/
+          }
         }
       }
     });
