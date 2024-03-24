@@ -577,7 +577,7 @@ def set_routes_for_books(app):
     return response  
 
   #upload users's  bookshelves pictures and start OCR with IA on it
-  @app.route('/upload_bookshelf', methods=['GET', 'POST'])
+  @app.route('/bookindexer', methods=['GET', 'POST'])
   @flask_login.login_required
   def upload_bookshelf():
     globalVars = tools.initApp()

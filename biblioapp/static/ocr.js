@@ -63,9 +63,6 @@ async function ajax_postOcr(images, button) {
           }
           else {
             $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + (i+1) + '</h2><p>' + result[i].response + '</p></div>');
-            /*$(button).text("Indexation Error");
-            $(button).removeClass('btn-warning');
-            $(button).addClass('btn-danger');*/
           }
         }
       }
