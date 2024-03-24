@@ -695,12 +695,12 @@ def set_routes_for_books(app):
     #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()
     import subprocess
     ocr_output = subprocess.check_output("cd " + ocr_path + " && ./ocr_wrapper.sh " + img_path, shell=True)
-    #print(ocr_output)
     try :
       ocr_analyse = json.loads(ocr_output)
+      #print(ocr_analyse)
       output = {'success':True, 'response':ocr_analyse}
     except Exception as e:
       print(e)
-      output = {'success':False, 'response':str(e)}
+      output = {'success':False, 'response': 'Error parsing JSON output -- ' + str(e)}
     #print(output)
     return output

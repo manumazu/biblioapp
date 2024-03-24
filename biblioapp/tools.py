@@ -218,12 +218,14 @@ async def searchApiBooksForOcr(books):
   notfound = []          
   for ocrbook in books:
     # book must have title to perform search
-    if ocrbook['title'] is None:
+    if 'title' not in ocrbook or ocrbook['title'] is None:
       notfound.append(ocrbook)
     else:
-      query = "intitle:"+ocrbook['title']
+      query = ""
       if ocrbook['author'] is not None and ocrbook['author']!= "":
-        query+="+inauthor:"+ocrbook['author']
+        #query="+inauthor:"+ocrbook['author']
+        query+=ocrbook['author']
+      query += "+intitle:"+ocrbook['title']
       #print(query)
       data = await searchBookApi(query, 'googleapis')
       if 'items' in data:
