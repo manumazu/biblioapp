@@ -184,42 +184,68 @@ def sortPositions(address):
 def sortCoords(coords):
   return coords[0]
 
+def match_words(words, string):
+  w = unidecode(words).lower()
+  s = unidecode(string).lower()
+  # search words inside string
+  compare = re.search("^"+re.escape(w), s, re.IGNORECASE)
+  #print(compare)
+  if compare and compare.start() == 0:
+    return True
+  return False
+
+# search ocr book title and api search result title
+def matchApiSearchResults(title, data, way):
+  cpt = 0
+  for item in data['items']:
+    # test match on 2 sides
+    if way == 'ocr-in-api':
+      test = match_words(title, item['volumeInfo']['title'])
+    if way == 'api-in-ocr':
+      test = match_words(item['volumeInfo']['title'], title)
+    # take the first matchting result only
+    if test:
+      cpt += 1
+      if cpt == 1:
+        searchedbook = formatBookApi('googleapis', item, None)
+        return searchedbook
+  return False
+
 # use api books to retrieve books for a list
-def searchApiBooksForOcr(books):
+async def searchApiBooksForOcr(books):
   searchresult = {}
   found = []
   notfound = []          
   for ocrbook in books:
     # book must have title to perform search
-    if 'title' not in ocrbook:
+    if ocrbook['title'] is None:
       notfound.append(ocrbook)
     else:
       query = "intitle:"+ocrbook['title']
       if ocrbook['author'] is not None and ocrbook['author']!= "":
         query+="+inauthor:"+ocrbook['author']
-      data = searchBookApi(query, 'googleapis')
+      #print(query)
+      data = await searchBookApi(query, 'googleapis')
       if 'items' in data:
-        cpt = 0
-        for item in data['items']:
-          searchedbook = formatBookApi('googleapis', item, None)
-          test = match_words(ocrbook['title'], searchedbook['title'])
-          # take the first result only
-          if test:
-            cpt += 1
-            if cpt == 1:
-              found.append(searchedbook)
-        # no result is matching
-        if cpt == 0:
+        # first test  : match ocr title into api title 
+        searchedbook = matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
+        if searchedbook == False:
+           # 2nd test  : match api title into ocr title 
+          searchedbook = matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
+        if searchedbook:
+         found.append(searchedbook)
+        else:
           notfound.append(ocrbook)
       # no search result is found
       else:
         notfound.append(ocrbook)
+
   searchresult.update({'found':found})
   searchresult.update({'notfound':notfound})
   return searchresult
 
 # Search books with open api
-def searchBookApi(query, api, ref = None):
+async def searchBookApi(query, api, ref = None):
   import requests
   if api == 'googleapis':
     url = "https://www.googleapis.com/books/v1/volumes?key="+app.config['GOOGLE_BOOK_API_KEY']+"&q="
@@ -330,16 +356,3 @@ def allowed_file(filename):
   return '.' in filename and \
     filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-def match_words(words, string):
-  w = unidecode(words).lower()
-  s = unidecode(string).lower()
-  # search words inside string
-  compare = re.search(re.escape(w), s, re.IGNORECASE)
-  if compare and compare.start() == 0:
-    return True
-  else:
-    # search string inside words
-    compare = re.search(re.escape(s), w, re.IGNORECASE)
-    if compare and compare.start() == 0:
-      return True
-  return False

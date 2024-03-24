@@ -338,7 +338,7 @@ def set_routes_for_books(app):
   @app.route('/booksearch/', methods=['GET', 'POST'])
   @app.route('/api/booksearch/', methods=['GET', 'POST'])
   @flask_login.login_required
-  def searchBookReference():
+  async def searchBookReference():
 
     globalVars = tools.initApp()
     if globalVars['arduino_map'] != None:   
@@ -357,7 +357,7 @@ def set_routes_for_books(app):
         if request.is_json and 'title' in request.json:
           query += "intitle:"+request.json['title']
         
-        data = tools.searchBookApi(query, 'googleapis')
+        data = await tools.searchBookApi(query, 'googleapis')
 
         #set response for api
         if 'api' in request.path and request.is_json:
@@ -380,7 +380,7 @@ def set_routes_for_books(app):
         # get book reference informations
         book = {}
         if ref != 'new':
-          data = tools.searchBookApi(None, 'googleapis', ref)
+          data = await tools.searchBookApi(None, 'googleapis', ref)
           book = tools.formatBookApi('googleapis', data, None)
           #print(book)
           if 'imageLinks' in data['volumeInfo']:
@@ -396,7 +396,7 @@ def set_routes_for_books(app):
         '''Search books with googleapis api'''
         if request.args.get('search_api')=='googleapis':
           query = "ISBN:\""+request.args.get('isbn')+"\""
-          data = tools.searchBookApi(query, 'googleapis')
+          data = await tools.searchBookApi(query, 'googleapis')
           #print(data)
           if 'items' in data:
             for item in data['items']:
@@ -405,7 +405,7 @@ def set_routes_for_books(app):
         '''Search books with openlibrary api'''
         if request.args.get('search_api')=='openlibrary':
           query = "ISBN:"+request.args.get('isbn')
-          data = tools.searchBookApi(query, 'openlibrary')
+          data = await tools.searchBookApi(query, 'openlibrary')
           #print(data)      
           if query in data:
             res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'))]  
@@ -656,7 +656,7 @@ def set_routes_for_books(app):
   #used for ocr indexation
   @app.route('/api/ajax_ocr/', methods=['POST'])
   @flask_login.login_required
-  def ajaxOcr():
+  async def ajaxOcr():
     globalVars = tools.initApp()
     if request.method == 'POST' and session.get('app_id'):
       pictures = request.form.getlist('img[]')
@@ -676,7 +676,7 @@ def set_routes_for_books(app):
             output.append(res)
           else:
             # start api search for ocr books
-            searchresult = tools.searchApiBooksForOcr(res['response'])
+            searchresult = await tools.searchApiBooksForOcr(res['response'])
             #print(searchresult)
             output.append({'success': True, 'response':searchresult, 'ocr_nb_books':len(res['response'])})
       # display result
