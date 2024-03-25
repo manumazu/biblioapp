@@ -33,6 +33,7 @@ async function ajax_postOcr(images, button) {
  const timer = waitingButton(button, 20);
  $(button).removeClass('btn-danger');
  $(button).addClass('btn-warning');
+ $('#ocrResult').empty();
  return new Promise((resolve, reject) => {
    $.ajax({
       data: images,
@@ -44,7 +45,6 @@ async function ajax_postOcr(images, button) {
         clearInterval(timer);
         $(button).text("Start indexation");
         $(button).removeClass('btn-warning');
-        $('#ocrResult').empty();
         //display results      
         for(let i=0; i<result.length; i++) 
         {

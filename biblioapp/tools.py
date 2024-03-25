@@ -199,6 +199,7 @@ def matchApiSearchResults(title, data, way):
   cpt = 0
   for item in data['items']:
     # test match on 2 sides
+    #print(item['volumeInfo']['title'])
     if way == 'ocr-in-api':
       test = match_words(title, item['volumeInfo']['title'])
     if way == 'api-in-ocr':
@@ -218,19 +219,19 @@ async def searchApiBooksForOcr(books):
   notfound = []          
   for ocrbook in books:
     # book must have title to perform search
-    if 'title' not in ocrbook or ocrbook['title'] is None:
+    if 'title' in ocrbook and len(ocrbook['title']) < 2:
       notfound.append(ocrbook)
     else:
-      query = ""
-      if ocrbook['author'] is not None and ocrbook['author']!= "":
-        #query="+inauthor:"+ocrbook['author']
-        query+=ocrbook['author']
+      query = ocrbook['title']
+      if 'author' in ocrbook and ocrbook['author'] != "":
+        query += " " + ocrbook['author']
       query += "+intitle:"+ocrbook['title']
-      #print(query)
+      print(query)
       data = await searchBookApi(query, 'googleapis')
       if 'items' in data:
         # first test  : match ocr title into api title 
         searchedbook = matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
+        #print(searchedbook)
         if searchedbook == False:
            # 2nd test  : match api title into ocr title 
           searchedbook = matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
