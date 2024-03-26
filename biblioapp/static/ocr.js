@@ -39,6 +39,18 @@ async function ajax_postOcr(images, button) {
       data: images,
       type: 'POST',
       url: '/api/ajax_ocr/',
+      statusCode: {
+        500: function(res) {
+          $('#ocrResult').append('<div class="error"><hr><h2>Server Error during process</h2><p>The Server returned an error.</p></div>');
+          console.log('Error 500', res);
+          clearInterval(timer);
+        },
+        502: function(res) {
+          $('#ocrResult').append('<div class="error"><hr><h2>Timeout Error during process</h2><p>The Server returned an error.</p></div>');
+          console.log('Error 502', res);
+          clearInterval(timer);
+        }
+      },
       complete: function(res) {
         //console.log(res.responseText);
         var result=$.parseJSON(res.responseText);

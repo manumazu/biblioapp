@@ -223,7 +223,7 @@ async def searchApiBooksForOcr(books):
       notfound.append(ocrbook)
     else:
       query = ocrbook['title']
-      if 'author' in ocrbook and ocrbook['author'] != "":
+      if 'author' in ocrbook and ocrbook['author'] is not None :
         query += " " + ocrbook['author']
       query += "+intitle:"+ocrbook['title']
       print(query)
