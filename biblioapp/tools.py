@@ -212,41 +212,6 @@ def matchApiSearchResults(title, data, way):
         return searchedbook
   return False
 
-# use api books to retrieve books for a list
-async def searchApiBooksForOcr(books):
-  searchresult = {}
-  found = []
-  notfound = []          
-  for ocrbook in books:
-    # book must have title to perform search
-    if 'title' in ocrbook and len(ocrbook['title']) < 2:
-      notfound.append(ocrbook)
-    else:
-      query = ocrbook['title']
-      if 'author' in ocrbook and ocrbook['author'] is not None :
-        query += " " + ocrbook['author']
-      query += "+intitle:"+ocrbook['title']
-      print(query)
-      data = await searchBookApi(query, 'googleapis')
-      if 'items' in data:
-        # first test  : match ocr title into api title 
-        searchedbook = matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
-        #print(searchedbook)
-        if searchedbook == False:
-           # 2nd test  : match api title into ocr title 
-          searchedbook = matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
-        if searchedbook:
-         found.append(searchedbook)
-        else:
-          notfound.append(ocrbook)
-      # no search result is found
-      else:
-        notfound.append(ocrbook)
-
-  searchresult.update({'found':found})
-  searchresult.update({'notfound':notfound})
-  return searchresult
-
 # Search books with open api
 async def searchBookApi(query, api, ref = None):
   import requests

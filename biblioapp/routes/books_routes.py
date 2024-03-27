@@ -676,16 +676,58 @@ def set_routes_for_books(app):
           if res['success'] == False:
             output.append(res)
           else:
-            # start api search for ocr books
-            searchresult = await tools.searchApiBooksForOcr(res['response'])
-            #print(searchresult)
-            output.append({'success': True, 'response':searchresult, 'ocr_nb_books':len(res['response'])})
+            # return ocr result
+            output.append({'success': True, 'response':res['response'], 'ocr_nb_books':len(res['response'])})
       # display result
       response = app.response_class(
         response=json.dumps(output),
         mimetype='application/json'
       )
       return response
+
+  # use api books to retrieve books from ocr result
+  @app.route('/api/ajax_bookindexer/', methods=['POST'])
+  @flask_login.login_required  
+  async def searchApiBooksForOcr():
+    searchresult = {}
+    found = []
+    notfound = []
+    #print(request.form)
+    if request.method == 'POST' and session.get('app_id'):# and request.is_json:       
+      # book must have title to perform search
+      ocrbook = request.form
+      if 'title' in ocrbook and len(ocrbook['title']) < 2:
+        notfound.append(ocrbook)
+      else:
+        query = ocrbook['title']
+        if 'author' in ocrbook and ocrbook['author'] is not None :
+          query += " " + ocrbook['author']
+        query += "+intitle:"+ocrbook['title']
+        print(query)
+        data = await tools.searchBookApi(query, 'googleapis')
+        if 'items' in data:
+          # first test  : match ocr title into api title 
+          searchedbook = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
+          #print(searchedbook)
+          if searchedbook == False:
+             # 2nd test  : match api title into ocr title 
+            searchedbook = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
+          if searchedbook:
+           found.append(searchedbook)
+          else:
+            notfound.append(ocrbook)
+        # no search result is found
+        else:
+          notfound.append(ocrbook)
+
+      searchresult.update({'found':found})
+      searchresult.update({'notfound':notfound})
+    # display result
+    response = app.response_class(
+      response=json.dumps(searchresult),
+      mimetype='application/json'
+    )   
+    return searchresult
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
