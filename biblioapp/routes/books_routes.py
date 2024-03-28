@@ -659,25 +659,26 @@ def set_routes_for_books(app):
   async def ajaxOcr():
     globalVars = tools.initApp()
     if request.method == 'POST' and session.get('app_id'):
-      pictures = request.form.getlist('img[]')
+      img_path = request.form.get('img')
       numshelf = request.form.get('numshelf')
+      img_num = request.form.get('img_num')
       # rebuild local path for img
       upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf)#, 'resize')
       if not os.path.exists(upload_dir):
         abort(404)
       # perform ocr + search
-      output = []
-      for path in pictures:
-        # execute ocr analyze foreach image checked
-        res = ocrAnalyse(os.path.join(upload_dir, path))
-        #print(res)
-        if 'success' in res:
-          # manage exception error in ocr result
-          if res['success'] == False:
-            output.append(res)
-          else:
-            # return ocr result
-            output.append({'success': True, 'response':res['response'], 'ocr_nb_books':len(res['response'])})
+      output = {}
+      # execute ocr analyze for image checked
+      res = ocrAnalyse(os.path.join(upload_dir, img_path))
+      #print(res)
+      if 'success' in res:
+        # manage exception error in ocr result
+        if res['success'] == False:
+          output = res
+          output.update({'img_num':img_num})
+        else:
+          # return ocr result
+          output = {'success': True, 'response':res['response'], 'ocr_nb_books':len(res['response']), 'img_num':img_num}
       # display result
       response = app.response_class(
         response=json.dumps(output),

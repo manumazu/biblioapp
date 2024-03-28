@@ -1,17 +1,19 @@
 $(document).ready(function() {
 
-$('#start-ocr').on('click', async function() {
-    var elements = [];
+$('#start-ocr').on('click', function() {
+    $(this).text("Indexation in process");
+    $(this).removeClass('btn-danger');
+    $(this).addClass('btn-warning');
+    const timer = waitingButton(this, 20);
     var numshelf = $('#numshelf').val();
-    $(':checkbox:checked').each(function(){
-          //elements[i] = $(this).val();
-          elements.push('img[]='+$(this).val());
+    var i = 0;
+    var button = this;
+    $(':checkbox:checked').each(async function(){
+        i++;
+        let params = 'img='+$(this).val()+'&numshelf='+numshelf+'&img_num='+i;
+        await ajax_postOcr(params, timer, button);
     });
-    params = elements.join('&');
-    params += '&numshelf='+numshelf;
-    await ajax_postOcr(params, this);
   });
-
 });
 
 function waitingButton(button, seconds) {
@@ -25,18 +27,14 @@ function waitingButton(button, seconds) {
     return setInterval(run, 500);
 }
 
-async function ajax_postOcr(images, button) {
+async function ajax_postOcr(image, timer, button) {
  /*row = element.split('_')[1];
  order = $(element).sortable('serialize');*/
- console.log(images);
- $(button).text("Indexation in process");
- const timer = waitingButton(button, 20);
- $(button).removeClass('btn-danger');
- $(button).addClass('btn-warning');
+ console.log(image);
  $('#ocrResult').empty();
  return new Promise((resolve, reject) => {
    $.ajax({
-      data: images,
+      data: image,
       type: 'POST',
       url: '/api/ajax_ocr/',
       statusCode: {
@@ -52,46 +50,42 @@ async function ajax_postOcr(images, button) {
         }
       },
       complete: async function(res) {
-        //console.log(res.responseText);
-        var result=$.parseJSON(res.responseText);
-        //display ocr results for each image checked  
-        for(let i=0; i<result.length; i++) 
-        {
-          if(result[i].success == true) {
-            // use search book api for each ocr result
-            var books = result[i].response;
+        var ocr_res = $.parseJSON(res.responseText);
+        var img_num = ocr_res.img_num;       
 
-            $('#ocrResult').append('<div id="ocrResultFound_' + i + '"><hr><h2>Books found for image ' + (i+1) + '</h2><ul></ul></div>');
-            $('#ocrResult').append('<div id="ocrResultNotFound_' + i + '"><hr><h2>Books not found for image ' + (i+1) + '</h2><ul></ul></div>');
-            $('#ocrResultFound_' + i).hide();
-            $('#ocrResultNotFound_' + i).hide();
+        if(ocr_res.success == true) {
+          // use search book api for each ocr result
+          var books = ocr_res.response;
+          $('#ocrResult').append('<div id="ocrResultFound_' + img_num + '"><hr><h2>Books found for image ' + img_num + '</h2><ul></ul></div>');
+          $('#ocrResult').append('<div id="ocrResultNotFound_' + img_num + '"><hr><h2>Books not found for image ' + img_num + '</h2><ul></ul></div>');
+          $('#ocrResultFound_' + img_num).hide();
+          $('#ocrResultNotFound_' + img_num).hide();
 
-            for(let j = 0; j<books.length; j++) 
-            {
-              let result = await searchBook(books[j])
-              //console.log(result)
-              //parse search and display response
-              if(result['found'].length > 0) {
-                let book = result['found'][0];
-                $('#ocrResultFound_' + i).show();
-                $('#ocrResultFound_' + i + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
-              }
-              if(result['notfound'].length > 0) {
-                let book = result['notfound'][0];
-                $('#ocrResultNotFound_' + i).show();
-                $('#ocrResultNotFound_' + i + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
-              }          
+          for(let j = 0; j<books.length; j++) 
+          {
+            let result = await searchBook(books[j])
+            //console.log(result)
+            //parse search and display response
+            if(result['found'].length > 0) {
+              let book = result['found'][0];
+              $('#ocrResultFound_' + img_num).show();
+              $('#ocrResultFound_' + img_num + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
             }
-            //display ocr analyse total found
-            console.log("ocr books found:", result[i].ocr_nb_books);
+            if(result['notfound'].length > 0) {
+              let book = result['notfound'][0];
+              $('#ocrResultNotFound_' + img_num).show();
+              $('#ocrResultNotFound_' + img_num + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
+            }
           }
-          else {
-            $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + (i+1) + '</h2><p>' + result[i].response + '</p></div>');
-          }
+          //display ocr analyse total found
+          console.log("ocr books found:", ocr_res.ocr_nb_books);           
+        }
+        else {
+          $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + img_num + '</h2><p>' + ocr_res.response + '</p></div>');
         }
         $(button).text("Start indexation");
-        $(button).removeClass('btn-warning');        
-        clearInterval(timer);
+        $(button).removeClass('btn-warning');
+        clearInterval(timer);               
       }
     });
   })
