@@ -54,9 +54,6 @@ async function ajax_postOcr(images, button) {
       complete: async function(res) {
         //console.log(res.responseText);
         var result=$.parseJSON(res.responseText);
-        clearInterval(timer);
-        $(button).text("Start indexation");
-        $(button).removeClass('btn-warning');
         //display ocr results for each image checked  
         for(let i=0; i<result.length; i++) 
         {
@@ -64,10 +61,10 @@ async function ajax_postOcr(images, button) {
             // use search book api for each ocr result
             var books = result[i].response;
 
-            $('#ocrResult').append('<div id="ocrResultFound"><hr><h2>Books found for image ' + (i+1) + '</h2><ul></ul></div>');
-            $('#ocrResult').append('<div id="ocrResultNotFound"><hr><h2>Books not found for image ' + (i+1) + '</h2><ul></ul></div>');
-            $('#ocrResultFound').hide();
-            $('#ocrResultNotFound').hide();
+            $('#ocrResult').append('<div id="ocrResultFound_' + i + '"><hr><h2>Books found for image ' + (i+1) + '</h2><ul></ul></div>');
+            $('#ocrResult').append('<div id="ocrResultNotFound_' + i + '"><hr><h2>Books not found for image ' + (i+1) + '</h2><ul></ul></div>');
+            $('#ocrResultFound_' + i).hide();
+            $('#ocrResultNotFound_' + i).hide();
 
             for(let j = 0; j<books.length; j++) 
             {
@@ -75,10 +72,14 @@ async function ajax_postOcr(images, button) {
               //console.log(result)
               //parse search and display response
               if(result['found'].length > 0) {
-                displayOcrResult(result['found'], 'ocrResultFound');
+                let book = result['found'][0];
+                $('#ocrResultFound_' + i).show();
+                $('#ocrResultFound_' + i + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
               }
               if(result['notfound'].length > 0) {
-                displayOcrResult(result['notfound'], 'ocrResultNotFound');
+                let book = result['notfound'][0];
+                $('#ocrResultNotFound_' + i).show();
+                $('#ocrResultNotFound_' + i + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
               }          
             }
             //display ocr analyse total found
@@ -88,21 +89,12 @@ async function ajax_postOcr(images, button) {
             $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + (i+1) + '</h2><p>' + result[i].response + '</p></div>');
           }
         }
+        $(button).text("Start indexation");
+        $(button).removeClass('btn-warning');        
+        clearInterval(timer);
       }
     });
   })
-}
-
-function displayOcrResult(books, destination) {
-  //$('#'+destination+' ul').empty();
-  //display book list 
-  if(books.length) {
-    $('#'+destination).show();
-    for(let i = 0; i < books.length; i++) {
-      //console.log(books[i])
-      $("#"+destination+" ul").append('<li>'+books[i]['title']+', '+books[i]['author']+'</li>');
-    }
-  }
 }
 
 // request for search api using ocr result
