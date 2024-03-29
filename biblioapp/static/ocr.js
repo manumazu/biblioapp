@@ -2,35 +2,33 @@ $(document).ready(function() {
 
 $('#start-ocr').on('click', function() {
     $(this).text("Indexation in process");
-    $(this).removeClass('btn-danger');
     $(this).addClass('btn-warning');
-
     $('#ocrResult').empty();
+
     const timer = waitingButton(this, 20);
     var numshelf = $('#numshelf').val();
-    var i = 0;
     var button = this;
     
     $(':checkbox:checked').each(async function(){
-        //start ocr
-        i++;
-        let params = 'img='+$(this).val()+'&numshelf='+numshelf+'&img_num='+i;
-        let ocr = await ajax_postOcr(params, timer);
-        console.log(ocr);
 
-        //var ocr = $.parseJSON(res.responseText);
-        var img_num = ocr.img_num;       
+        const filename = $(this).val();
+        const img_num = filename.split('_');
+
+        // prepare display results
+        $('#ocrResult').append('<div id="ocrResultFound_' + img_num[0] + '"><hr><h2>Books found for image ' + filename + '</h2><ul></ul></div>');
+        $('#ocrResult').append('<div id="ocrResultNotFound_' + img_num[0] + '"><hr><h2>Books not found for image ' + filename + '</h2><ul></ul></div>');
+        $('#ocrResultFound_' + img_num[0]).hide();
+        $('#ocrResultNotFound_' + img_num[0]).hide();       
+
+        //start ocr
+        const params = 'img='+filename+'&numshelf='+numshelf+'&img_num='+img_num[0];
+        const ocr = await ajax_postOcr(params, timer);
+        //console.log(ocr); 
 
         if(ocr.success == true) {
-          
-          // prepare display results
-          $('#ocrResult').append('<div id="ocrResultFound_' + img_num + '"><hr><h2>Books found for image ' + img_num + '</h2><ul></ul></div>');
-          $('#ocrResult').append('<div id="ocrResultNotFound_' + img_num + '"><hr><h2>Books not found for image ' + img_num + '</h2><ul></ul></div>');
-          $('#ocrResultFound_' + img_num).hide();
-          $('#ocrResultNotFound_' + img_num).hide();
 
           // use search book api for each ocr result
-          var books = ocr.response;
+          const books = ocr.response;
           for(let j = 0; j<books.length; j++) {
 
             let result = await searchBook(books[j])
@@ -39,21 +37,23 @@ $('#start-ocr').on('click', function() {
             //parse search and display response
             if(result['found'].length > 0) {
               let book = result['found'][0];
-              $('#ocrResultFound_' + img_num).show();
-              $('#ocrResultFound_' + img_num + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
+              $('#ocrResultFound_' + ocr.img_num).show();
+              $('#ocrResultFound_' + ocr.img_num + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
             }
             if(result['notfound'].length > 0) {
               let book = result['notfound'][0];
-              $('#ocrResultNotFound_' + img_num).show();
-              $('#ocrResultNotFound_' + img_num + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
+              $('#ocrResultNotFound_' + ocr.img_num).show();
+              $('#ocrResultNotFound_' + ocr.img_num + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
             }
+            
           }
           //display ocr analyse total found
           console.log("ocr books found:", ocr.ocr_nb_books);           
         }
         else {
-          $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + img_num + '</h2><p>' + ocr.response + '</p></div>');
+          $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + filename + '</h2><p>' + ocr.response + '</p></div>');
         }
+
         $(button).text("Start indexation");
         $(button).removeClass('btn-warning');
         clearInterval(timer);           
@@ -77,7 +77,7 @@ async function ajax_postOcr(params, timer) {
         clearInterval(timer);
       },
       502: function(res) {
-        $('#ocrResult').append('<div class="error"><hr><h2>Timeout Error during process</h2><p>The Server returned an error.</p></div>');
+        $('#ocrResult').append('<div class="error"><hr><h2>Timeout Error during process</h2><p>The Server returned a timeout error.</p></div>');
         console.log('Error 502', res);
         clearInterval(timer);
       }
