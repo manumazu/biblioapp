@@ -213,7 +213,7 @@ def matchApiSearchResults(title, data, way):
   return False
 
 # Search books with open api
-async def searchBookApi(query, api, ref = None):
+def searchBookApi(query, api, ref = None):
   import requests
   if api == 'googleapis':
     url = "https://www.googleapis.com/books/v1/volumes?key="+app.config['GOOGLE_BOOK_API_KEY']+"&q="

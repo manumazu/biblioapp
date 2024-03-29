@@ -357,7 +357,7 @@ def set_routes_for_books(app):
         if request.is_json and 'title' in request.json:
           query += "intitle:"+request.json['title']
         
-        data = await tools.searchBookApi(query, 'googleapis')
+        data = tools.searchBookApi(query, 'googleapis')
 
         #set response for api
         if 'api' in request.path and request.is_json:
@@ -380,7 +380,7 @@ def set_routes_for_books(app):
         # get book reference informations
         book = {}
         if ref != 'new':
-          data = await tools.searchBookApi(None, 'googleapis', ref)
+          data = tools.searchBookApi(None, 'googleapis', ref)
           book = tools.formatBookApi('googleapis', data, None)
           #print(book)
           if 'imageLinks' in data['volumeInfo']:
@@ -396,7 +396,7 @@ def set_routes_for_books(app):
         '''Search books with googleapis api'''
         if request.args.get('search_api')=='googleapis':
           query = "ISBN:\""+request.args.get('isbn')+"\""
-          data = await tools.searchBookApi(query, 'googleapis')
+          data = tools.searchBookApi(query, 'googleapis')
           #print(data)
           if 'items' in data:
             for item in data['items']:
@@ -405,7 +405,7 @@ def set_routes_for_books(app):
         '''Search books with openlibrary api'''
         if request.args.get('search_api')=='openlibrary':
           query = "ISBN:"+request.args.get('isbn')
-          data = await tools.searchBookApi(query, 'openlibrary')
+          data = tools.searchBookApi(query, 'openlibrary')
           #print(data)      
           if query in data:
             res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'))]  
@@ -689,7 +689,7 @@ def set_routes_for_books(app):
   # use api books to retrieve books from ocr result
   @app.route('/api/ajax_bookindexer/', methods=['POST'])
   @flask_login.login_required  
-  async def searchApiBooksForOcr():
+  def searchApiBooksForOcr():
     searchresult = {}
     found = []
     notfound = []
@@ -705,7 +705,7 @@ def set_routes_for_books(app):
           query += " " + ocrbook['author']
         query += "+intitle:"+ocrbook['title']
         print(query)
-        data = await tools.searchBookApi(query, 'googleapis')
+        data = tools.searchBookApi(query, 'googleapis')
         if 'items' in data:
           # first test  : match ocr title into api title 
           searchedbook = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
