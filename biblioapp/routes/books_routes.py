@@ -714,7 +714,8 @@ def set_routes_for_books(app):
              # 2nd test  : match api title into ocr title 
             searchedbook = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
           if searchedbook:
-           found.append(searchedbook)
+            searchedbook.update({'ref_url':url_for('searchBookReference', ref=searchedbook['reference'])})
+            found.append(searchedbook)
           else:
             notfound.append(ocrbook)
         # no search result is found
@@ -723,6 +724,8 @@ def set_routes_for_books(app):
 
       searchresult.update({'found':found})
       searchresult.update({'notfound':notfound})
+      #set book index in ocr result order
+      searchresult.update({'numbook':ocrbook['numbook']})
     # display result
     response = app.response_class(
       response=json.dumps(searchresult),

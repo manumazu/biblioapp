@@ -31,21 +31,22 @@ $('#start-ocr').on('click', function() {
           const books = ocr.response;
           for(let j = 0; j<books.length; j++) {
 
-            let result = await searchBook(books[j])
+            let result = await searchBook(books[j], (j+1))
             //console.log(result)
 
             //parse search and display response
             if(result['found'].length > 0) {
               let book = result['found'][0];
               $('#ocrResultFound_' + ocr.img_num).show();
-              $('#ocrResultFound_' + ocr.img_num + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
+              let linkRef = '<a href=' + book['ref_url'] + '>' + book['title'] + '</a>';
+              $('#ocrResultFound_' + ocr.img_num + ' ul').append('<li>' + linkRef + ', '+book['author']+', order: ' + j + ' / ' + result.numbook + '</li>');
             }
             if(result['notfound'].length > 0) {
               let book = result['notfound'][0];
               $('#ocrResultNotFound_' + ocr.img_num).show();
-              $('#ocrResultNotFound_' + ocr.img_num + ' ul').append('<li>'+book['title']+', '+book['author']+'</li>');
+              $('#ocrResultNotFound_' + ocr.img_num + ' ul').append('<li>'+book['title']+', '+book['author']+', order: ' + j + ' / ' + result.numbook + '</li>');
             }
-            
+
           }
           //display ocr analyse total found
           console.log("ocr books found:", ocr.ocr_nb_books);           
@@ -89,12 +90,13 @@ async function ajax_postOcr(params, timer) {
 }
 
 // request for search api using ocr result
-async function searchBook(ocr) {
+async function searchBook(ocr, index) {
   var elem = [];
   //console.log(ocr)
   elem.push('title='+ocr.title)
   elem.push('author='+ocr.author)
   elem.push('editor='+ocr.editor)
+  elem.push('numbook='+index)
   params = elem.join('&');
  return $.ajax({
     data: params,
