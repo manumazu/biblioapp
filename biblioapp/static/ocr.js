@@ -4,67 +4,38 @@ $('#start-ocr').on('click', function() {
     $(this).text("Indexation in process");
     $(this).removeClass('btn-danger');
     $(this).addClass('btn-warning');
+
+    $('#ocrResult').empty();
     const timer = waitingButton(this, 20);
     var numshelf = $('#numshelf').val();
     var i = 0;
     var button = this;
+    
     $(':checkbox:checked').each(async function(){
+        //start ocr
         i++;
         let params = 'img='+$(this).val()+'&numshelf='+numshelf+'&img_num='+i;
-        await ajax_postOcr(params, timer, button);
-    });
-  });
-});
+        let ocr = await ajax_postOcr(params, timer);
+        console.log(ocr);
 
-function waitingButton(button, seconds) {
-    var str = ".";
-    function run() {
-      str+=".";
-      $(button).text("Indexation in process "+str);
-      if(str.length > 20)
-        str = '.';
-    }
-    return setInterval(run, 500);
-}
+        //var ocr = $.parseJSON(res.responseText);
+        var img_num = ocr.img_num;       
 
-async function ajax_postOcr(image, timer, button) {
- /*row = element.split('_')[1];
- order = $(element).sortable('serialize');*/
- console.log(image);
- $('#ocrResult').empty();
- return new Promise((resolve, reject) => {
-   $.ajax({
-      data: image,
-      type: 'POST',
-      url: '/api/ajax_ocr/',
-      statusCode: {
-        500: function(res) {
-          $('#ocrResult').append('<div class="error"><hr><h2>Server Error during process</h2><p>The Server returned an error.</p></div>');
-          console.log('Error 500', res);
-          clearInterval(timer);
-        },
-        502: function(res) {
-          $('#ocrResult').append('<div class="error"><hr><h2>Timeout Error during process</h2><p>The Server returned an error.</p></div>');
-          console.log('Error 502', res);
-          clearInterval(timer);
-        }
-      },
-      complete: async function(res) {
-        var ocr_res = $.parseJSON(res.responseText);
-        var img_num = ocr_res.img_num;       
-
-        if(ocr_res.success == true) {
-          // use search book api for each ocr result
-          var books = ocr_res.response;
+        if(ocr.success == true) {
+          
+          // prepare display results
           $('#ocrResult').append('<div id="ocrResultFound_' + img_num + '"><hr><h2>Books found for image ' + img_num + '</h2><ul></ul></div>');
           $('#ocrResult').append('<div id="ocrResultNotFound_' + img_num + '"><hr><h2>Books not found for image ' + img_num + '</h2><ul></ul></div>');
           $('#ocrResultFound_' + img_num).hide();
           $('#ocrResultNotFound_' + img_num).hide();
 
-          for(let j = 0; j<books.length; j++) 
-          {
+          // use search book api for each ocr result
+          var books = ocr.response;
+          for(let j = 0; j<books.length; j++) {
+
             let result = await searchBook(books[j])
             //console.log(result)
+
             //parse search and display response
             if(result['found'].length > 0) {
               let book = result['found'][0];
@@ -78,17 +49,43 @@ async function ajax_postOcr(image, timer, button) {
             }
           }
           //display ocr analyse total found
-          console.log("ocr books found:", ocr_res.ocr_nb_books);           
+          console.log("ocr books found:", ocr.ocr_nb_books);           
         }
         else {
-          $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + img_num + '</h2><p>' + ocr_res.response + '</p></div>');
+          $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + img_num + '</h2><p>' + ocr.response + '</p></div>');
         }
         $(button).text("Start indexation");
         $(button).removeClass('btn-warning');
-        clearInterval(timer);               
-      }
+        clearInterval(timer);           
     });
-  })
+
+  });
+});
+
+async function ajax_postOcr(params, timer) {
+
+ console.log(params);
+
+ return $.ajax({
+    data: params,
+    type: 'POST',
+    url: '/api/ajax_ocr/',
+    statusCode: {
+      500: function(res) {
+        $('#ocrResult').append('<div class="error"><hr><h2>Server Error during process</h2><p>The Server returned an error.</p></div>');
+        console.log('Error 500', res);
+        clearInterval(timer);
+      },
+      502: function(res) {
+        $('#ocrResult').append('<div class="error"><hr><h2>Timeout Error during process</h2><p>The Server returned an error.</p></div>');
+        console.log('Error 502', res);
+        clearInterval(timer);
+      }
+    },
+    complete: async function(res) {
+      return res.responseText;
+    }
+  });
 }
 
 // request for search api using ocr result
@@ -108,5 +105,16 @@ async function searchBook(ocr) {
       return res.responseText;
     }
   })
+}
+
+function waitingButton(button, seconds) {
+    var str = ".";
+    function run() {
+      str+=".";
+      $(button).text("Indexation in process "+str);
+      if(str.length > 20)
+        str = '.';
+    }
+    return setInterval(run, 500);
 }
 
