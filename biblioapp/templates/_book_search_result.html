@@ -1,0 +1,35 @@
+<li>
+		<form method="post" action="/bookreferencer/">
+		<input type="hidden" name="reference" value="{{ book['reference'] }}">
+
+		{% if 'authors' in book %}
+		  {% for author in book['authors'] %}
+		    {{ author }}, 
+		    <input type="hidden" name="authors[]" value="{{ author }}">
+		  {% endfor %}
+		{% endif %}
+
+		<input type="hidden" name="title" value="{{ book['title'] }}">
+		<input type="hidden" name="editor" value="{{ book['editor'] }}">
+		<input type="hidden" name="pages" value="{{ book['pages'] }}">
+		<input type="hidden" name="year" value="{{ book['year'] }}">
+		<input type="hidden" name="description" value="{{book['description']}}">
+
+		<i><a href="{{ url_for('searchBookReference') }}?ref={{ book['reference'] }}">{{ book['title'] }}</a></i> - 
+		{{ book['editor'] }} ({{ book['year'] }}, {{ book['pages'] }}p)
+
+		{% if field and 'categories' in field['volumeInfo'] %} -
+		    {% for category in field['volumeInfo']['categories'] %}
+			<input type="hidden" name="tags" value="{{ category }}">
+			{{ category }}
+		    {% endfor %}
+		{% endif %}
+		
+		 {% if 'isbn' in book %} -
+		  	<input type="hidden" name="isbn" value="{{ book['isbn'] }}">
+		  	<!--ISBN : {{ book['isbn'] }}-->
+		  {% endif %}
+
+		<input type="submit" value="add this book !" class="btn btn-primary btn-sm">
+		</form>
+</li>

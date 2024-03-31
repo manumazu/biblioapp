@@ -188,9 +188,9 @@ def match_words(words, string):
   w = unidecode(words).lower()
   s = unidecode(string).lower()
   # search words inside string
-  compare = re.search("^"+re.escape(w), s, re.IGNORECASE)
+  compare = re.search(re.escape(w), s, re.IGNORECASE)
   #print(compare)
-  if compare and compare.start() == 0:
+  if compare and compare.start() < 2:
     return True
   return False
 
@@ -226,7 +226,7 @@ def searchBookApi(query, api, ref = None):
   data = {}
   r = requests.get(url + query)
   data = r.json()
-  #print(query)
+  print(query)
   return data
 
 def formatBookApi(api, data, isbn):

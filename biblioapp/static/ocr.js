@@ -32,14 +32,15 @@ $('#start-ocr').on('click', function() {
           for(let j = 0; j<books.length; j++) {
 
             let result = await searchBook(books[j], (j+1))
-            //console.log(result)
+            console.log('order ', result['numbook'])
 
             //parse search and display response
             if(result['found'].length > 0) {
               let book = result['found'][0];
               $('#ocrResultFound_' + ocr.img_num).show();
-              let linkRef = '<a href=' + book['ref_url'] + '>' + book['title'] + '</a>';
-              $('#ocrResultFound_' + ocr.img_num + ' ul').append('<li>' + linkRef + ', '+book['author']+', order: ' + j + ' / ' + result.numbook + '</li>');
+              //let linkRef = '<a href=' + book['ref_url'] + '>' + book['title'] + '</a>';
+              //$('#ocrResultFound_' + ocr.img_num + ' ul').append('<li>' + linkRef + ', '+book['author']+', order: ' + j + ' / ' + result.numbook + '</li>');
+              $('#ocrResultFound_' + ocr.img_num + ' ul').append(book);
             }
             if(result['notfound'].length > 0) {
               let book = result['notfound'][0];

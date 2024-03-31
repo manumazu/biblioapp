@@ -444,16 +444,16 @@ def set_routes_for_books(app):
 
       '''resume detail on api before saving'''
       if source_api=='googleapis':
-        r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
-        data = r.json()
+        data = tools.searchBookApi(None, 'googleapis', ref)
         book = tools.formatBookApi('googleapis', data, isbn) 
       if source_api=='openlibrary':
         r = requests.get("https://openlibrary.org/api/volumes/brief/isbn/"+isbn+".json")
         data = r.json()
         book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn)
 
-      book_width = request.args.get('book_width')
-      book['width'] = round(float(book_width))
+      if 'book_width' in request.args:
+        book_width = request.args.get('book_width')
+        book['width'] = round(float(book_width))
       #print(book)
 
       #save process
@@ -704,18 +704,19 @@ def set_routes_for_books(app):
         if 'author' in ocrbook and ocrbook['author'] is not None :
           query += " " + ocrbook['author']
         query += "+intitle:"+ocrbook['title']
-        print(query)
+        #query += "+inauthor:"+ocrbook['author']
+        #print(query)
         data = tools.searchBookApi(query, 'googleapis')
+        #print(data)
         if 'items' in data:
           # first test  : match ocr title into api title 
           searchedbook = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
-          #print(searchedbook)
           if searchedbook == False:
              # 2nd test  : match api title into ocr title 
             searchedbook = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
           if searchedbook:
-            searchedbook.update({'ref_url':url_for('searchBookReference', ref=searchedbook['reference'])})
-            found.append(searchedbook)
+            render = render_template('_book_search_result.html', book=searchedbook)
+            found.append(render)
           else:
             notfound.append(ocrbook)
         # no search result is found
@@ -735,7 +736,7 @@ def set_routes_for_books(app):
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
-    #return json.loads('{"success": 1, "response": [{"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}]}')
     #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
@@ -745,7 +746,7 @@ def set_routes_for_books(app):
     #print(ocr_output)
     try :
       ocr_analyse = json.loads(ocr_output)
-      #print(ocr_analyse)
+      print(ocr_analyse)
       output = {'success':True, 'response':ocr_analyse}
     except Exception as e:
       print(e)
