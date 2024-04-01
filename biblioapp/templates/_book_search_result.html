@@ -1,6 +1,16 @@
 <li class="list-group-item">
+		{% if book['found'] %}
 		<form method="post" action="/bookreferencer/">
-		<input type="hidden" name="reference" value="{{ book['reference'] }}">
+			<input type="hidden" name="title" value="{{ book['title'] }}">
+			<input type="hidden" name="editor" value="{{ book['editor'] }}">
+			<input type="hidden" name="pages" value="{{ book['pages'] }}">
+			<input type="hidden" name="year" value="{{ book['year'] }}">
+			<input type="hidden" name="description" value="{{book['description']}}">
+			<input type="hidden" name="reference" value="{{ book['reference'] }}">
+		{% else %}
+		<form method="post" action="/booksearch/">
+			<input type="hidden" name="intitle" value="{{ book['title'] }}">
+		{% endif %}
 
 		{% if numbook %}
 			{{ numbook }}-
@@ -13,14 +23,11 @@
 		  {% endfor %}
 		{% endif %}
 
-		<input type="hidden" name="title" value="{{ book['title'] }}">
-		<input type="hidden" name="editor" value="{{ book['editor'] }}">
-		<input type="hidden" name="pages" value="{{ book['pages'] }}">
-		<input type="hidden" name="year" value="{{ book['year'] }}">
-		<input type="hidden" name="description" value="{{book['description']}}">
-
-		<i><a href="{{ url_for('searchBookReference') }}?ref={{ book['reference'] }}">{{ book['title'] }}</a></i> - 
-		{{ book['editor'] }} ({{ book['year'] }}, {{ book['pages'] }}p)
+		{% if book['found'] %}
+			<i><a href="{{ url_for('searchBookReference') }}?ref={{ book['reference'] }}">{{ book['title'] }}</a></i>, {{ book['editor'] }} ({{ book['year'] }}, {{ book['pages'] }}p)
+		{% else %}
+			<i style="color:#aaa">{{ book['title'] }}</i> - {{ book['editor'] }} 
+		{% endif %}
 
 		{% if field and 'categories' in field['volumeInfo'] %} -
 		    {% for category in field['volumeInfo']['categories'] %}
@@ -34,8 +41,10 @@
 		  	<!--ISBN : {{ book['isbn'] }}-->
 		  {% endif %}
 
-		{% if 'found' in book and book['found'] %}
+		{% if book['found'] %}
 			<input type="submit" value="add this book !" class="btn btn-primary btn-sm">
+		{% else %}
+			<input type="submit" value="search for this book..." class="btn btn-warning btn-sm">
 		{% endif %}
 		</form>
 </li>

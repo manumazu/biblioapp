@@ -250,7 +250,7 @@ def formatBookApi(api, data, isbn, found = False):
 
   # used for AI ocr results
   if api == 'ocr':
-    bookapi['author'] = data['author']
+    bookapi['authors'] = [data['author']]
     bookapi['title'] = data['title']
     bookapi['editor'] = data['editor']
 
