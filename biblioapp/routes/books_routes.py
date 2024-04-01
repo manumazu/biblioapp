@@ -364,7 +364,9 @@ def set_routes_for_books(app):
           res = []          
           if 'items' in data:
             for item in data['items']:
-              res.append(tools.formatBookApi('googleapis', item, None))   
+              book = tools.formatBookApi('googleapis', item, None, True)
+              #print(book)
+              res.append(book)
           response = app.response_class(
               response=json.dumps(res),
               mimetype='application/json'
@@ -381,7 +383,7 @@ def set_routes_for_books(app):
         book = {}
         if ref != 'new':
           data = tools.searchBookApi(None, 'googleapis', ref)
-          book = tools.formatBookApi('googleapis', data, None)
+          book = tools.formatBookApi('googleapis', data, None, True)
           #print(book)
           if 'imageLinks' in data['volumeInfo']:
             book['imageLinks'] = data['volumeInfo']['imageLinks']
@@ -400,7 +402,7 @@ def set_routes_for_books(app):
           #print(data)
           if 'items' in data:
             for item in data['items']:
-              res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn')))
+              res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn'), True))
 
         '''Search books with openlibrary api'''
         if request.args.get('search_api')=='openlibrary':
@@ -408,7 +410,7 @@ def set_routes_for_books(app):
           data = tools.searchBookApi(query, 'openlibrary')
           #print(data)      
           if query in data:
-            res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'))]  
+            res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'), True)]  
 
         #print(res)
         response = app.response_class(
@@ -428,7 +430,7 @@ def set_routes_for_books(app):
     globalVars = tools.initApp()
     '''save classic data from form'''
     if request.method == 'POST':
-      book = tools.formatBookApi('localform', request.form, request.form['isbn'])  
+      book = tools.formatBookApi('localform', request.form, request.form['isbn'], False)  
       if 'id' in request.form:
         book['id'] = request.form['id']
       db.bookSave(book, globalVars['arduino_map']['user_id'], None, request.form['tags'])
@@ -445,11 +447,11 @@ def set_routes_for_books(app):
       '''resume detail on api before saving'''
       if source_api=='googleapis':
         data = tools.searchBookApi(None, 'googleapis', ref)
-        book = tools.formatBookApi('googleapis', data, isbn) 
+        book = tools.formatBookApi('googleapis', data, isbn, True) 
       if source_api=='openlibrary':
         r = requests.get("https://openlibrary.org/api/volumes/brief/isbn/"+isbn+".json")
         data = r.json()
-        book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn)
+        book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn, True)
 
       if 'book_width' in request.args:
         book_width = request.args.get('book_width')
@@ -690,15 +692,12 @@ def set_routes_for_books(app):
   @app.route('/api/ajax_bookindexer/', methods=['POST'])
   @flask_login.login_required  
   def searchApiBooksForOcr():
-    searchresult = {}
-    found = []
-    notfound = []
     #print(request.form)
     if request.method == 'POST' and session.get('app_id'):# and request.is_json:       
       # book must have title to perform search
       ocrbook = request.form
       if 'title' in ocrbook and len(ocrbook['title']) < 2:
-        notfound.append(ocrbook)
+        searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
       else:
         query = ocrbook['title']
         if 'author' in ocrbook and ocrbook['author'] is not None :
@@ -710,29 +709,20 @@ def set_routes_for_books(app):
         #print(data)
         if 'items' in data:
           # first test  : match ocr title into api title 
-          searchedbook = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
-          if searchedbook == False:
+          test = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
+          if test == False:
              # 2nd test  : match api title into ocr title 
-            searchedbook = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
-          if searchedbook:
-            render = render_template('_book_search_result.html', book=searchedbook)
-            found.append(render)
+            test = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
+          if test:
+            searchedbook = tools.formatBookApi('googleapis', test, None, True)
+        # no search result is found            
           else:
-            notfound.append(ocrbook)
-        # no search result is found
+            searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)  
         else:
-          notfound.append(ocrbook)
+          searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
 
-      searchresult.update({'found':found})
-      searchresult.update({'notfound':notfound})
-      #set book index in ocr result order
-      searchresult.update({'numbook':ocrbook['numbook']})
-    # display result
-    response = app.response_class(
-      response=json.dumps(searchresult),
-      mimetype='application/json'
-    )   
-    return searchresult
+      return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'])
+    abort(404)
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
@@ -746,7 +736,7 @@ def set_routes_for_books(app):
     #print(ocr_output)
     try :
       ocr_analyse = json.loads(ocr_output)
-      print(ocr_analyse)
+      #print(ocr_analyse)
       output = {'success':True, 'response':ocr_analyse}
     except Exception as e:
       print(e)

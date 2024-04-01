@@ -1,6 +1,10 @@
-<li>
+<li class="list-group-item">
 		<form method="post" action="/bookreferencer/">
 		<input type="hidden" name="reference" value="{{ book['reference'] }}">
+
+		{% if numbook %}
+			{{ numbook }}-
+		{% endif %}
 
 		{% if 'authors' in book %}
 		  {% for author in book['authors'] %}
@@ -30,6 +34,8 @@
 		  	<!--ISBN : {{ book['isbn'] }}-->
 		  {% endif %}
 
-		<input type="submit" value="add this book !" class="btn btn-primary btn-sm">
+		{% if 'found' in book and book['found'] %}
+			<input type="submit" value="add this book !" class="btn btn-primary btn-sm">
+		{% endif %}
 		</form>
 </li>

@@ -42,9 +42,9 @@
 	{% if 'items' in data %}
 	<!-- Api Google search results -->
 	<h2>Results</h2>
-	<ul>       
+	<ul class="list-group" style="color:#000">       
 	{% for field in data['items'] %}
-		{% set book = tools.formatBookApi('googleapis', field, None) %}
+		{% set book = tools.formatBookApi('googleapis', field, None, True) %}
 		{% include '_book_search_result.html' %}
 	{% endfor %}
 	</ul>

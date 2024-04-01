@@ -208,8 +208,7 @@ def matchApiSearchResults(title, data, way):
     if test:
       cpt += 1
       if cpt == 1:
-        searchedbook = formatBookApi('googleapis', item, None)
-        return searchedbook
+        return item
   return False
 
 # Search books with open api
@@ -229,7 +228,7 @@ def searchBookApi(query, api, ref = None):
   print(query)
   return data
 
-def formatBookApi(api, data, isbn):
+def formatBookApi(api, data, isbn, found = False):
   bookapi = {}
 
   if api == 'localform':
@@ -249,6 +248,12 @@ def formatBookApi(api, data, isbn):
     else :
       bookapi['width'] = None
 
+  # used for AI ocr results
+  if api == 'ocr':
+    bookapi['author'] = data['author']
+    bookapi['title'] = data['title']
+    bookapi['editor'] = data['editor']
+
   if api == 'openlibrary':
     authors = []
     if 'authors' in data:
@@ -267,7 +272,7 @@ def formatBookApi(api, data, isbn):
     bookapi['pages'] = data['number_of_pages'] if 'number_of_pages' in data else 0
     bookapi['year'] = getYear(data['publish_date']) if 'publish_date' in data else ""
     
-  elif api == 'googleapis':
+  if api == 'googleapis':
     authors = []
     if 'authors' in data['volumeInfo']:
       authors = data['volumeInfo']['authors']
@@ -294,6 +299,7 @@ def formatBookApi(api, data, isbn):
       converter = 10 if width.find('cm') else 1 # convert dimension from cm to mm
       bookapi['width'] = str2int(width)*converter
 
+  bookapi['found'] = found
   return bookapi
 
 def str2int(str):

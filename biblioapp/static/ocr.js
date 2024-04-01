@@ -15,39 +15,25 @@ $('#start-ocr').on('click', function() {
         const img_num = filename.split('_');
 
         // prepare display results
-        $('#ocrResult').append('<div id="ocrResultFound_' + img_num[0] + '"><hr><h2>Books found for image ' + filename + '</h2><ul></ul></div>');
-        $('#ocrResult').append('<div id="ocrResultNotFound_' + img_num[0] + '"><hr><h2>Books not found for image ' + filename + '</h2><ul></ul></div>');
+        const list_header = '<hr><h2>Analyze result for image ' + filename + '</h2><ul class="list-group" style="color:#000"></ul>';
+        $('#ocrResult').append('<div id="ocrResultFound_' + img_num[0] + '">' + list_header + '</div>');
         $('#ocrResultFound_' + img_num[0]).hide();
-        $('#ocrResultNotFound_' + img_num[0]).hide();       
 
         //start ocr
         const params = 'img='+filename+'&numshelf='+numshelf+'&img_num='+img_num[0];
         const ocr = await ajax_postOcr(params, timer);
         //console.log(ocr); 
 
-        if(ocr.success == true) {
-
+        if(ocr.success == true) 
+        {
+          $('#ocrResultFound_' + ocr.img_num).show();
           // use search book api for each ocr result
           const books = ocr.response;
-          for(let j = 0; j<books.length; j++) {
-
+          for(let j = 0; j<books.length; j++) 
+          {
             let result = await searchBook(books[j], (j+1))
-            console.log('order ', result['numbook'])
-
-            //parse search and display response
-            if(result['found'].length > 0) {
-              let book = result['found'][0];
-              $('#ocrResultFound_' + ocr.img_num).show();
-              //let linkRef = '<a href=' + book['ref_url'] + '>' + book['title'] + '</a>';
-              //$('#ocrResultFound_' + ocr.img_num + ' ul').append('<li>' + linkRef + ', '+book['author']+', order: ' + j + ' / ' + result.numbook + '</li>');
-              $('#ocrResultFound_' + ocr.img_num + ' ul').append(book);
-            }
-            if(result['notfound'].length > 0) {
-              let book = result['notfound'][0];
-              $('#ocrResultNotFound_' + ocr.img_num).show();
-              $('#ocrResultNotFound_' + ocr.img_num + ' ul').append('<li>'+book['title']+', '+book['author']+', order: ' + j + ' / ' + result.numbook + '</li>');
-            }
-
+            //console.log(result)
+            $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
           }
           //display ocr analyse total found
           console.log("ocr books found:", ocr.ocr_nb_books);           
