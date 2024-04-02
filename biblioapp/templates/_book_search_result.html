@@ -1,4 +1,4 @@
-<li class="list-group-item">
+<li class="list-group-item" {% if numbook %}id="book_{{ numbook }}"{% endif %}>
 		{% if book['found'] %}
 		<form method="post" action="/bookreferencer/">
 			<input type="hidden" name="title" value="{{ book['title'] }}">
@@ -42,9 +42,9 @@
 		  {% endif %}
 
 		{% if book['found'] %}
-			<input type="submit" value="add this book !" class="btn btn-primary btn-sm">
+			<input type="submit" value="add this book !" class="btn btn-primary btn-sm" {% if numbook %}onClick="saveBook('book_{{ numbook }}')"{% endif %}>
 		{% else %}
-			<input type="submit" value="search for this book..." class="btn btn-warning btn-sm">
+			<input type="submit" value="search for this book..." class="btn btn-warning btn-sm" {% if numbook %}id="searchBook('book_{{ numbook }}')"{% endif %}>
 		{% endif %}
 		</form>
 </li>
