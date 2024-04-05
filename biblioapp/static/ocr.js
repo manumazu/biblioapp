@@ -31,7 +31,7 @@ $(document).ready(function() {
             const books = ocr.response;
             for(let j = 0; j<books.length; j++) 
             {
-              let result = await ajax_searchBook(books[j], (j+1))
+              let result = await ajax_indexBook(books[j], (j+1))
               //console.log(result)
               $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
             }
@@ -41,7 +41,11 @@ $(document).ready(function() {
           else {
             $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + filename + '</h2><p>' + ocr.response + '</p></div>');
           }
-
+          // force forms created not being submited
+          $('form').on('submit', function(e){
+            e.preventDefault();
+          });
+          // set button in normal mode
           $(button).text("Start indexation");
           $(button).removeClass('btn-warning');
           clearInterval(timer);           
@@ -76,7 +80,7 @@ async function ajax_postOcr(params, timer) {
 }
 
 // request for search api using ocr result
-async function ajax_searchBook(ocr, index) {
+async function ajax_indexBook(ocr, index) {
   var elem = [];
   //console.log(ocr)
   elem.push('title='+ocr.title)
@@ -106,11 +110,8 @@ function waitingButton(button, seconds) {
     return setInterval(run, 500);
 }
 
+//index book position using api
 function saveBook(form_id) {
-  //prevent submit form
-  $(this).on('click', function(e){
-    e.preventDefault();
-  });
   const reference = $('#' + form_id + ' > form > input[name=reference]').val()
   const elem = [];
   elem.push('ref='+reference)
@@ -118,4 +119,35 @@ function saveBook(form_id) {
   params = elem.join('&');
   console.log(params);
 }
+
+// search book and return results
+async function searchBook(form_id) {
+  const title = $('#' + form_id + ' > form > input[name=intitle]').val()
+  const index = form_id.split('_');
+  const result = await ajax_searchBook(title, index[1])
+  //console.log(result)
+  $('#'+form_id).replaceWith(result);
+}
+
+// request for search api
+async function ajax_searchBook(title, index) {
+  var elem = [];
+  const payload = {
+    title: title,
+    numbook: index,
+    search_api: 'googleapis',
+    search_origin: 'ocr'
+  };  
+  return $.ajax({
+    data: JSON.stringify(payload), 
+    type: 'POST',
+    contentType: "application/json",
+    url: '/api/booksearch/', 
+    complete: function(res) {
+      return res.responseText;
+    }
+  })
+}
+
+
 

@@ -1,3 +1,4 @@
+{% if book %}
 <li class="list-group-item" {% if numbook %}id="book_{{ numbook }}"{% endif %}>
 		{% if book['found'] %}
 		<form method="post" action="/bookreferencer/">
@@ -42,9 +43,16 @@
 		  {% endif %}
 
 		{% if book['found'] %}
-			<input type="submit" value="add this book !" class="btn btn-primary btn-sm" {% if numbook %}onClick="saveBook('book_{{ numbook }}')"{% endif %}>
+			<button type="submit" class="btn btn-primary btn-sm saveBook" {% if numbook %}onClick="saveBook('book_{{ numbook }}')"{% endif %}>add this book !</button>
+			{% if numbook %}<button class="btn btn-sm btn-secondary">cancel indexation</button>{% endif %}
 		{% else %}
-			<input type="submit" value="search for this book..." class="btn btn-warning btn-sm" {% if numbook %}id="searchBook('book_{{ numbook }}')"{% endif %}>
+			<button type="submit" class="btn btn-warning btn-sm searchBook" {% if numbook %}onClick="searchBook('book_{{ numbook }}')"{% endif %}>search for this book...</button>
+			<button class="btn btn-sm btn-secondary">cancel indexation</button>
 		{% endif %}
 		</form>
 </li>
+{% else %}
+<li class="list-group-item">
+	No result for this search "{{ search }}" <button class="btn btn-sm btn-secondary">cancel indexation</button>
+</li>
+{% endif %}
