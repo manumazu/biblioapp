@@ -80,6 +80,20 @@ def uuid_encode(string):
 def set_id_ble(module):
   return "bibus"+"-"+str(module['id']).zfill(4)+"-"+str(module['nb_lines']).zfill(2)+""+str(module['nb_cols']).zfill(3)
 
+def set_book_width(pages):
+  # use scale 120 pages for 1 cm 
+  if pages <= 350:
+    cm = pages/120
+  # use scale 200 pages for 1 cm 
+  elif pages > 350 and pages <= 500:
+    cm = pages/200
+  # use scale 350 pages for 1 cm 
+  elif pages > 500:
+    cm = pages/350
+  if cm < 1:
+    cm = 1
+  return round(float(cm),2)*10
+
 def led_range(book, leds_interval):
   #compute interval with led strip spec
   if book['width'] and book['width'] > 0:

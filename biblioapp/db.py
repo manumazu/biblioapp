@@ -369,9 +369,9 @@ def bookSave(book, user_id, app_id, tags = None):
   return bookId
 
 
-def get_bookapi(isbn, user_id):
+def get_bookapi(isbn, ref, user_id):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id FROM biblio_book WHERE `isbn`=%s and `id_user`=%s", (isbn, user_id))
+  mysql['cursor'].execute("SELECT id FROM biblio_book WHERE (`isbn`=%s or `reference`=%s) and `id_user`=%s", (isbn, ref, user_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()

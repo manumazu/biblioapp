@@ -34,6 +34,10 @@ $(document).ready(function() {
               let result = await ajax_indexBook(books[j], (j+1))
               //console.log(result)
               $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
+              // force forms created not being submited
+              $('form').on('submit', function(e){
+                e.preventDefault();
+              });          
             }
             //display ocr analyse total found
             console.log("ocr books found:", ocr.ocr_nb_books);           
@@ -41,10 +45,6 @@ $(document).ready(function() {
           else {
             $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + filename + '</h2><p>' + ocr.response + '</p></div>');
           }
-          // force forms created not being submited
-          $('form').on('submit', function(e){
-            e.preventDefault();
-          });
           // set button in normal mode
           $(button).text("Start indexation");
           $(button).removeClass('btn-warning');
@@ -110,23 +110,54 @@ function waitingButton(button, seconds) {
     return setInterval(run, 500);
 }
 
+// when the book can not be found
+function doNotIndex(form_id) {
+  $('#' + form_id).addClass('disabled');
+}
+
 //index book position using api
-function saveBook(form_id) {
+async function saveBook(form_id) {
   const reference = $('#' + form_id + ' > form > input[name=reference]').val()
-  const elem = [];
-  elem.push('ref='+reference)
-  elem.push('save_bookapi=googleapis')
-  params = elem.join('&');
-  console.log(params);
+  const title = $('#' + form_id + ' > form > input[name=title]').val()
+  const index = form_id.split('_');
+  // save book + location 
+  const data = await ajax_saveBook(reference);
+  console.log(data);
+  if(data['result'] == 'error') {
+      $('#' + form_id).addClass('list-group-item-danger');
+  }                         
+  if(data['result'] == 'success' && data['address'] != undefined) {
+      $('#' + form_id).addClass('list-group-item-success');
+  }
+  //display new posiion in shelf  
+  if(typeof data['message'] != undefined){
+    const message = index[1] + '- "' + title + '": ' + data['message'];
+    $('#' + form_id).html(message);
+  }
+}
+
+async function ajax_saveBook(reference) {
+  const params = 'ref='+reference+'&save_bookapi=googleapis&forcePosition=true&token=ocr';
+  return $.ajax({
+    data: params, 
+    url: '/api/bookreferencer/', 
+    complete: function(res) {
+      return res.responseText;
+    }
+  })
 }
 
 // search book and return results
 async function searchBook(form_id) {
   const title = $('#' + form_id + ' > form > input[name=intitle]').val()
   const index = form_id.split('_');
-  const result = await ajax_searchBook(title, index[1])
+  const result = await ajax_searchBook(title, index[1]);
   //console.log(result)
   $('#'+form_id).replaceWith(result);
+  // force forms created not being submited
+  $('form').on('submit', function(e){
+    e.preventDefault();
+  });  
 }
 
 // request for search api

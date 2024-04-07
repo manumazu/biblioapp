@@ -441,7 +441,7 @@ def set_routes_for_books(app):
         book['id'] = request.form['id']
       db.bookSave(book, globalVars['arduino_map']['user_id'], None, request.form['tags'])
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
-      #return render_template('bookreferencer.html', user_login=globalVars['user_login'])    
+      #return render_template('bookreferencer.html', user_login=globalVars['user_login'])
 
     '''save book from mobile app'''
     if 'api' in request.path and request.args.get('token') and request.args.get('save_bookapi'):
@@ -462,20 +462,29 @@ def set_routes_for_books(app):
       if 'book_width' in request.args:
         book_width = request.args.get('book_width')
         book['width'] = round(float(book_width))
-      #print(book)
+      # force width if not found or not set
+      elif 'width' not in book:
+        book['width'] = round(tools.set_book_width(book['pages']))
+
+      forcePosition = request.args.get('forcePosition')
 
       #save process
-      bookId = db.get_bookapi(isbn, globalVars['arduino_map']['user_id'])
-      message = {}  
+      bookId = db.get_bookapi(isbn, ref, globalVars['arduino_map']['user_id'])
+      message = {}
 
-      if bookId:
+      if bookId and forcePosition == 'false':
         message = {'result':'error', 'message':'This book is already in your shelfs'}
       #add new book
       else:
-        bookId = db.bookSave(book, globalVars['arduino_map']['user_id'], None)
+        if bookId == False:
+          bookId = db.bookSave(book, globalVars['arduino_map']['user_id'], None)
         #force position in current app
-        forcePosition = request.args.get('forcePosition')
         if forcePosition == 'true':
+          # check if position already exists and remove it
+          currentpos = db.get_position_for_book(session['app_id'], bookId['id'])
+          if currentpos:
+            db.del_item_position(session.get('app_id'), bookId['id'], 'book', currentpos['row'])
+          #set new position
           lastPos = db.get_last_saved_position(session.get('app_id'))
           newInterval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
           if lastPos:
@@ -732,8 +741,8 @@ def set_routes_for_books(app):
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
-    #return json.loads('{"success": 1, "response": [{"title": "Thèmesetvariations", "author": "Léo Ferré", "editor": "Le Castor Astral"}]}')
-    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}]}')
+    return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
     #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()
@@ -742,7 +751,7 @@ def set_routes_for_books(app):
     #print(ocr_output)
     try :
       ocr_analyse = json.loads(ocr_output)
-      #print(ocr_analyse)
+      print(ocr_analyse)
       output = {'success':True, 'response':ocr_analyse}
     except Exception as e:
       print(e)
