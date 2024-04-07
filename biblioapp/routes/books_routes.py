@@ -714,35 +714,43 @@ def set_routes_for_books(app):
       if 'title' in ocrbook and len(ocrbook['title']) < 2:
         searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
       else:
-        query = ocrbook['title']
-        if 'author' in ocrbook and ocrbook['author'] is not None :
-          query += " " + ocrbook['author']
-        query += "+intitle:"+ocrbook['title']
-        #query += "+inauthor:"+ocrbook['author']
-        #print(query)
-        data = tools.searchBookApi(query, 'googleapis')
-        #print(data)
-        if 'items' in data:
-          # first test  : match ocr title into api title 
-          test = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
-          if test == False:
-             # 2nd test  : match api title into ocr title 
-            test = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
-          if test:
-            searchedbook = tools.formatBookApi('googleapis', test, None, True)
-        # no search result is found            
-          else:
-            searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)  
+        # first, search for book inside shelf
+        data = db.search_book(session['app_id'], ocrbook['title'])
+        if data:
+          searchedbook = data[0]
+          searchedbook.update({'authors':searchedbook['author'].split(',')})
+          searchedbook.update({'found':True})
         else:
-          searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
+        #second search with api
+          query = ocrbook['title']
+          if 'author' in ocrbook and ocrbook['author'] is not None :
+            query += " " + ocrbook['author']
+          query += "+intitle:"+ocrbook['title']
+          #query += "+inauthor:"+ocrbook['author']
+          #print(query)
+          data = tools.searchBookApi(query, 'googleapis')
+          #print(data)
+          if 'items' in data:
+            # first test  : match ocr title into api title 
+            test = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
+            if test == False:
+              # 2nd test  : match api title into ocr title 
+              test = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
+            if test:
+              searchedbook = tools.formatBookApi('googleapis', test, None, True)
+            # no search result is found            
+            else:
+              searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)  
+          else:
+            searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
 
       return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'])
     abort(404)
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
-    #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}]}')
-    return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}, {"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
     #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()

@@ -886,7 +886,7 @@ def sort_customcodes(user_id, app_id, codes) :
 def search_book(app_id, keyword) :
   searchTerm = "%"+keyword+"%"
   mysql = get_db()
-  mysql['cursor'].execute("SELECT id, title, author FROM biblio_search where id_app=%s and \
+  mysql['cursor'].execute("SELECT * FROM biblio_search where id_app=%s and \
     (author like %s or title like %s or tags like %s)", (app_id, searchTerm, searchTerm, searchTerm))
   row = mysql['cursor'].fetchall()
   mysql['cursor'].close()

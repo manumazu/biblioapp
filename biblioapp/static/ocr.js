@@ -31,9 +31,14 @@ $(document).ready(function() {
             const books = ocr.response;
             for(let j = 0; j<books.length; j++) 
             {
-              let result = await ajax_indexBook(books[j], (j+1))
+              let index = (j+1)
+              let result = await ajax_indexBook(books[j], index)
               //console.log(result)
               $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
+              // disable list excepted first
+              if(index > 1) {
+                $('#book_' + index).addClass('disabled');
+              }
               // force forms created not being submited
               $('form').on('submit', function(e){
                 e.preventDefault();
@@ -110,6 +115,11 @@ function waitingButton(button, seconds) {
     return setInterval(run, 500);
 }
 
+function enableForm(index) {
+  console.log(index);
+  $('#book_' + index).removeClass('disabled');
+}
+
 // when the book can not be found
 function doNotIndex(form_id) {
   $('#' + form_id).addClass('disabled');
@@ -133,6 +143,8 @@ async function saveBook(form_id) {
   if(typeof data['message'] != undefined){
     const message = index[1] + '- "' + title + '": ' + data['message'];
     $('#' + form_id).html(message);
+    //enable next from
+    enableForm(parseInt(index[1])+1)
   }
 }
 
