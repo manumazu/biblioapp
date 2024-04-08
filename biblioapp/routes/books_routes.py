@@ -719,7 +719,7 @@ def set_routes_for_books(app):
         if data:
           searchedbook = data[0]
           searchedbook.update({'authors':searchedbook['author'].split(',')})
-          searchedbook.update({'found':True})
+          searchedbook.update({'found':'local'})
         else:
         #second search with api
           query = ocrbook['title']
