@@ -47,7 +47,7 @@
 		  {% endif %}
 
 		{% if book['found'] %}
-			<button type="submit" class="btn btn-primary btn-sm" {% if numbook %}onClick="saveBook('book_{{ numbook }}')"{% endif %}>add this book !</button>
+			<button type="submit" class="btn btn-primary btn-sm" {% if numbook %}onClick="saveBook('book_{{ numbook }}', {{ numshelf }})"{% endif %}>add this book !</button>
 			{% if numbook %}<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('book_{{ numbook }}')"{% endif %}>do not index</button>{% endif %}
 		{% else %}
 			<button type="submit" class="btn btn-warning btn-sm" {% if numbook %}onClick="searchBook('book_{{ numbook }}')"{% endif %}>search again...</button>

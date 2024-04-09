@@ -544,13 +544,19 @@ def del_item_position(app_id, item_id, item_type, numrow) :
   return True
 
 #get address for max position in all rows
-def get_last_saved_position(id_app):
+def get_last_saved_position(id_app, numshelf = None):
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and item_type='book' and \
-    position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and item_type='book' GROUP by row) \
-    ORDER BY row DESC LIMIT 1", (id_app, id_app));
-  row = mysql['cursor'].fetchone()
+  if numshelf > 0:
+    mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and item_type='book' and \
+      position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and row = %s and item_type='book' GROUP by row) \
+      ORDER BY row DESC LIMIT 1", (id_app, id_app, numshelf));
+  else:
+    mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and item_type='book' and \
+      position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and item_type='book' GROUP by row) \
+      ORDER BY row DESC LIMIT 1", (id_app, id_app));
+  row = mysql['cursor'].fetchone()    
   mysql['cursor'].close()
+  #print(mysql['cursor']._last_executed)
   mysql['conn'].close()
   if row:
     return row

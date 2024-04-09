@@ -32,7 +32,7 @@ $(document).ready(function() {
             for(let j = 0; j<books.length; j++) 
             {
               let index = (j+1)
-              let result = await ajax_indexBook(books[j], index)
+              let result = await ajax_indexBook(books[j], index, numshelf)
               //console.log(result)
               $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
               // disable list excepted first
@@ -85,13 +85,14 @@ async function ajax_postOcr(params, timer) {
 }
 
 // request for search api using ocr result
-async function ajax_indexBook(ocr, index) {
+async function ajax_indexBook(ocr, index, numshelf) {
   var elem = [];
   //console.log(ocr)
   elem.push('title='+ocr.title)
   elem.push('author='+ocr.author)
   elem.push('editor='+ocr.editor)
   elem.push('numbook='+index)
+  elem.push('numshelf='+numshelf)
   params = elem.join('&');
   return $.ajax({
     data: params,
@@ -126,12 +127,12 @@ function doNotIndex(form_id) {
 }
 
 //index book position using api
-async function saveBook(form_id) {
+async function saveBook(form_id, numshelf) {
   const reference = $('#' + form_id + ' > form > input[name=reference]').val()
   const title = $('#' + form_id + ' > form > input[name=title]').val()
   const index = form_id.split('_');
   // save book + location 
-  const data = await ajax_saveBook(reference);
+  const data = await ajax_saveBook(reference, numshelf);
   console.log(data);
   if(data['result'] == 'error') {
       $('#' + form_id).addClass('list-group-item-danger');
@@ -148,8 +149,8 @@ async function saveBook(form_id) {
   }
 }
 
-async function ajax_saveBook(reference) {
-  const params = 'ref='+reference+'&save_bookapi=googleapis&forcePosition=true&token=ocr';
+async function ajax_saveBook(reference, numshelf) {
+  const params = 'numshelf='+numshelf+'&ref='+reference+'&save_bookapi=googleapis&forcePosition=true&token=ocr';
   return $.ajax({
     data: params, 
     url: '/api/bookreferencer/', 

@@ -436,7 +436,7 @@ def set_routes_for_books(app):
     globalVars = tools.initApp()
     '''save classic data from form'''
     if request.method == 'POST':
-      book = tools.formatBookApi('localform', request.form, request.form['isbn'], False)  
+      book = tools.formatBookApi('localform', request.form, request.form['isbn'], False) 
       if 'id' in request.form:
         book['id'] = request.form['id']
       db.bookSave(book, globalVars['arduino_map']['user_id'], None, request.form['tags'])
@@ -449,6 +449,7 @@ def set_routes_for_books(app):
       ref = request.args.get('ref')
       isbn = request.args.get('isbn')
       source_api = request.args.get('save_bookapi')
+      numshelf = int(request.args.get('numshelf'))
 
       '''resume detail on api before saving'''
       if source_api=='googleapis':
@@ -485,7 +486,7 @@ def set_routes_for_books(app):
           if currentpos:
             db.del_item_position(session.get('app_id'), bookId['id'], 'book', currentpos['row'])
           #set new position
-          lastPos = db.get_last_saved_position(session.get('app_id'))
+          lastPos = db.get_last_saved_position(session.get('app_id'), numshelf)
           newInterval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
           if lastPos:
             newPos = lastPos['position']+1
@@ -745,7 +746,7 @@ def set_routes_for_books(app):
           else:
             searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
 
-      return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'])
+      return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'], numshelf=ocrbook['numshelf'])
     abort(404)
 
   # use subprocess to gemeni ocr analyse
