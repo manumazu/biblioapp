@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, abort, flash, redirect, json, escape, session, url_for, jsonify, \
 Response, send_from_directory
-import flask_login, hashlib
+import flask_login, hashlib, os
+from PIL import Image
+from werkzeug.utils import secure_filename
 
 '''
 Manage bookshelf, books, tags, search in shelves
@@ -336,16 +338,12 @@ def set_routes_for_books(app):
   @app.route('/booksearch/', methods=['GET', 'POST'])
   @app.route('/api/booksearch/', methods=['GET', 'POST'])
   @flask_login.login_required
-  def searchBookReference():
-    import requests
-    globalVars = tools.initApp()
-    if globalVars['arduino_map'] != None:
-      data={}
+  async def searchBookReference():
 
-      '''Search books with google api'''  
-      url = "https://www.googleapis.com/books/v1/volumes"
-      query = "?key="+app.config['GOOGLE_BOOK_API_KEY']+"&q="
-      '''search on api for form'''
+    globalVars = tools.initApp()
+    if globalVars['arduino_map'] != None:   
+      # search on api for form
+      query = ""
       if request.method == 'POST':
         if 'isbn' in request.form and request.form['isbn']:
           query += "ISBN:\""+request.form['isbn']+"\"&"
@@ -359,31 +357,39 @@ def set_routes_for_books(app):
         if request.is_json and 'title' in request.json:
           query += "intitle:"+request.json['title']
         
-        r = requests.get(url + query)
-        data = r.json()
+        data = tools.searchBookApi(query, 'googleapis')
+        #print(data)
+
         #set response for api
-        if request.is_json and 'api' in request.path:
+        if 'api' in request.path and request.is_json:
           res = []          
           if 'items' in data:
             for item in data['items']:
-              res.append(tools.formatBookApi('googleapis', item, None))   
+              book = tools.formatBookApi('googleapis', item, None, True)
+              #print(book)
+              res.append(book)
           response = app.response_class(
               response=json.dumps(res),
               mimetype='application/json'
           )
-          #print(res)          
-          return response
+          #print(res)
+          # return first result only for ocr search html render, for other case return json array
+          if 'search_origin' in request.json and request.json['search_origin'] == 'ocr':
+            book = res[0] if len(res) > 0 else None 
+            return render_template('_book_search_result.html', book=book, numbook=request.json['numbook'], search=request.json['title'])
+          else:
+            return response
         return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
           shelf_infos=globalVars['arduino_map'], tools=tools)
 
       '''display classic form for edition'''
       if request.method == 'GET' and request.args.get('ref'):
         ref = request.args.get('ref')
+        # get book reference informations
         book = {}
         if ref != 'new':
-          r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
-          data = r.json()
-          book = tools.formatBookApi('googleapis', data, None)
+          data = tools.searchBookApi(None, 'googleapis', ref)
+          book = tools.formatBookApi('googleapis', data, None, True)
           #print(book)
           if 'imageLinks' in data['volumeInfo']:
             book['imageLinks'] = data['volumeInfo']['imageLinks']
@@ -397,23 +403,20 @@ def set_routes_for_books(app):
         res = []
         '''Search books with googleapis api'''
         if request.args.get('search_api')=='googleapis':
-          query += "ISBN:\""+request.args.get('isbn')+"\""
-          r = requests.get(url + query)
-          data = r.json() 
-          #print(url + query)
+          query = "ISBN:\""+request.args.get('isbn')+"\""
+          data = tools.searchBookApi(query, 'googleapis')
+          #print(data)
           if 'items' in data:
             for item in data['items']:
-              res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn')))
+              res.append(tools.formatBookApi('googleapis', item, request.args.get('isbn'), True))
 
         '''Search books with openlibrary api'''
         if request.args.get('search_api')=='openlibrary':
-          url = "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys="
           query = "ISBN:"+request.args.get('isbn')
-          r = requests.get(url + query)
-          data = r.json()
+          data = tools.searchBookApi(query, 'openlibrary')
           #print(data)      
           if query in data:
-            res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'))]  
+            res = [tools.formatBookApi('openlibrary', data[query], request.args.get('isbn'), True)]  
 
         #print(res)
         response = app.response_class(
@@ -433,12 +436,12 @@ def set_routes_for_books(app):
     globalVars = tools.initApp()
     '''save classic data from form'''
     if request.method == 'POST':
-      book = tools.formatBookApi('localform', request.form, request.form['isbn'])  
+      book = tools.formatBookApi('localform', request.form, request.form['isbn'], False)  
       if 'id' in request.form:
         book['id'] = request.form['id']
       db.bookSave(book, globalVars['arduino_map']['user_id'], None, request.form['tags'])
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
-      #return render_template('bookreferencer.html', user_login=globalVars['user_login'])    
+      #return render_template('bookreferencer.html', user_login=globalVars['user_login'])
 
     '''save book from mobile app'''
     if 'api' in request.path and request.args.get('token') and request.args.get('save_bookapi'):
@@ -449,30 +452,39 @@ def set_routes_for_books(app):
 
       '''resume detail on api before saving'''
       if source_api=='googleapis':
-        r = requests.get("https://www.googleapis.com/books/v1/volumes/"+ref)
-        data = r.json()
-        book = tools.formatBookApi('googleapis', data, isbn) 
+        data = tools.searchBookApi(None, 'googleapis', ref)
+        book = tools.formatBookApi('googleapis', data, isbn, True) 
       if source_api=='openlibrary':
         r = requests.get("https://openlibrary.org/api/volumes/brief/isbn/"+isbn+".json")
         data = r.json()
-        book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn)
+        book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn, True)
 
-      book_width = request.args.get('book_width')
-      book['width'] = round(float(book_width))
-      #print(book)
+      if 'book_width' in request.args:
+        book_width = request.args.get('book_width')
+        book['width'] = round(float(book_width))
+      # force width if not found or not set
+      elif 'width' not in book:
+        book['width'] = round(tools.set_book_width(book['pages']))
+
+      forcePosition = request.args.get('forcePosition')
 
       #save process
-      bookId = db.get_bookapi(isbn, globalVars['arduino_map']['user_id'])
-      message = {}  
+      bookId = db.get_bookapi(isbn, ref, globalVars['arduino_map']['user_id'])
+      message = {}
 
-      if bookId:
+      if bookId and forcePosition == 'false':
         message = {'result':'error', 'message':'This book is already in your shelfs'}
       #add new book
       else:
-        bookId = db.bookSave(book, globalVars['arduino_map']['user_id'], None)
+        if bookId == False:
+          bookId = db.bookSave(book, globalVars['arduino_map']['user_id'], None)
         #force position in current app
-        forcePosition = request.args.get('forcePosition')
         if forcePosition == 'true':
+          # check if position already exists and remove it
+          currentpos = db.get_position_for_book(session['app_id'], bookId['id'])
+          if currentpos:
+            db.del_item_position(session.get('app_id'), bookId['id'], 'book', currentpos['row'])
+          #set new position
           lastPos = db.get_last_saved_position(session.get('app_id'))
           newInterval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
           if lastPos:
@@ -581,3 +593,176 @@ def set_routes_for_books(app):
     )
     return response  
 
+  #upload users's  bookshelves pictures and start OCR with IA on it
+  @app.route('/bookindexer', methods=['GET', 'POST'])
+  @flask_login.login_required
+  def upload_bookshelf():
+    globalVars = tools.initApp()
+    #print(globalVars)
+    
+    if request.method == 'GET':
+
+        # display uploaded pictures for current bookshelf and shelf number
+        if 'numshelf' in request.args: 
+          numshelf = request.args.get('numshelf')
+          upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf, 'resize')
+          full_path_dir = os.path.join(app.root_path, upload_dir)
+          #get uploaded image list
+          if os.path.isdir(full_path_dir) is False:
+            abort(404)
+          img_list = os.listdir(full_path_dir)
+          img_list = sorted(img_list)
+          dir_list = []
+          for img in img_list:
+            relative_img_path = os.path.join(upload_dir, img)
+            dir_list.append({"path":relative_img_path, "filename":img})
+            #print(dir_list)   
+          rendered = render_template('upload_bookshelf_render.html', img_paths = dir_list, numshelf = numshelf, module_name=globalVars['arduino_map']['arduino_name'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
+          return rendered
+      
+        # dislay upload form
+        else:
+          return render_template('upload_bookshelf.html', nb_lines=globalVars['arduino_map']['nb_lines'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
+    
+    # manage post pictures + resize
+    if request.method == 'POST':
+
+        if 'shelf_img' not in request.files:
+            flash('Veuillez sélectionner un dossier')
+            return redirect(request.url)
+        shelf_img = request.files['shelf_img']
+        if shelf_img.filename == '':
+            flash('Aucun fichier sélectionné', 'warning')
+            return redirect(request.url)
+        if tools.allowed_file(shelf_img.filename) is False:
+          flash('Format de fichier non autorisé', 'warning')
+          return redirect(request.url)
+        if shelf_img and 'shelf' in request.form:
+            filename = secure_filename(shelf_img.filename)
+            numshelf = str(request.form['shelf'])
+            upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf)
+            #create user dir if not exists
+            user_dir = os.path.join(app.root_path, upload_dir)
+            if not os.path.exists(user_dir):
+              os.makedirs(user_dir)
+            
+            #order file list
+            count_img = os.listdir(user_dir)
+            nb_img = len(count_img)
+            if nb_img == 0:
+              nb_img = 1
+            filename = str(nb_img) + '_' + filename
+            
+            #save image 
+            full_path_img = os.path.join(user_dir, filename)
+            shelf_img.save(full_path_img)
+            
+            #resize image
+            img = Image.open(full_path_img)
+            width, height = img.size
+            ratio = width/height
+            img_resized = img.resize((2000,int(2000/ratio))) if(ratio > 1) else img.resize((1500,int(1500/ratio)))
+            resize_dir = os.path.join(user_dir, 'resize')
+            if not os.path.exists(resize_dir):
+              os.makedirs(resize_dir)
+            img_resized_path = os.path.join(resize_dir, filename)
+            img_resized.save(img_resized_path)
+            
+            return redirect(request.url + '?numshelf=' + numshelf)
+
+  #used for ocr indexation
+  @app.route('/api/ajax_ocr/', methods=['POST'])
+  @flask_login.login_required
+  async def ajaxOcr():
+    globalVars = tools.initApp()
+    if request.method == 'POST' and session.get('app_id'):
+      img_path = request.form.get('img')
+      numshelf = request.form.get('numshelf')
+      img_num = request.form.get('img_num')
+      # rebuild local path for img
+      upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf)#, 'resize')
+      if not os.path.exists(upload_dir):
+        abort(404)
+      # perform ocr + search
+      output = {}
+      # execute ocr analyze for image checked
+      res = ocrAnalyse(os.path.join(upload_dir, img_path))
+      #print(res)
+      if 'success' in res:
+        # manage exception error in ocr result
+        if res['success'] == False:
+          output = res
+          output.update({'img_num':img_num})
+        else:
+          # return ocr result
+          output = {'success': True, 'response':res['response'], 'ocr_nb_books':len(res['response']), 'img_num':img_num}
+      # display result
+      response = app.response_class(
+        response=json.dumps(output),
+        mimetype='application/json'
+      )
+      return response
+
+  # use api books to retrieve books from ocr result
+  @app.route('/api/ajax_bookindexer/', methods=['POST'])
+  @flask_login.login_required  
+  def searchApiBooksForOcr():
+    #print(request.form)
+    if request.method == 'POST' and session.get('app_id'):# and request.is_json:       
+      # book must have title to perform search
+      ocrbook = request.form
+      if 'title' in ocrbook and len(ocrbook['title']) < 2:
+        searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
+      else:
+        # first, search for book inside shelf
+        data = db.search_book(session['app_id'], ocrbook['title'])
+        if data:
+          searchedbook = data[0]
+          searchedbook.update({'authors':searchedbook['author'].split(',')})
+          searchedbook.update({'found':'local'})
+        else:
+        #second search with api
+          query = ocrbook['title']
+          if 'author' in ocrbook and ocrbook['author'] is not None :
+            query += " " + ocrbook['author']
+          query += "+intitle:"+ocrbook['title']
+          #query += "+inauthor:"+ocrbook['author']
+          #print(query)
+          data = tools.searchBookApi(query, 'googleapis')
+          #print(data)
+          if 'items' in data:
+            # first test  : match ocr title into api title 
+            test = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
+            if test == False:
+              # 2nd test  : match api title into ocr title 
+              test = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
+            if test:
+              searchedbook = tools.formatBookApi('googleapis', test, None, True)
+            # no search result is found            
+            else:
+              searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)  
+          else:
+            searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
+
+      return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'])
+    abort(404)
+
+  # use subprocess to gemeni ocr analyse
+  def ocrAnalyse(img_path):
+    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}, {"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
+
+    ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
+    #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()
+    import subprocess
+    ocr_output = subprocess.check_output("cd " + ocr_path + " && ./ocr_wrapper.sh " + img_path, shell=True)
+    #print(ocr_output)
+    try :
+      ocr_analyse = json.loads(ocr_output)
+      print(ocr_analyse)
+      output = {'success':True, 'response':ocr_analyse}
+    except Exception as e:
+      print(e)
+      output = {'success':False, 'response': 'Error parsing JSON output -- ' + str(e)}
+    #print(output)
+    return output

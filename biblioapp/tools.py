@@ -1,7 +1,9 @@
 from flask import session, flash
 from datetime import datetime
 from biblioapp import create_app, db, hashlib, base64
+from unidecode import unidecode
 import flask_login
+import re
 
 app = create_app()
 
@@ -77,6 +79,20 @@ def uuid_encode(string):
 
 def set_id_ble(module):
   return "bibus"+"-"+str(module['id']).zfill(4)+"-"+str(module['nb_lines']).zfill(2)+""+str(module['nb_cols']).zfill(3)
+
+def set_book_width(pages):
+  # use scale 120 pages for 1 cm 
+  if pages <= 350:
+    cm = pages/120
+  # use scale 200 pages for 1 cm 
+  elif pages > 350 and pages <= 500:
+    cm = pages/200
+  # use scale 350 pages for 1 cm 
+  elif pages > 500:
+    cm = pages/350
+  if cm < 1:
+    cm = 1
+  return round(float(cm),2)*10
 
 def led_range(book, leds_interval):
   #compute interval with led strip spec
@@ -182,7 +198,51 @@ def sortPositions(address):
 def sortCoords(coords):
   return coords[0]
 
-def formatBookApi(api, data, isbn):
+def match_words(words, string):
+  w = unidecode(words).lower()
+  s = unidecode(string).lower()
+  # search words inside string
+  compare = re.search(re.escape(w), s, re.IGNORECASE)
+  #print(compare)
+  if compare and compare.start() < 2:
+    return True
+  return False
+
+# search ocr book title and api search result title
+def matchApiSearchResults(title, data, way):
+  cpt = 0
+  for item in data['items']:
+    # test match on 2 sides
+    #print(item['volumeInfo']['title'])
+    if way == 'ocr-in-api':
+      test = match_words(title, item['volumeInfo']['title'])
+    if way == 'api-in-ocr':
+      test = match_words(item['volumeInfo']['title'], title)
+    # take the first matchting result only
+    if test:
+      cpt += 1
+      if cpt == 1:
+        return item
+  return False
+
+# Search books with open api
+def searchBookApi(query, api, ref = None):
+  import requests
+  if api == 'googleapis':
+    url = "https://www.googleapis.com/books/v1/volumes?key="+app.config['GOOGLE_BOOK_API_KEY']+"&q="
+  if api == 'openlibrary':
+    url = "https://openlibrary.org/api/books?format=json&jscmd=data&bibkeys="
+  if ref is not None:
+    url = "https://www.googleapis.com/books/v1/volumes/"
+    query = ref
+
+  data = {}
+  r = requests.get(url + query)
+  data = r.json()
+  print(query)
+  return data
+
+def formatBookApi(api, data, isbn, found = False):
   bookapi = {}
 
   if api == 'localform':
@@ -202,6 +262,12 @@ def formatBookApi(api, data, isbn):
     else :
       bookapi['width'] = None
 
+  # used for AI ocr results
+  if api == 'ocr':
+    bookapi['authors'] = [data['author']]
+    bookapi['title'] = data['title']
+    bookapi['editor'] = data['editor']
+
   if api == 'openlibrary':
     authors = []
     if 'authors' in data:
@@ -220,7 +286,7 @@ def formatBookApi(api, data, isbn):
     bookapi['pages'] = data['number_of_pages'] if 'number_of_pages' in data else 0
     bookapi['year'] = getYear(data['publish_date']) if 'publish_date' in data else ""
     
-  elif api == 'googleapis':
+  if api == 'googleapis':
     authors = []
     if 'authors' in data['volumeInfo']:
       authors = data['volumeInfo']['authors']
@@ -247,6 +313,7 @@ def formatBookApi(api, data, isbn):
       converter = 10 if width.find('cm') else 1 # convert dimension from cm to mm
       bookapi['width'] = str2int(width)*converter
 
+  bookapi['found'] = found
   return bookapi
 
 def str2int(str):
@@ -272,3 +339,8 @@ def drawline(line, x, y, xoffset, nb_leds, color):
   for j in range(maxled-xoffset):
     leds[j] = color;
   return leds
+
+def allowed_file(filename):
+  return '.' in filename and \
+    filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+

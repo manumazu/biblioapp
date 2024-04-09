@@ -40,49 +40,12 @@
 	</form>
 
 	{% if 'items' in data %}
-	<!-- Api search results -->
+	<!-- Api Google search results -->
 	<h2>Results</h2>
-	<ul>       
+	<ul class="list-group" style="color:#000">       
 	{% for field in data['items'] %}
-	    <li>
-		<form method="post" action="/bookreferencer/">
-		<input type="hidden" name="reference" value="{{ field['id'] }}">
-
-		{% if 'authors' in field['volumeInfo'] %}
-		  {% for author in field['volumeInfo']['authors'] %}
-		    {{ author }}, 
-		    <input type="hidden" name="authors[]" value="{{ author }}">
-		  {% endfor %}
-		{% endif %}
-
-		<input type="hidden" name="title" value="{{ field['volumeInfo']['title'] }} {{field['volumeInfo']['subtitle']}}">
-		<input type="hidden" name="editor" value="{{ field['volumeInfo']['publisher'] }}">
-		<input type="hidden" name="pages" value="{{ field['volumeInfo']['pageCount'] }}">
-		<input type="hidden" name="year" value="{{ tools.getYear(field['volumeInfo']['publishedDate']) }}">
-		<input type="hidden" name="description" value="{{field['volumeInfo']['description']}}">
-
-		<i><a href="{{ url_for('searchBookReference') }}?ref={{ field['id'] }}">{{ field['volumeInfo']['title'] }}</a> {{field['volumeInfo']['subtitle']}}</i> - 
-		{{ field['volumeInfo']['publisher'] }} ({{ tools.getYear(field['volumeInfo']['publishedDate']) }}, {{ field['volumeInfo']['pageCount'] }}p)
-
-		- {% if 'categories' in field['volumeInfo'] %}
-		    {% for category in field['volumeInfo']['categories'] %}
-			<input type="hidden" name="tags" value="{{ category }}">
-			{{ category }}
-		    {% endfor %}
-		{% endif %}
-
-		<ul>
-		{% for Ids in field['volumeInfo']['industryIdentifiers'] %}
-		  {% if Ids['type'] == "ISBN_13" %}
-		  	<input type="hidden" name="isbn" value="{{Ids['identifier']}}">
-		  	<li>ISBN : {{ Ids['identifier'] }}</li>
-		  {% endif %}
-		{% endfor %}
-		</ul>
-
-		<input type="submit" value="add this book !" class="btn btn-primary btn-sm">
-		</form>
-	   </li>
+		{% set book = tools.formatBookApi('googleapis', field, None, True) %}
+		{% include '_book_search_result.html' %}
 	{% endfor %}
 	</ul>
 	
