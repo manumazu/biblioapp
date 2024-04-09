@@ -297,6 +297,7 @@ def formatBookApi(api, data, isbn, found = False):
     if 'subtitle' in data['volumeInfo']:
       bookapi['title'] += ' - '+data['volumeInfo']['subtitle']
     bookapi['reference'] = data['id']
+    bookapi['isbn'] = ''
     if isbn is not None:
       bookapi['isbn'] = isbn
     else:

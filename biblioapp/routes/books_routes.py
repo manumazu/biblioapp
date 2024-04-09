@@ -708,14 +708,15 @@ def set_routes_for_books(app):
   @flask_login.login_required  
   def searchApiBooksForOcr():
     #print(request.form)
+    globalVars = tools.initApp()
     if request.method == 'POST' and session.get('app_id'):# and request.is_json:       
       # book must have title to perform search
       ocrbook = request.form
       if 'title' in ocrbook and len(ocrbook['title']) < 2:
         searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
       else:
-        # first, search for book inside shelf
-        data = db.search_book(session['app_id'], ocrbook['title'])
+        # first, search for book inside shelf index
+        data = db.search_book_title(globalVars['arduino_map']['user_id'], ocrbook['title'])
         if data:
           searchedbook = data[0]
           searchedbook.update({'authors':searchedbook['author'].split(',')})

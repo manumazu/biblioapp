@@ -883,6 +883,18 @@ def sort_customcodes(user_id, app_id, codes) :
     sortable[i]={'code':code,'position':i}
   return sortable
 
+def search_book_title(user_id, keyword) :
+  searchTerm = "%"+keyword+"%"
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT * FROM biblio_book where id_user=%s and title like %s", (user_id, searchTerm))
+  row = mysql['cursor'].fetchall()
+  #print(mysql['cursor']._last_executed)
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False
+
 def search_book(app_id, keyword) :
   searchTerm = "%"+keyword+"%"
   mysql = get_db()
