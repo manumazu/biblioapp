@@ -35,10 +35,11 @@ $(document).ready(function() {
               let result = await ajax_indexBook(books[j], index, numshelf)
               //console.log(result)
               $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
-              // disable list excepted first
-              if(index > 1) {
+              // disable list excepted first or already in shelf
+              hasPosition = $('#book_' + index).hasClass('list-group-item-success');
+              /*if(index > 1 && !hasPosition) {
                 $('#book_' + index).addClass('disabled');
-              }
+              }*/
               // force forms created not being submited
               $('form').on('submit', function(e){
                 e.preventDefault();
