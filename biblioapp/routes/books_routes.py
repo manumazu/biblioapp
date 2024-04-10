@@ -439,10 +439,12 @@ def set_routes_for_books(app):
       book = tools.formatBookApi('localform', request.form, request.form['isbn'], False) 
       if 'id' in request.form:
         book['id'] = request.form['id']
-      db.bookSave(book, globalVars['arduino_map']['user_id'], None, request.form['tags'])
+      bookId = db.get_bookapi(request.form['isbn'], request.form['reference'], globalVars['arduino_map']['user_id'])
+      if bookId == False:
+          tags = request.form['tags'] if 'tags' in request.form else None
+          db.bookSave(book, globalVars['arduino_map']['user_id'], session.get('app_id'), tags)
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
-      #return render_template('bookreferencer.html', user_login=globalVars['user_login'])
-
+      
     '''save book from mobile app'''
     if 'api' in request.path and request.args.get('token') and request.args.get('save_bookapi'):
       import requests
@@ -478,7 +480,7 @@ def set_routes_for_books(app):
       #add new book
       else:
         if bookId == False:
-          bookId = db.bookSave(book, globalVars['arduino_map']['user_id'], None)
+          bookId = db.bookSave(book, globalVars['arduino_map']['user_id'], session.get('app_id'), None)
         #force position in current app
         if forcePosition == 'true':
           # check if position already exists and remove it
@@ -751,7 +753,7 @@ def set_routes_for_books(app):
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
-    #return json.loads('{"success": 1, "response": [{"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Surveillance électronique planétaire", "author": "Duncan Campbell", "editor": "Garnier"}]}')
     #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}, {"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")

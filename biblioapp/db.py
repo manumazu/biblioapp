@@ -355,10 +355,12 @@ def bookSave(book, user_id, app_id, tags = None):
   bookId = set_book(book, user_id, app_id)
   #manage tags + taxonomy
   #author tags
-  authorTags = tools.getLastnameFirstname(book['authors'])
-  authorTagids = set_tags(authorTags,'Authors')
-  if len(authorTagids)>0:
-    set_tag_node(bookId, authorTagids)
+  authorTagids = []
+  if len(book['authors']) > 0:
+    authorTags = tools.getLastnameFirstname(book['authors'])
+    authorTagids = set_tags(authorTags,'Authors')
+    if len(authorTagids)>0:
+      set_tag_node(bookId, authorTagids)
   #categories
   if tags is not None :  
     clean_tag_for_node(bookId['id'], 1) #clean tags categories  before update
@@ -547,9 +549,9 @@ def del_item_position(app_id, item_id, item_type, numrow) :
 def get_last_saved_position(id_app, numshelf = None):
   mysql = get_db()
   if numshelf > 0:
-    mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and item_type='book' and \
+    mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and row = %s and item_type='book' and \
       position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and row = %s and item_type='book' GROUP by row) \
-      ORDER BY row DESC LIMIT 1", (id_app, id_app, numshelf));
+      ORDER BY row DESC LIMIT 1", (id_app, numshelf, id_app, numshelf));
   else:
     mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and item_type='book' and \
       position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and item_type='book' GROUP by row) \

@@ -117,13 +117,15 @@ function waitingButton(button, seconds) {
 }
 
 function enableForm(index) {
-  console.log(index);
+  //console.log(index);
   $('#book_' + index).removeClass('disabled');
 }
 
 // when the book can not be found
 function doNotIndex(form_id) {
   $('#' + form_id).addClass('disabled');
+  const index = form_id.split('_');
+  enableForm(parseInt(index[1])+1)
 }
 
 //index book position using api
@@ -133,7 +135,7 @@ async function saveBook(form_id, numshelf) {
   const index = form_id.split('_');
   // save book + location 
   const data = await ajax_saveBook(reference, numshelf);
-  console.log(data);
+  //console.log(data);
   if(data['result'] == 'error') {
       $('#' + form_id).addClass('list-group-item-danger');
   }                         
