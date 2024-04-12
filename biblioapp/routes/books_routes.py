@@ -632,14 +632,14 @@ def set_routes_for_books(app):
 
         if 'shelf_img' not in request.files:
             flash('Veuillez sélectionner un dossier')
-            return redirect(request.url)
+            return redirect(url_for('upload_bookshelf', _scheme='https', _external=True))
         shelf_img = request.files['shelf_img']
         if shelf_img.filename == '':
             flash('Aucun fichier sélectionné', 'warning')
-            return redirect(request.url)
+            return redirect(url_for('upload_bookshelf', _scheme='https', _external=True))
         if tools.allowed_file(shelf_img.filename) is False:
           flash('Format de fichier non autorisé', 'warning')
-          return redirect(request.url)
+          return redirect(url_for('upload_bookshelf', _scheme='https', _external=True))
         if shelf_img and 'shelf' in request.form:
             filename = secure_filename(shelf_img.filename)
             numshelf = str(request.form['shelf'])
@@ -671,7 +671,7 @@ def set_routes_for_books(app):
             img_resized_path = os.path.join(resize_dir, filename)
             img_resized.save(img_resized_path)
             
-            return redirect(request.url + '?numshelf=' + numshelf)
+            return redirect(url_for('upload_bookshelf', numshelf=numshelf, _scheme='https', _external=True))
 
   #used for ocr indexation
   @app.route('/api/ajax_ocr/', methods=['POST'])
