@@ -895,12 +895,13 @@ def search_book_title(user_id, keyword) :
   #use fulltext index search
   searchArray = keyword.split(' ')
   #build search string using double quote for the 2 first words in string for better result
-  if len(searchArray) > 2:
-    searchTerm = '\"' + searchArray[0] + ' ' + searchArray[1] + '\"'
-    for i in range(2, len(searchArray)):
+  if len(searchArray) > 3:
+    searchTerm = '\"' + searchArray[0] + ' ' + searchArray[1] + ' ' + searchArray[2] + '\"'
+    for i in range(3, len(searchArray)):
       searchTerm += ' ' + searchArray[i]
   else:
-    searchTerm = keyword
+    searchTerm = '\"' + keyword + '\"'
+  app.logger.info('ocr : search book db for "%s"', searchTerm)
   #searchTerm = "%"+keyword+"%"
   mysql = get_db()
   mysql['cursor'].execute("SELECT * FROM biblio_book where id_user=%s and MATCH(title) AGAINST(%s)", (user_id, searchTerm)) 

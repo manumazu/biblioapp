@@ -5,6 +5,8 @@ from markupsafe import escape
 import flask_login, hashlib, base64, os, locale, glob
 from flask_session import Session
 from flask_cors import CORS
+#import config for loggin
+from biblioapp.logging_config import dictConfig
 
 login_manager = flask_login.LoginManager()
 
@@ -13,6 +15,7 @@ def create_app():
   app = Flask(__name__)
   CORS(app, resources={r"/api/*": {"origins": "*"}})
   app.config.from_pyfile("../config.py")
+
   #override elements from environment settings
   for variable, value in os.environ.items():
     #if variable.startswith("MYSQL_"):
