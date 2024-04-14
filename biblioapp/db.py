@@ -894,10 +894,10 @@ def sort_customcodes(user_id, app_id, codes) :
 def search_book_title(user_id, keyword) :
   #use fulltext index search
   searchArray = keyword.split(' ')
-  #build search string using double quote for the 4 first words in string for better result
-  if len(searchArray) > 4:
-    searchTerm = '\"' + searchArray[0] + ' ' + searchArray[1] + ' ' + searchArray[2] + ' ' + searchArray[3] + '\"'
-    for i in range(4, len(searchArray)):
+  #build search string using double quote for the 5 first words in string for better result
+  if len(searchArray) > 5:
+    searchTerm = '\"' + searchArray[0] + ' ' + searchArray[1] + ' ' + searchArray[2] + ' ' + searchArray[3] + ' ' + searchArray[4] + '\"'
+    for i in range(5, len(searchArray)):
       searchTerm += ' ' + searchArray[i]
   else:
     searchTerm = '\"' + keyword + '\"'
