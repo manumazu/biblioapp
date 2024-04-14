@@ -164,10 +164,10 @@ async function ajax_saveBook(reference, numshelf) {
 }
 
 // search book and return results
-async function searchBook(form_id) {
+async function searchBook(form_id, numshelf) {
   const title = $('#' + form_id + ' > form > input[name=intitle]').val()
   const index = form_id.split('_');
-  const result = await ajax_searchBook(title, index[1]);
+  const result = await ajax_searchBook(title, index[1], numshelf);
   //console.log(result)
   $('#'+form_id).replaceWith(result);
   // force forms created not being submited
@@ -177,13 +177,14 @@ async function searchBook(form_id) {
 }
 
 // request for search api
-async function ajax_searchBook(title, index) {
+async function ajax_searchBook(title, index, numshelf) {
   var elem = [];
   const payload = {
     title: title,
     numbook: index,
     search_api: 'googleapis',
-    search_origin: 'ocr'
+    search_origin: 'ocr',
+    numshelf: numshelf
   };  
   return $.ajax({
     data: JSON.stringify(payload), 

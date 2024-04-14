@@ -894,14 +894,14 @@ def sort_customcodes(user_id, app_id, codes) :
 def search_book_title(user_id, keyword) :
   #use fulltext index search
   searchArray = keyword.split(' ')
-  #build search string using double quote for the 2 first words in string for better result
-  if len(searchArray) > 3:
-    searchTerm = '\"' + searchArray[0] + ' ' + searchArray[1] + ' ' + searchArray[2] + '\"'
-    for i in range(3, len(searchArray)):
+  #build search string using double quote for the 4 first words in string for better result
+  if len(searchArray) > 4:
+    searchTerm = '\"' + searchArray[0] + ' ' + searchArray[1] + ' ' + searchArray[2] + ' ' + searchArray[3] + '\"'
+    for i in range(4, len(searchArray)):
       searchTerm += ' ' + searchArray[i]
   else:
     searchTerm = '\"' + keyword + '\"'
-  app.logger.info('ocr : search book db for "%s"', searchTerm)
+  app.logger.info('ocr 2 : search book db for "%s"', searchTerm)
   #searchTerm = "%"+keyword+"%"
   mysql = get_db()
   mysql['cursor'].execute("SELECT * FROM biblio_book where id_user=%s and MATCH(title) AGAINST(%s)", (user_id, searchTerm)) 

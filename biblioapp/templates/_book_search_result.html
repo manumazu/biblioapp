@@ -56,7 +56,7 @@
 				{% if numbook %}<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('book_{{ numbook }}')"{% endif %}>do not index</button>{% endif %}
 			{% else %}
 				<!-- book not found in search api result -->
-				<button type="submit" class="btn btn-warning btn-sm" {% if numbook %}onClick="searchBook('book_{{ numbook }}')"{% endif %}>search again...</button>
+				<button type="submit" class="btn btn-warning btn-sm" {% if numbook %}onClick="searchBook('book_{{ numbook }}', {{ numshelf }})"{% endif %}>search again...</button>
 				<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('book_{{ numbook }}')"{% endif %}>do not index</button>
 			{% endif %}
 			</form>
