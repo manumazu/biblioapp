@@ -439,10 +439,8 @@ def set_routes_for_books(app):
       book = tools.formatBookApi('localform', request.form, request.form['isbn'], False) 
       if 'id' in request.form:
         book['id'] = request.form['id']
-      bookId = db.get_bookapi(request.form['isbn'], request.form['reference'], globalVars['arduino_map']['user_id'])
-      if bookId == False:
-          tags = request.form['tags'] if 'tags' in request.form else None
-          db.bookSave(book, globalVars['arduino_map']['user_id'], session.get('app_id'), tags)
+      tags = request.form['tags'] if 'tags' in request.form else None
+      db.bookSave(book, globalVars['arduino_map']['user_id'], session.get('app_id'), tags)
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
       
     '''save book from mobile app'''
