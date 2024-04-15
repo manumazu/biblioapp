@@ -896,7 +896,7 @@ def search_book_title(user_id, keyword) :
   searchArray = keyword.split(' ')
   #build search string using double quote for the 5 first words in string for better result
   if len(searchArray) > 5:
-    searchTerm = '\"' + searchArray[0] + ' ' + searchArray[1] + ' ' + searchArray[2] + ' ' + searchArray[3] + ' ' + searchArray[4] + '\"'
+    searchTerm = '+\"' + searchArray[0] + ' ' + searchArray[1] + ' ' + searchArray[2] + ' ' + searchArray[3] + ' ' + searchArray[4] + '\"'
     for i in range(5, len(searchArray)):
       searchTerm += ' ' + searchArray[i]
   else:
@@ -904,7 +904,7 @@ def search_book_title(user_id, keyword) :
   app.logger.info('ocr 2 : search book db for "%s"', searchTerm)
   #searchTerm = "%"+keyword+"%"
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_book where id_user=%s and MATCH(title) AGAINST(%s)", (user_id, searchTerm)) 
+  mysql['cursor'].execute("SELECT * FROM biblio_book where id_user=%s and MATCH(title) AGAINST(%s IN BOOLEAN MODE)", (user_id, searchTerm)) 
   #and title like %s", (user_id, searchTerm))
   row = mysql['cursor'].fetchall()
   #print(mysql['cursor']._last_executed)
