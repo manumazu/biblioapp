@@ -134,17 +134,19 @@ async function saveBook(form_id, numshelf) {
   const reference = $('#' + form_id + ' > form > input[name=reference]').val()
   const title = $('#' + form_id + ' > form > input[name=title]').val()
   const index = form_id.split('_');
+
   // save book + location 
   const data = await ajax_saveBook(reference, numshelf);
   //console.log(data);
   if(data['result'] == 'error') {
       $('#' + form_id).addClass('list-group-item-danger');
   }                         
-  if(data['result'] == 'success' && data['address'] != undefined) {
+  if(data['result'] == 'success' && typeof data['address'] !== 'undefined') {
+      $('#' + form_id).removeClass('list-group-item-warning');
       $('#' + form_id).addClass('list-group-item-success');
   }
   //display new posiion in shelf  
-  if(typeof data['message'] != undefined){
+  if(typeof data['message'] !== 'undefined'){
     const message = index[1] + '- "' + title + '": ' + data['message'];
     $('#' + form_id).html(message);
     //enable next from
@@ -196,6 +198,4 @@ async function ajax_searchBook(title, index, numshelf) {
     }
   })
 }
-
-
 

@@ -414,10 +414,27 @@ manage position suppression for one item
 - delete current position
 '''  
 
-''' manage items position '''
-def get_position_for_book(app_id, book_id) :
+''' get book for in all apps for given user '''
+def get_book_position_for_user(user_id, book_id) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_position where id_app=%s and id_item=%s and item_type='book'",(app_id, book_id))
+  mysql['cursor'].execute("SELECT bp.*, ba.arduino_name FROM biblio_position bp \
+    INNER JOIN biblio_app ba ON bp.id_app = ba.id \
+    INNER JOIN biblio_book bb ON bp.id_item = bb.id AND bb.id_user=%s\
+    where bp.id_item=%s and bp.item_type='book'",(user_id, book_id))
+  row = mysql['cursor'].fetchone()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False
+
+''' get book position for given app '''
+def get_position_for_book(app_id, book_id, all_apps = False) :
+  mysql = get_db()
+  if all_apps:
+    mysql['cursor'].execute("SELECT * FROM biblio_position where id_item=%s and item_type='book'", book_id)
+  else:
+    mysql['cursor'].execute("SELECT * FROM biblio_position where id_app=%s and id_item=%s and item_type='book'", (app_id, book_id))
   row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
@@ -539,7 +556,7 @@ def del_item_position(app_id, item_id, item_type, numrow) :
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
-  #print(mysql['cursor']._last_executed)
+  #app.logger.info('debug %s', mysql['cursor']._last_executed)
   #udpate app for book item
   if item_type == 'book':
     update_app_book(None, item_id)  
@@ -563,6 +580,33 @@ def get_last_saved_position(id_app, numshelf = None):
   if row:
     return row
   return False
+
+# suppr and add new position for given book
+def update_position(app_id, book, numshelf, globalVars, force = False):
+  # check if position already exists and remove it
+  currentpos = get_position_for_book(app_id, book['id'], force)
+  if currentpos:
+    del_item_position(currentpos['id_app'], book['id'], 'book', currentpos['row'])
+  #set new position
+  lastPos = get_last_saved_position(app_id, numshelf)
+  newInterval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
+  if lastPos:
+    newPos = lastPos['position']+1
+    newRow = lastPos['row']
+    newLedNum = lastPos['led_column']+lastPos['range']
+  else:#first book in line
+    newPos = 1
+    newRow = 1
+    newLedNum = 0   
+  #adjust new led column with static element
+  statics = get_static_positions(app_id, newPos) 
+  if statics:
+    for static in statics:
+     if int(newLedNum) == int(static['led_column']):
+      newLedNum += static['range']               
+  set_position(app_id, book['id'], newPos, newRow, newInterval, 'book', newLedNum)
+  return get_position_for_book(app_id, book['id'])
+
 
 ''' manage taxonomy '''
 def get_tag_for_node(id_node, id_taxonomy):

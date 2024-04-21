@@ -443,31 +443,29 @@ def set_routes_for_books(app):
       db.bookSave(book, globalVars['arduino_map']['user_id'], session.get('app_id'), tags)
       return redirect(url_for('myBookShelf', _scheme='https', _external=True))
       
-    '''save book from mobile app'''
+    '''save book from mobile app or ocr search '''
     if 'api' in request.path and request.args.get('token') and request.args.get('save_bookapi'):
-      import requests
       ref = request.args.get('ref')
       isbn = request.args.get('isbn')
       source_api = request.args.get('save_bookapi')
       numshelf = int(request.args.get('numshelf'))
+      forcePosition = request.args.get('forcePosition')
 
-      '''resume detail on api before saving'''
+      '''resume detail on api before saving book'''
       if source_api=='googleapis':
         data = tools.searchBookApi(None, 'googleapis', ref)
         book = tools.formatBookApi('googleapis', data, isbn, True) 
       if source_api=='openlibrary':
+        import requests
         r = requests.get("https://openlibrary.org/api/volumes/brief/isbn/"+isbn+".json")
         data = r.json()
         book = tools.formatBookApi('openlibrary', data['records'][ref]['data'], isbn, True)
-
       if 'book_width' in request.args:
         book_width = request.args.get('book_width')
         book['width'] = round(float(book_width))
       # force width if not found or not set
       elif 'width' not in book:
         book['width'] = round(tools.set_book_width(book['pages']))
-
-      forcePosition = request.args.get('forcePosition')
 
       #save process
       bookId = db.get_bookapi(isbn, ref, globalVars['arduino_map']['user_id'])
@@ -479,37 +477,17 @@ def set_routes_for_books(app):
       else:
         if bookId == False:
           bookId = db.bookSave(book, globalVars['arduino_map']['user_id'], session.get('app_id'), None)
+        book['id'] = bookId['id']
         #force position in current app
         if forcePosition == 'true':
-          # check if position already exists and remove it
-          currentpos = db.get_position_for_book(session['app_id'], bookId['id'])
-          if currentpos:
-            db.del_item_position(session.get('app_id'), bookId['id'], 'book', currentpos['row'])
-          #set new position
-          lastPos = db.get_last_saved_position(session.get('app_id'), numshelf)
-          newInterval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
-          if lastPos:
-            newPos = lastPos['position']+1
-            newRow = lastPos['row']
-            newLedNum = lastPos['led_column']+lastPos['range']
-          else:#first book in line
-            newPos = 1
-            newRow = 1
-            newLedNum = 0   
-          #adjust new led column with static element
-          statics = db.get_static_positions(session.get('app_id'),newPos) 
-          if statics:      
-            for static in statics:
-             if int(newLedNum) == int(static['led_column']):
-              newLedNum += static['range']               
-          db.set_position(session.get('app_id'), bookId['id'], newPos, newRow, newInterval, 'book', newLedNum)
-          address = db.get_position_for_book(session.get('app_id'), bookId['id'])
+          # force new position 
+          address = db.update_position(session.get('app_id'), book, numshelf, globalVars, True)
         #confirm message
         if bookId:
           message['result'] = 'success'
           message['message'] = 'Book added with id '+str(bookId['id'])
-          if forcePosition == 'true' and newLedNum != None:
-            message['message'] += ' at position n°' +str(newPos)+ ' and LED n° ' + str(int(newLedNum)+1) + ' in row n°'+str(newRow)
+          if forcePosition == 'true' and address:
+            message['message'] += ' at position n°' +str(address['position'])+ ' and LED n° ' + str(int(address['led_column'])+1) + ' in row n°'+str(address['row'])
             message['address'] = [{'action':'add', 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \
         'id_node':bookId['id'], 'borrowed':address['borrowed']}]
         else:
@@ -722,7 +700,7 @@ def set_routes_for_books(app):
           searchedbook = data[0]
           searchedbook.update({'authors':searchedbook['author'].split(',')})
           searchedbook.update({'found':'local'})
-          address = db.get_position_for_book(session.get('app_id'), searchedbook['id'])
+          address = db.get_book_position_for_user(globalVars['arduino_map']['user_id'], searchedbook['id'])
           app.logger.info('ocr 3 : book search local result "%s"', searchedbook['title'])
           if address:
             #print(searchedbook['title'], address)
@@ -751,12 +729,12 @@ def set_routes_for_books(app):
           else:
             searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
 
-      return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'], numshelf=ocrbook['numshelf'])
+      return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'], numshelf=ocrbook['numshelf'], app_id=session.get('app_id'))
     abort(404)
 
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
-    #return json.loads('{"success": 1, "response": [{"title": "Le Monde grec antique", "author": "Thomas Piketty", "editor": "Hachette"}, {"title": "Capital et idéologie", "author": "Thomas Piketty", "editor": "Hachette"}, {"title": "Il faut dire que les temps ont changé...", "author": "Daniel Cohen", "editor": "Albin Michel"}, {"title": "La philosophie du catharisme", "author": "René Nelli", "editor": "Seuil"}, {"title": "La vie quotidienne des cathares", "author": "René Nelli", "editor": "Hachette"}, {"title": "Problèmes de linguistique générale", "author": "Benveniste", "editor": "Gallimard"}, {"title": "Histoire du mouvement ouvrier français", "author": "Jacques Girault, Jean-Louis Robert", "editor": "Messioon"}, {"title": "La révolution anarchiste", "author": "Nataf", "editor": "Jurassienne"}, {"title": "Surveiller et punir", "author": "Michel Foucault", "editor": "Gallimard"}, {"title": "Réflexions sur la peine capitale", "author": "Albert Camus", "editor": "Gallimard"}, {"title": "Les esclaves en Grèce ancienne", "author": "Yvon Garlan", "editor": "La Découverte"}, {"title": "Théâtre comique du Moyen Age", "author": "Michel Vovelle", "editor": "Hachette"}, {"title": "Piété baroque et déchristianisation en Provence au XVIIIe siècle", "author": "Michel Vovelle", "editor": "Hachette"}]}')
+    return json.loads('{"success": 1, "response": [{"title": "Tigre en papier", "author": "Olivier Rolin", "editor": "Hachette"}, {"title": "Le Monde grec antique", "author": "Thomas Piketty", "editor": "Hachette"}, {"title": "Capital et idéologie", "author": "Thomas Piketty", "editor": "Hachette"}, {"title": "Il faut dire que les temps ont changé...", "author": "Daniel Cohen", "editor": "Albin Michel"}, {"title": "La philosophie du catharisme", "author": "René Nelli", "editor": "Seuil"}, {"title": "La vie quotidienne des cathares", "author": "René Nelli", "editor": "Hachette"}, {"title": "Problèmes de linguistique générale", "author": "Benveniste", "editor": "Gallimard"}, {"title": "Histoire du mouvement ouvrier français", "author": "Jacques Girault, Jean-Louis Robert", "editor": "Messioon"}, {"title": "La révolution anarchiste", "author": "Nataf", "editor": "Jurassienne"}, {"title": "Surveiller et punir", "author": "Michel Foucault", "editor": "Gallimard"}, {"title": "Réflexions sur la peine capitale", "author": "Albert Camus", "editor": "Gallimard"}, {"title": "Les esclaves en Grèce ancienne", "author": "Yvon Garlan", "editor": "La Découverte"}, {"title": "Théâtre comique du Moyen Age", "author": "Michel Vovelle", "editor": "Hachette"}, {"title": "Piété baroque et déchristianisation en Provence au XVIIIe siècle", "author": "Michel Vovelle", "editor": "Hachette"}]}')
     #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}, {"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Œuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet - Phèdre", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "LES QUATRE ACCORDS TOLTEQUES", "author": "Don Miguel Ruiz", "editor": "MADENITATES"}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
