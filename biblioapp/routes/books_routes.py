@@ -486,6 +486,7 @@ def set_routes_for_books(app):
         if bookId:
           message['result'] = 'success'
           message['message'] = 'Book added with id '+str(bookId['id'])
+          message['book'] = {'id_book':bookId['id']}
           if forcePosition == 'true' and address:
             message['message'] += ' at position n°' +str(address['position'])+ ' and LED n° ' + str(int(address['led_column'])+1) + ' in row n°'+str(address['row'])
             message['address'] = [{'action':'add', 'row':address['row'], 'start':address['led_column'], 'interval':address['range'], \

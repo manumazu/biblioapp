@@ -25,11 +25,23 @@
 			{% set css_class = "list-group-item-success" %}
 			{% set message %}
 				found in shelf n°{{ book['address']['row'] }}, with id {{ book['id'] }} at position n° {{ book['address']['position'] }} and LED n°{{ book['address']['led_column'] }}
-			{% endset %}			
+			{% endset %}		
 		{% endif %}
 	{% endif %}
 
-	<li class="list-group-item {{ css_class }}" {% if numbook %}id="book_{{ numbook }}"{% endif %}>
+	{%- set book_id -%}
+		{%- if book['found'] == 'local' -%}
+			{%- if book['address'] -%}
+				indexed_{{ book['id'] }}
+			{%- else -%}
+				book_{{ book['id'] }}
+			{%- endif -%}
+		{%- else -%}
+			newbook_{{ numbook }}		
+		{%- endif -%}
+	{%- endset -%}
+
+	<li class="list-group-item {{ css_class }}" {% if numbook %}id="{{ book_id }}"{% endif %}>
 	<!-- display form for found book in search api result -->
 	{% if book['found'] %}
 	<form method="post" action="/bookreferencer/">
@@ -91,18 +103,18 @@
 		{% if book['address'] %}
 			<!-- display button for changing position -->
 			{% if numshelf|int != book['address']['row']|int or app_id|int != book['address']['id_app']|int %}
-				<button class="btn btn-primary btn-sm" onClick="saveBook('book_{{ numbook }}', {{ numshelf }})">Update position</button>
-				<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('book_{{ numbook }}')"{% endif %}>cancel</button>
+				<button class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numshelf }})">Update position</button>
+				<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
 			{% endif %}
 		{% else %}
 			<!-- display button for saving book + postion -->
-			<input type="submit" class="btn btn-primary btn-sm" {% if numbook %}onClick="saveBook('book_{{ numbook }}', {{ numshelf }})"{% endif %} value="add this book !">
-			{% if numbook %}<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('book_{{ numbook }}')"{% endif %}>do not index</button>{% endif %}
+			<input type="submit" class="btn btn-primary btn-sm" {% if numbook %}onClick="saveBook('{{ book_id }}', {{ numshelf }})"{% endif %} value="add this book !">
+			{% if numbook %}<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>do not index</button>{% endif %}
 		{% endif %}
 	{% else %}
 		<!-- book not found in search api result -->
-		<button type="submit" class="btn btn-warning btn-sm" {% if numbook %}onClick="searchBook('book_{{ numbook }}', {{ numshelf }})"{% endif %}>search again...</button>
-		<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('book_{{ numbook }}')"{% endif %}>do not index</button>
+		<button type="submit" class="btn btn-warning btn-sm" {% if numbook %}onClick="searchBook('{{ book_id }}', {{ numshelf }})"{% endif %}>search again...</button>
+		<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>do not index</button>
 	{% endif %}
 	</form>
 	</li>

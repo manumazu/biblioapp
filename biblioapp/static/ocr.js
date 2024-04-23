@@ -134,28 +134,42 @@ async function saveBook(form_id, numshelf) {
   const reference = $('#' + form_id + ' > form > input[name=reference]').val()
   const title = $('#' + form_id + ' > form > input[name=title]').val()
   const index = form_id.split('_');
-
+  
   // save book + location 
   const data = await ajax_saveBook(reference, numshelf);
+
   //console.log(data);
   if(data['result'] == 'error') {
       $('#' + form_id).addClass('list-group-item-danger');
   }                         
-  if(data['result'] == 'success' && typeof data['address'] !== 'undefined') {
+  if(data['result'] == 'success' && typeof data['book'] !== 'undefined') {
       $('#' + form_id).removeClass('list-group-item-warning');
-      $('#' + form_id).addClass('list-group-item-success');
-  }
-  //display new posiion in shelf  
-  if(typeof data['message'] !== 'undefined'){
-    const message = index[1] + '- "' + title + '": ' + data['message'];
-    $('#' + form_id).html(message);
-    //enable next from
-    enableForm(parseInt(index[1])+1)
+      $('#' + form_id).addClass('list-group-item-success');     
+      //udapte id of book as added
+      const newId = 'indexed_' + data['book']['id_book']; 
+      $('#' + form_id).attr('id', newId)
+      // update content
+      const message = index[1] + '- "' + title + '": ' + data['message'] ;
+      $('#' + newId).html(message);       
+      //get list of books ids by order : 
+      const resultListId =  $('#' + newId).parent().parent().attr('id');
+      let reqStr = "row="+numshelf
+      $('#' + resultListId + ' > ul > li').each(function(){ 
+        const listId = $(this).attr('id');
+        //build request for sorting book's postion by order in shelf
+        if(listId.indexOf('indexed') == 0) {
+          const Id = listId.split('_');
+          reqStr += '&book[]=' + Id[1]
+        }
+      })
+      // update order for books as found by ocr
+      const newBookOrder = await ajax_postOrder(reqStr);
+      console.log(newBookOrder);
   }
 }
 
 async function ajax_saveBook(reference, numshelf) {
-  const params = 'numshelf='+numshelf+'&ref='+reference+'&save_bookapi=googleapis&forcePosition=true&token=ocr';
+  const params = 'numshelf='+numshelf+'&ref='+reference+'&save_bookapi=googleapis&token=ocr'; //&forcePosition=true
   return $.ajax({
     data: params, 
     url: '/api/bookreferencer/', 
@@ -197,5 +211,17 @@ async function ajax_searchBook(title, index, numshelf) {
       return res.responseText;
     }
   })
+}
+
+async function ajax_postOrder(elements) {
+   console.log(elements);
+   return $.ajax({
+    data: elements,
+    type: 'POST',
+    url: '/ajax_sort/',
+    complete: function(res) {
+      return res.responseText;
+    }
+  });
 }
 
