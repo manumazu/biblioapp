@@ -374,13 +374,15 @@ def set_routes_for_positions(app):
         i=0
         sortable = []
         for book_id in book_ids:
-          position = db.get_position_for_book(app_id, book_id)
+          # find current postion in all shelfs, get size and remove it
+          position = db.get_position_for_book(app_id, book_id, True)
           if position:
-            interval = position['range'] 
+            interval = position['range']
+            db.del_item_position(position['id_app'], book_id, 'book', position['row'])
           else:
             book = db.get_book_not_ranged(book_id, globalVars['arduino_map']['user_id'])
             interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
-          i+=1   
+          i+=1
           db.set_position(app_id, book_id, i, current_row, interval, 'book', 0) #reinit led column
         
         #update new leds number

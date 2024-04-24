@@ -35,11 +35,7 @@ $(document).ready(function() {
               let result = await ajax_indexBook(books[j], index, numshelf)
               //console.log(result)
               $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
-              // disable list excepted first or already in shelf
-              hasPosition = $('#book_' + index).hasClass('list-group-item-success');
-              /*if(index > 1 && !hasPosition) {
-                $('#book_' + index).addClass('disabled');
-              }*/
+              
               // force forms created not being submited
               $('form').on('submit', function(e){
                 e.preventDefault();
@@ -106,6 +102,11 @@ async function ajax_indexBook(ocr, index, numshelf) {
   })
 }
 
+function enableForm(index) {
+  //console.log(index);
+  $('#book_' + index).removeClass('disabled');
+}
+
 function waitingButton(button, seconds) {
     var str = ".";
     function run() {
@@ -117,12 +118,6 @@ function waitingButton(button, seconds) {
     return setInterval(run, 500);
 }
 
-function enableForm(index) {
-  //console.log(index);
-  $('#book_' + index).removeClass('disabled');
-}
-
-// when the book can not be found
 function doNotIndex(form_id) {
   $('#' + form_id).addClass('disabled');
   const index = form_id.split('_');
@@ -130,9 +125,10 @@ function doNotIndex(form_id) {
 }
 
 //index book position using api
-async function saveBook(form_id, numshelf) {
-  const reference = $('#' + form_id + ' > form > input[name=reference]').val()
-  const title = $('#' + form_id + ' > form > input[name=title]').val()
+async function saveBook(form_id, numbook, numshelf) {
+  const reference = $('#' + form_id + " > form > input[name=reference]").val()
+  const title = $('#' + form_id + " > form > input[name=title]").val()
+  const author = $('#' + form_id + " > form > input[name='authors[]']").val()
   const index = form_id.split('_');
   
   // save book + location 
@@ -147,10 +143,7 @@ async function saveBook(form_id, numshelf) {
       $('#' + form_id).addClass('list-group-item-success');     
       //udapte id of book as added
       const newId = 'indexed_' + data['book']['id_book']; 
-      $('#' + form_id).attr('id', newId)
-      // update content
-      const message = index[1] + '- "' + title + '": ' + data['message'] ;
-      $('#' + newId).html(message);       
+      $('#' + form_id).attr('id', newId)     
       //get list of books ids by order : 
       const resultListId =  $('#' + newId).parent().parent().attr('id');
       let reqStr = "row="+numshelf
@@ -164,7 +157,15 @@ async function saveBook(form_id, numshelf) {
       })
       // update order for books as found by ocr
       const newBookOrder = await ajax_postOrder(reqStr);
-      console.log(newBookOrder);
+      // display info for new postion
+      for (let i=0; i < newBookOrder.length; i++) {
+        if(newBookOrder[i]['book'] == data['book']['id_book']) {
+            // update content book form content
+            const message = numbook + '- ' + author + ', "' + title + '": ' + data['message'] + ' at position n°'+ newBookOrder[i]['position'];
+            $('#' + newId).html(message);  
+        }
+        //console.log(newBookOrder[i]); 
+      }
   }
 }
 
