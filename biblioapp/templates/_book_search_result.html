@@ -8,24 +8,11 @@
 
 	<!-- book is found in ocr, display forms -->
 	{% set css_class = "" %}
-	{% set message = "" %}
 	{% if book['address'] %}
 		{% if numshelf|int != book['address']['row']|int or app_id|int != book['address']['id_app']|int%}
-			{% set css_class = "list-group-item-warning" %}
-			{% if numshelf|int != book['address']['row']|int %}
-				{% set message %} 
-					Book is already in bookshelf but in another shelf n°{{ book['address']['row'] }}, with id {{ book['id'] }} at position n° {{ book['address']['position'] }} and LED n°{{ book['address']['led_column'] }}
-				{% endset %}
-			{% elif app_id|int != book['address']['id_app']|int %}
-				{% set message %}
-					Book is in another bookshelf "{{ book['address']['arduino_name'] }}", shelf n°{{ book['address']['row'] }}, with id {{ book['id'] }} at position n° {{ book['address']['position'] }} and LED n°{{ book['address']['led_column'] }}
-				{% endset %}
-			{% endif %}			
+			{% set css_class = "list-group-item-warning" %}		
 		{% else %}
-			{% set css_class = "list-group-item-success" %}
-			{% set message %}
-				found in shelf n°{{ book['address']['row'] }}, with id {{ book['id'] }} at position n° {{ book['address']['position'] }} and LED n°{{ book['address']['led_column'] }}
-			{% endset %}		
+			{% set css_class = "list-group-item-success" %}	
 		{% endif %}
 	{% endif %}
 
@@ -72,17 +59,27 @@
 	{% endif %}
 
 	{% if book['found'] %}
-		{% if book['address'] %}
-			<!-- display force position for book already in current shelf -->
-			"{{ book['title'] }}": {{ message }}
+		<!-- display url for edition -->
+		{% if book['found'] == 'local' %}
+			<i><a href="{{ url_for('getBook', book_id=book['id']) }}">{{ book['title'] }}</a></i>, 
 		{% else %}
-			<!-- display url for edition -->
-			{% if book['found'] == 'local' %}
-				<i><a href="{{ url_for('getBook', book_id=book['id']) }}">{{ book['title'] }}</a></i>, {{ book['editor'] }} ({{ book['year'] }}, {{ book['pages'] }}p) - [Already in the index]
-			{% else %}
-				<i><a href="{{ url_for('searchBookReference') }}?ref={{ book['reference'] }}">{{ book['title'] }}</a></i>, {{ book['editor'] }} ({{ book['year'] }}, {{ book['pages'] }}p)
-			{% endif %}
+			<i><a href="{{ url_for('searchBookReference') }}?ref={{ book['reference'] }}">{{ book['title'] }}</a></i>, 
 		{% endif %}
+
+		{{ book['editor'] }} ({{ book['year'] }}, {{ book['pages'] }}p) 
+
+		<!--display info about position-->
+		<span id="position_{{ book['id'] }}">
+		{% if book['address'] %}
+			{% if numshelf|int != book['address']['row']|int %}
+				Book is in another shelf n°{{ book['address']['row'] }}
+			{% elif app_id|int != book['address']['id_app']|int %}
+				Book is in another bookshelf "{{ book['address']['arduino_name'] }}"
+			{% endif %}
+			(position n° {{ book['address']['position'] }} and LED n°{{ book['address']['led_column'] }})
+		{% endif %}
+		</span>	
+
 	{% else %}
 		<i style="color:#aaa">{{ book['title'] }}</i> - {{ book['editor'] }} 
 	{% endif %}
@@ -100,16 +97,10 @@
 	  {% endif %}
 
 	{% if book['found'] %}
-		{% if book['address'] %}
-			<!-- display button for changing position -->
-			{% if numshelf|int != book['address']['row']|int or app_id|int != book['address']['id_app']|int %}
-				<button class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }})">Update position</button>
-				<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
-			{% endif %}
-		{% else %}
-			<!-- display button for saving book + postion -->
-			<input type="submit" class="btn btn-primary btn-sm" {% if numbook %}onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }})"{% endif %} value="add this book !">
-			{% if numbook %}<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>do not index</button>{% endif %}
+		<!-- display button for saving book or changing position -->
+		{% if not book['address'] or numshelf|int != book['address']['row']|int or app_id|int != book['address']['id_app']|int %}
+			<button id="btn_save_{{ book['id'] }}" class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }})">Save position</button>
+			<button id="btn_cancel_{{ book['id'] }}" class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
 		{% endif %}
 	{% else %}
 		<!-- book not found in search api result -->

@@ -161,8 +161,11 @@ async function saveBook(form_id, numbook, numshelf) {
       for (let i=0; i < newBookOrder.length; i++) {
         if(newBookOrder[i]['book'] == data['book']['id_book']) {
             // update content book form content
-            const message = numbook + '- ' + author + ', "' + title + '": ' + data['message'] + ' at position n°'+ newBookOrder[i]['position'];
-            $('#' + newId).html(message);  
+            const msg = '(position n°' + newBookOrder[i]['position'] + ' and LED n°' + newBookOrder[i]['led_column'] + ')';
+            $('#position_'+data['book']['id_book']).html(msg);
+            //hide form buttons
+            $('#btn_save_'+data['book']['id_book']).hide();
+            $('#btn_cancel_'+data['book']['id_book']).hide();
         }
         //console.log(newBookOrder[i]); 
       }

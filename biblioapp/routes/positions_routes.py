@@ -390,7 +390,8 @@ def set_routes_for_positions(app):
         for pos in positions:
           led_column = db.get_led_column(app_id, pos['id_item'], current_row, pos['position'])
           db.set_led_column(app_id, pos['id_item'], current_row, led_column)
-          sortable.append({'book':pos['id_item'], 'position':pos['position'], 'fulfillment':int(led_column+pos['range']), 'shelf':current_row})
+          sortable.append({'book':pos['id_item'], 'position':pos['position'], 'fulfillment':int(led_column+pos['range']), 'led_column':led_column, \
+           'shelf':current_row})
 
       #save order for customcodes
       if 'customcode' in request.form:
