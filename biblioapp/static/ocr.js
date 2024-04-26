@@ -132,11 +132,11 @@ async function saveBook(form_id, numbook, numshelf) {
   const author = $('#' + form_id + " > form > input[name='authors[]']").val()
   const index = form_id.split('_');
   const img_num = $('#' + form_id + " > form > input[name='source_img_num']").val()
-  
-  // save book + location 
-  const data = await ajax_saveBook(reference, numshelf);
 
-  //console.log(data);
+  // save book
+  const data = await ajax_saveBook(reference, numshelf, index);
+  console.log(data);
+
   if(data['result'] == 'error') {
       $('#' + form_id).addClass('list-group-item-danger');
   }                         
@@ -165,18 +165,22 @@ async function saveBook(form_id, numbook, numshelf) {
         if(newBookOrder[i]['book'] == data['book']['id_book']) {
             // update content book form content
             const msg = '(position n°' + newBookOrder[i]['position'] + ' and LED n°' + newBookOrder[i]['led_column'] + ')';
-            $('#position_'+data['book']['id_book']).html(msg);
+            $('#' + newId + ' > form > span').html(msg);
             //hide form buttons
-            $('#btn_save_'+data['book']['id_book']).hide();
-            $('#btn_cancel_'+data['book']['id_book']).hide();
+            $('#' + newId + ' > form > .btn').each(function(){
+              $(this).hide();
+            })
         }
         //console.log(newBookOrder[i]); 
       }
   }
 }
 
-async function ajax_saveBook(reference, numshelf) {
-  const params = 'numshelf='+numshelf+'&ref='+reference+'&save_bookapi=googleapis&token=ocr'; //&forcePosition=true
+async function ajax_saveBook(reference, numshelf, index) {
+  let params = 'numshelf='+numshelf+'&ref='+reference+'&save_bookapi=googleapis&token=ocr'; //&forcePosition=true
+  //for book already index, get info by id
+  if(index[0] == 'book')
+    params += '&id_book='+index[1]
   return $.ajax({
     data: params, 
     url: '/api/bookreferencer/', 

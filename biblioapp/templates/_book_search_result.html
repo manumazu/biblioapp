@@ -73,7 +73,7 @@
 		{{ book['editor'] }} ({{ book['year'] }}, {{ book['pages'] }}p) 
 
 		<!--display info about position-->
-		<span id="position_{{ book['id'] }}">
+		<span>
 		{% if book['address'] %}
 			{% if numshelf|int != book['address']['row']|int %}
 				Book is in another shelf n°{{ book['address']['row'] }}
@@ -103,8 +103,8 @@
 	{% if book['found'] %}
 		<!-- display button for saving book or changing position -->
 		{% if not book['address'] or numshelf|int != book['address']['row']|int or app_id|int != book['address']['id_app']|int %}
-			<button id="btn_save_{{ book['id'] }}" class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }})">Save position</button>
-			<button id="btn_cancel_{{ book['id'] }}" class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
+			<button class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }})">Save position</button>
+			<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
 		{% endif %}
 	{% else %}
 		<!-- book not found in search api result -->
