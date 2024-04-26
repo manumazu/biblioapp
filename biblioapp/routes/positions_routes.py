@@ -365,14 +365,23 @@ def set_routes_for_positions(app):
       if request.is_json and 'book_ids' in request.json:
         book_ids = request.json['book_ids']
         current_row = request.json['row']
+        #lastPos = request.json['last_position'] 
       elif 'row' in request.form:
         current_row = request.form['row'] 
         book_ids = request.form.getlist('book[]')
+        source_img_num = 0
+        if 'source_img_num' in request.form:
+          source_img_num = request.form['source_img_num'] 
 
       if len(book_ids) > 0:
         app_id = session.get('app_id')
-        i=0
         sortable = []
+        i=0
+        # for ocr ai analyse : prevent having same position for books in different images
+        # retrieve last book position for bookshelf's image   
+        if source_img_num and int(source_img_num) > 1:
+          lastPos = db.get_last_saved_position(app_id, int(current_row))
+          i=lastPos['position']
         for book_id in book_ids:
           # find current postion in all shelfs, get size and remove it
           position = db.get_position_for_book(app_id, book_id, True)

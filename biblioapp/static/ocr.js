@@ -32,7 +32,7 @@ $(document).ready(function() {
             for(let j = 0; j<books.length; j++) 
             {
               let index = (j+1)
-              let result = await ajax_indexBook(books[j], index, numshelf)
+              let result = await ajax_indexBook(books[j], index, numshelf, ocr.img_num)
               //console.log(result)
               $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
               
@@ -82,7 +82,7 @@ async function ajax_postOcr(params, timer) {
 }
 
 // request for search api using ocr result
-async function ajax_indexBook(ocr, index, numshelf) {
+async function ajax_indexBook(ocr, index, numshelf, img_num) {
   var elem = [];
   //console.log(ocr)
   elem.push('title='+ocr.title)
@@ -90,6 +90,7 @@ async function ajax_indexBook(ocr, index, numshelf) {
   elem.push('editor='+ocr.editor)
   elem.push('numbook='+index)
   elem.push('numshelf='+numshelf)
+  elem.push('img_num='+img_num)
   params = elem.join('&');
   return $.ajax({
     data: params,
@@ -130,6 +131,7 @@ async function saveBook(form_id, numbook, numshelf) {
   const title = $('#' + form_id + " > form > input[name=title]").val()
   const author = $('#' + form_id + " > form > input[name='authors[]']").val()
   const index = form_id.split('_');
+  const img_num = $('#' + form_id + " > form > input[name='source_img_num']").val()
   
   // save book + location 
   const data = await ajax_saveBook(reference, numshelf);
@@ -146,10 +148,11 @@ async function saveBook(form_id, numbook, numshelf) {
       $('#' + form_id).attr('id', newId)     
       //get list of books ids by order : 
       const resultListId =  $('#' + newId).parent().parent().attr('id');
-      let reqStr = "row="+numshelf
+      
+      //build request for sorting book's postion by order in shelf
+      let reqStr = "row="+numshelf+"&source_img_num="+img_num
       $('#' + resultListId + ' > ul > li').each(function(){ 
         const listId = $(this).attr('id');
-        //build request for sorting book's postion by order in shelf
         if(listId.indexOf('indexed') == 0) {
           const Id = listId.split('_');
           reqStr += '&book[]=' + Id[1]
@@ -186,8 +189,9 @@ async function ajax_saveBook(reference, numshelf) {
 // search book and return results
 async function searchBook(form_id, numshelf) {
   const title = $('#' + form_id + ' > form > input[name=intitle]').val()
+  const img_num = $('#' + form_id + " > form > input[name='source_img_num']").val()
   const index = form_id.split('_');
-  const result = await ajax_searchBook(title, index[1], numshelf);
+  const result = await ajax_searchBook(title, index[1], numshelf, img_num);
   //console.log(result)
   $('#'+form_id).replaceWith(result);
   // force forms created not being submited
@@ -197,14 +201,15 @@ async function searchBook(form_id, numshelf) {
 }
 
 // request for search api
-async function ajax_searchBook(title, index, numshelf) {
+async function ajax_searchBook(title, index, numshelf, img_num) {
   var elem = [];
   const payload = {
     title: title,
     numbook: index,
     search_api: 'googleapis',
     search_origin: 'ocr',
-    numshelf: numshelf
+    numshelf: numshelf,
+    img_num: img_num
   };  
   return $.ajax({
     data: JSON.stringify(payload), 

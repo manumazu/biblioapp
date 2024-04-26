@@ -47,6 +47,10 @@
 		<input type="hidden" name="intitle" value="{{ book['title'] }}">
 	{% endif %}
 
+	{% if img_num %}
+		<input type="hidden" name="source_img_num" value="{{ img_num }}">
+	{% endif%}
+
 	{% if numbook %}
 		{{ numbook }}-
 	{% endif %}

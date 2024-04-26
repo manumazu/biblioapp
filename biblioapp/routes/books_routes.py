@@ -376,7 +376,7 @@ def set_routes_for_books(app):
           # return first result only for ocr search html render, for other case return json array
           if 'search_origin' in request.json and request.json['search_origin'] == 'ocr':
             book = res[0] if len(res) > 0 else None 
-            return render_template('_book_search_result.html', book=book, numbook=request.json['numbook'], search=request.json['title'], numshelf=request.json['numshelf'])
+            return render_template('_book_search_result.html', book=book, numbook=request.json['numbook'], search=request.json['title'], numshelf=request.json['numshelf'], img_num=request.json['img_num'])
           else:
             return response
         return render_template('booksearch.html', user_login=globalVars['user_login'], data=data, req=request.form, \
@@ -730,7 +730,7 @@ def set_routes_for_books(app):
           else:
             searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
 
-      return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'], numshelf=ocrbook['numshelf'], app_id=session.get('app_id'))
+      return render_template('_book_search_result.html', book=searchedbook, numbook=ocrbook['numbook'], numshelf=ocrbook['numshelf'], app_id=session.get('app_id'), img_num=ocrbook['img_num'])
     abort(404)
 
   # use subprocess to gemeni ocr analyse
