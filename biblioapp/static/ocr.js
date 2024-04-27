@@ -135,7 +135,7 @@ async function saveBook(form_id, numbook, numshelf) {
 
   // save book
   const data = await ajax_saveBook(reference, numshelf, index);
-  console.log(data);
+  //console.log(data);
 
   if(data['result'] == 'error') {
       $('#' + form_id).addClass('list-group-item-danger');
@@ -148,31 +148,9 @@ async function saveBook(form_id, numbook, numshelf) {
       $('#' + form_id).attr('id', newId)     
       //get list of books ids by order : 
       const resultListId =  $('#' + newId).parent().parent().attr('id');
-      
-      //build request for sorting book's postion by order in shelf
-      let reqStr = "row="+numshelf+"&source_img_num="+img_num
-      $('#' + resultListId + ' > ul > li').each(function(){ 
-        const listId = $(this).attr('id');
-        if(listId.indexOf('indexed') == 0) {
-          const Id = listId.split('_');
-          reqStr += '&book[]=' + Id[1]
-        }
-      })
-      // update order for books as found by ocr
-      const newBookOrder = await ajax_postOrder(reqStr);
-      // display info for new postion
-      for (let i=0; i < newBookOrder.length; i++) {
-        if(newBookOrder[i]['book'] == data['book']['id_book']) {
-            // update content book form content
-            const msg = '(position n°' + newBookOrder[i]['position'] + ' and LED n°' + newBookOrder[i]['led_column'] + ')';
-            $('#' + newId + ' > form > span').html(msg);
-            //hide form buttons
-            $('#' + newId + ' > form > .btn').each(function(){
-              $(this).hide();
-            })
-        }
-        //console.log(newBookOrder[i]); 
-      }
+
+      // build request for sorting book's postion by order in shelf
+      postOrder(resultListId, numshelf, img_num);
   }
 }
 
@@ -224,6 +202,34 @@ async function ajax_searchBook(title, index, numshelf, img_num) {
       return res.responseText;
     }
   })
+}
+
+// retrieve indexed books id, reorder LEDs position, update order in list
+async function postOrder(resultListId, numshelf, img_num) {
+  //build request for sorting book's postion by order in shelf
+  let reqStr = "row="+numshelf+"&source_img_num="+img_num
+  $('#' + resultListId + ' > ul > li').each(function(){ 
+    const listId = $(this).attr('id');
+    if(listId.indexOf('indexed') == 0) {
+      const Id = listId.split('_');
+      reqStr += '&book[]=' + Id[1]
+    }
+  })
+
+  // update order for books as found by ocr
+  const newBookOrder = await ajax_postOrder(reqStr);
+  // display info for new postion
+  for (let i=0; i < newBookOrder.length; i++) {
+    // update content book form content
+    const newId = 'indexed_' + newBookOrder[i]['book'];      
+    const msg = '(position n°' + newBookOrder[i]['position'] + ' and LED n°' + newBookOrder[i]['led_column'] + ')';
+    $('#' + newId + ' > form > span').html(msg);
+    //hide form buttons
+    $('#' + newId + ' > form > .btn').each(function(){
+      $(this).hide();
+    })
+    //console.log(newBookOrder[i]); 
+  }
 }
 
 async function ajax_postOrder(elements) {
