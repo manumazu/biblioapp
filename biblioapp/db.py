@@ -497,19 +497,20 @@ def update_app_book(app_id, item_id) :
   mysql['cursor'].close()
   mysql['conn'].close()
 
-def set_position(app_id, item_id, position, row, interval, item_type, led_column) :
+def set_position(app_id, item_id, position, row, interval, item_type, led_column, shift_position = 0) :
   mysql = get_db()
   mysql['cursor'].execute("INSERT INTO biblio_position (`id_app`, `id_item`, `item_type`, \
-      `position`, `row`, `range`, `led_column`) VALUES (%s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY \
-      UPDATE position=%s, row=%s, `range`=%s, `led_column`=%s", \
-      (app_id, item_id, item_type, position, row, interval, led_column, position, row, interval, led_column))
+      `position`, `row`, `range`, `led_column`, `shiftpos`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY \
+      UPDATE position=%s, row=%s, `range`=%s, `led_column`=%s, `shiftpos`=%s", \
+      (app_id, item_id, item_type, position, row, interval, led_column, shift_position, \
+        position, row, interval, led_column, shift_position))
+  #app.logger.info(mysql['cursor']._last_executed)  
   mysql['conn'].commit()
   mysql['cursor'].close()
   mysql['conn'].close()
   #udpate app for book item
   if item_type == 'book':
     update_app_book(app_id, item_id)
-  #print(mysql['cursor']._last_executed)
 
 def set_led_column(app_id, item_id, row, led_column) :
   mysql = get_db()
@@ -519,17 +520,21 @@ def set_led_column(app_id, item_id, row, led_column) :
   mysql['cursor'].close()
   mysql['conn'].close()
 
-'''compute sum of intervals for setting physical position'''
+'''compute sum of books intervals and shifted position (for missing books) for setting physical position'''
 def get_led_column(app_id, item_id, row, column) :
   mysql = get_db()
-  mysql['cursor'].execute("SELECT sum(`range`) as `column` FROM `biblio_position` \
+  mysql['cursor'].execute("SELECT (sum(`range`) + sum(`shiftpos`)) as `column` FROM `biblio_position` \
     WHERE `position`<%s  and id_app=%s and `row`=%s and id_item <> %s and item_type='book'",(column, app_id, row, item_id))
-  #print(mysql['cursor']._last_executed)
+  #app.logger.info('get_led_column: %s', mysql['cursor']._last_executed)
   res = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
   if res['column'] is None:
     res['column'] = 0
+  #check if book's real position must be shifted     
+  shifted = get_shifted_position_for_book(app_id, row, item_id)    
+  if shifted and shifted['shiftpos'] > 0:
+    res['column'] += shifted['shiftpos']
   #check for static columns to shift book's real position     
   statics = get_static_positions(app_id, row)    
   if statics:
@@ -543,6 +548,17 @@ def get_static_positions(app_id, row):
   mysql['cursor'].execute("SELECT `led_column`, `range`, position, item_type FROM `biblio_position` \
     WHERE item_type='static' AND id_app=%s AND `row`=%s ORDER BY `position`", (app_id, row))
   row = mysql['cursor'].fetchall()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  if row:
+    return row
+  return False
+
+def get_shifted_position_for_book(app_id, row, item_id):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT `shiftpos` FROM `biblio_position` \
+    WHERE `item_type`='book' AND `id_app`=%s AND `row`=%s AND `id_item`=%s ORDER BY `position`", (app_id, row, item_id))
+  row = mysql['cursor'].fetchone()
   mysql['cursor'].close()
   mysql['conn'].close()
   if row:

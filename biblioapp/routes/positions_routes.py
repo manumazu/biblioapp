@@ -376,30 +376,42 @@ def set_routes_for_positions(app):
       if len(book_ids) > 0:
         app_id = session.get('app_id')
         sortable = []
+        postedPos = {}
         i=0
+        shift_position = 0   
         # for ocr ai analyse : prevent having same position for books in different images
         # retrieve last book position for bookshelf's image   
         if source_img_num and int(source_img_num) > 1:
           lastPos = db.get_last_saved_position(app_id, int(current_row))
-          i=lastPos['position']
+          i=lastPos['position']       
         for book_id in book_ids:
+          # store shift position counter for indexed book when it follows books not indexed in list (cf ocr-ai analyse)
+          if book_id.startswith('empty'):
+            shift_position = book_id.split('_')[1]
+          if book_id.isnumeric():
+            postedPos.update({'id_book':book_id, 'shift':shift_position})
+            shift_position = 0
+        
           # find current postion in all shelfs, get size and remove it
-          position = db.get_position_for_book(app_id, book_id, True)
+          position = db.get_position_for_book(app_id, postedPos['id_book'], True)
           if position:
             interval = position['range']
-            db.del_item_position(position['id_app'], book_id, 'book', position['row'])
+            db.del_item_position(position['id_app'], postedPos['id_book'], 'book', position['row'])
           else:
-            book = db.get_book_not_ranged(book_id, globalVars['arduino_map']['user_id'])
+            book = db.get_book_not_ranged(postedPos['id_book'], globalVars['arduino_map']['user_id'])
             interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
           i+=1
-          db.set_position(app_id, book_id, i, current_row, interval, 'book', 0) #reinit led column
+          #app.logger.info('id %s, shift %s', postedPos['id_book'], postedPos['shift'])
+          #reinit led column + store shift led position if needed 
+          db.set_position(app_id, postedPos['id_book'], i, current_row, interval, 'book', 0, int(postedPos['shift'])) 
         
+        app.logger.info('%s', postedPos)
         #update new leds number
         positions = db.get_positions_for_row(app_id, current_row)
         for pos in positions:
-          led_column = db.get_led_column(app_id, pos['id_item'], current_row, pos['position'])
-          db.set_led_column(app_id, pos['id_item'], current_row, led_column)
-          sortable.append({'book':pos['id_item'], 'position':pos['position'], 'fulfillment':int(led_column+pos['range']), 'led_column':led_column, \
+          led_columns_sum = db.get_led_column(app_id, pos['id_item'], current_row, pos['position'])
+          db.set_led_column(app_id, pos['id_item'], current_row, led_columns_sum)
+          sortable.append({'book':pos['id_item'], 'position':pos['position'], 'fulfillment':int(led_columns_sum+pos['range']), 'led_column':led_columns_sum, \
            'shelf':current_row})
 
       #save order for customcodes

@@ -132,6 +132,7 @@ async function saveBook(form_id, numbook, numshelf) {
   const author = $('#' + form_id + " > form > input[name='authors[]']").val()
   const index = form_id.split('_');
   const img_num = $('#' + form_id + " > form > input[name='source_img_num']").val()
+  console.log('img_num', img_num)
 
   // save book
   const data = await ajax_saveBook(reference, numshelf, index);
@@ -208,12 +209,24 @@ async function ajax_searchBook(title, index, numshelf, img_num) {
 async function postOrder(resultListId, numshelf, img_num) {
   //build request for sorting book's postion by order in shelf
   let reqStr = "row="+numshelf+"&source_img_num="+img_num
+  let cpt = 0;
   $('#' + resultListId + ' > ul > li').each(function(){ 
+    
     const listId = $(this).attr('id');
+    
+    //increase interval for books not found or not in position index
+    if(listId.indexOf('newbook') == 0 || listId.indexOf('book') == 0) {
+      cpt++;
+    }
+
     if(listId.indexOf('indexed') == 0) {
       const Id = listId.split('_');
-      reqStr += '&book[]=' + Id[1]
+      if(cpt>0)
+        reqStr += '&book[]=empty_' + cpt; 
+      reqStr += '&book[]=' + Id[1];
+      cpt=0;
     }
+    
   })
 
   // update order for books as found by ocr
