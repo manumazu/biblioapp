@@ -383,7 +383,8 @@ def set_routes_for_positions(app):
         # retrieve last book position for bookshelf's image   
         if source_img_num and int(source_img_num) > 1:
           lastPos = db.get_last_saved_position(app_id, int(current_row))
-          counter = lastPos['position']       
+          counter = lastPos['position']
+          #app.logger.info('lastPos %s', lastPos)     
         for book_id in book_ids:
           # store shift position counter for indexed book when it follows books not indexed in list (cf ocr-ai analyse)
           if book_id.startswith('empty'):

@@ -99,6 +99,8 @@ def led_range(book, leds_interval):
   if book['width'] and book['width'] > 0:
     book_width = book['width'] / 10 #convert mm to cm
     lrange = round(book_width/leds_interval)
+    if lrange < 1:
+      lrange = 1
   #compute range with book nb of pages
   else:
     nb_pages =str(book['pages'])
