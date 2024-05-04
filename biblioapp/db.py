@@ -351,8 +351,8 @@ def del_reset_request(app_id) :
 
 ''' manage book '''
 
-def bookSave(book, user_id, app_id, tags = None):
-  bookId = set_book(book, user_id, app_id)
+def bookSave(book, user_id, app_id, tags = None, ocr_title = None):
+  bookId = set_book(book, user_id, app_id, ocr_title)
   #manage tags + taxonomy
   #author tags
   authorTagids = []
@@ -381,13 +381,14 @@ def get_bookapi(isbn, ref, user_id):
     return row
   return False
 
-def set_book(bookapi, user_id, app_id) :
+def set_book(bookapi, user_id, app_id, ocr_title = None) :
   hasBook = {}
   if 'id' in bookapi:
     mysql = get_db()
     mysql['cursor'].execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, `reference`=%s, \
-    `description`=%s, `width`=%s  WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], \
-    bookapi['pages'], bookapi['reference'], bookapi['description'], bookapi['width'], bookapi['id']))
+    `description`=%s, `width`=%s, `ocr_keywords`=%s  WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], \
+      bookapi['editor'], bookapi['year'], bookapi['pages'], bookapi['reference'], bookapi['description'], bookapi['width'], \
+      ocr_title, bookapi['id']))
     mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
@@ -395,9 +396,9 @@ def set_book(bookapi, user_id, app_id) :
   else:
     mysql = get_db()
     mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `id_app`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, \
-      `reference`, `description`, `width`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, app_id, bookapi['isbn'], \
-        bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], bookapi['pages'], bookapi['reference'], \
-        bookapi['description'], bookapi['width']))
+      `reference`, `description`, `width`, `ocr_keywords`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, app_id, \
+      bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], bookapi['pages'], \
+      bookapi['reference'], bookapi['description'], bookapi['width'], ocr_title))
     mysql['conn'].commit()
     mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")
     hasBook = mysql['cursor'].fetchone()
@@ -603,6 +604,8 @@ def update_position_before_order(app_id, counter, id_book, numshelf, globalVars,
   position = get_position_for_book(app_id, id_book, True)
   if position:
     interval = position['range']
+    # save shift book for update : what happen if I had new book not in ocr ?
+    shift_position = position['shiftpos']
     del_item_position(position['id_app'], id_book, 'book', position['row'])
   else:
     book = get_book_not_ranged(id_book, globalVars['arduino_map']['user_id'])
@@ -968,9 +971,10 @@ def search_book_title(user_id, keyword) :
   app.logger.info('ocr 2 : search book db for "%s"', searchTerm)
   #searchTerm = "%"+keyword+"%"
   mysql = get_db()
-  mysql['cursor'].execute("SELECT * FROM biblio_book where id_user=%s and MATCH(title) AGAINST(%s IN BOOLEAN MODE)", (user_id, searchTerm)) 
+  mysql['cursor'].execute("SELECT * FROM biblio_book where id_user=%s and (MATCH(title) AGAINST(%s IN BOOLEAN MODE) \
+    or MATCH(ocr_keywords) AGAINST(\"%s\"))", (user_id, searchTerm, keyword)) 
   #and title like %s", (user_id, searchTerm))
-  row = mysql['cursor'].fetchall()
+  row = mysql['cursor'].fetchone()
   #print(mysql['cursor']._last_executed)
   mysql['cursor'].close()
   mysql['conn'].close()

@@ -708,12 +708,11 @@ def set_routes_for_books(app):
         searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
       else:
         # first, search for book inside shelf index
-        data = db.search_book_title(globalVars['arduino_map']['user_id'], ocrbook['title'])
-        if data:
-          searchedbook = data[0]
+        searchedbook = db.search_book_title(globalVars['arduino_map']['user_id'], ocrbook['title'])
+        if searchedbook:
           searchedbook['authors'] = searchedbook['author'].split(',')
           searchedbook['found'] = 'local'
-          app.logger.info('ocr 3 : book search local result "%s"', searchedbook['title'])
+          app.logger.info('ocr 3 : book found local "%s"', searchedbook['title'])
           address = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], int(ocrbook['numshelf']), globalVars)
           if address:
             searchedbook['address'] = address
@@ -738,11 +737,11 @@ def set_routes_for_books(app):
               #autmatic save process              
               if 'width' not in searchedbook:
                 searchedbook['width'] = round(tools.set_book_width(searchedbook['pages']))              
-              bookId = db.bookSave(searchedbook, globalVars['arduino_map']['user_id'], session.get('app_id'), None)
+              bookId = db.bookSave(searchedbook, globalVars['arduino_map']['user_id'], session.get('app_id'), None, ocrbook['title'])
               searchedbook['id'] = bookId['id']
               searchedbook['found'] = 'local'
               searchedbook['address'] = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], int(ocrbook['numshelf']), globalVars)
-              app.logger.info('ocr 5 : book saved from api result "%s"', searchedbook['title'])
+              app.logger.info('ocr 5 : book saved from api "%s"', searchedbook['title'])
             # no search result is found
             else:
               searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)  
