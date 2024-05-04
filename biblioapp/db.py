@@ -591,36 +591,40 @@ def get_last_saved_position(id_app, numshelf = None):
       ORDER BY row DESC LIMIT 1", (id_app, id_app));
   row = mysql['cursor'].fetchone()    
   mysql['cursor'].close()
-  #print(mysql['cursor']._last_executed)
+  #app.logger.info('debug DB %s', mysql['cursor']._last_executed)
   mysql['conn'].close()
   if row:
     return row
   return False
 
 # suppr and add new position for given book
-def update_position(app_id, book, numshelf, globalVars, force = False):
-  # check if position already exists and remove it
-  currentpos = get_position_for_book(app_id, book['id'], force)
-  if currentpos:
-    del_item_position(currentpos['id_app'], book['id'], 'book', currentpos['row'])
-  #set new position
+def update_position_before_order(app_id, counter, id_book, numshelf, globalVars, shift_position = 0):
+  # find current postion in all shelfs, get size and remove it
+  position = get_position_for_book(app_id, id_book, True)
+  if position:
+    interval = position['range']
+    del_item_position(position['id_app'], id_book, 'book', position['row'])
+  else:
+    book = get_book_not_ranged(id_book, globalVars['arduino_map']['user_id'])
+    interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
+  #save position + reinit led column + store shift led position before reorder
+  set_position(app_id, id_book, counter, numshelf, interval, 'book', 0, shift_position)
+  return get_position_for_book(app_id, id_book)
+
+
+#set new position for book on the end of list
+def force_new_position(app_id, book, numshelf, globalVars):
   lastPos = get_last_saved_position(app_id, numshelf)
-  newInterval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
+  interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
   if lastPos:
-    newPos = lastPos['position']+1
-    newRow = lastPos['row']
-    newLedNum = lastPos['led_column']+lastPos['range']
-  else:#first book in line
-    newPos = 1
-    newRow = 1
-    newLedNum = 0   
-  #adjust new led column with static element
-  statics = get_static_positions(app_id, newPos) 
-  if statics:
-    for static in statics:
-     if int(newLedNum) == int(static['led_column']):
-      newLedNum += static['range']               
-  set_position(app_id, book['id'], newPos, newRow, newInterval, 'book', newLedNum)
+    position = lastPos['position']+1
+    row = lastPos['row']
+    led_column = lastPos['led_column']+interval
+  else:
+    position = 1
+    row = 1
+    led_column = 0 
+  set_position(app_id, book['id'], position, row, interval, 'book', led_column)
   return get_position_for_book(app_id, book['id'])
 
 

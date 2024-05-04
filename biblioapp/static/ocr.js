@@ -12,21 +12,22 @@ $(document).ready(function() {
       $(':checkbox:checked').each(async function(){
 
           const filename = $(this).val();
-          const img_num = filename.split('_');
+          const img_num = filename.split('_')[0];
+          const resultListId =  'ocrResultFound_' + img_num;
 
           // prepare display results
           const list_header = '<hr><h2>Analyze result for image ' + filename + '</h2><ul class="list-group" style="color:#000"></ul>';
-          $('#ocrResult').append('<div id="ocrResultFound_' + img_num[0] + '">' + list_header + '</div>');
-          $('#ocrResultFound_' + img_num[0]).hide();
+          $('#ocrResult').append('<div id="' + resultListId + '">' + list_header + '</div>');
+          $('#' + resultListId).hide();
 
           //start ocr
-          const params = 'img='+filename+'&numshelf='+numshelf+'&img_num='+img_num[0];
+          const params = 'img='+filename+'&numshelf='+numshelf+'&img_num='+img_num;
           const ocr = await ajax_postOcr(params, timer);
           //console.log(ocr); 
 
           if(ocr.success == true) 
           {
-            $('#ocrResultFound_' + ocr.img_num).show();
+            $('#' + resultListId).show();
             // use search book api for each ocr result
             const books = ocr.response;
             for(let j = 0; j<books.length; j++) 
@@ -34,16 +35,20 @@ $(document).ready(function() {
               let index = (j+1)
               let result = await ajax_indexBook(books[j], index, numshelf, ocr.img_num)
               //console.log(result)
-              $('#ocrResultFound_' + ocr.img_num + ' ul').append(result);
+              $('#' + resultListId + ' ul').append(result);
               
               // force forms created not being submited
               $('form').on('submit', function(e){
                 e.preventDefault();
               });          
             }
-            //display ocr analyse total found
-            console.log("ocr books found:", ocr.ocr_nb_books);           
+            console.log("ocr books found:", ocr.ocr_nb_books);
+
+            // reorder all books for indexed items in list
+            postOrder(resultListId, numshelf, ocr.img_num);            
+
           }
+          // display ocr error
           else {
             $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + filename + '</h2><p>' + ocr.response + '</p></div>');
           }

@@ -377,13 +377,13 @@ def set_routes_for_positions(app):
         app_id = session.get('app_id')
         sortable = []
         postedPos = {}
-        i=0
+        counter=0
         shift_position = 0   
         # for ocr ai analyse : prevent having same position for books in different images
         # retrieve last book position for bookshelf's image   
         if source_img_num and int(source_img_num) > 1:
           lastPos = db.get_last_saved_position(app_id, int(current_row))
-          i=lastPos['position']       
+          counter = lastPos['position']       
         for book_id in book_ids:
           # store shift position counter for indexed book when it follows books not indexed in list (cf ocr-ai analyse)
           if book_id.startswith('empty'):
@@ -391,21 +391,11 @@ def set_routes_for_positions(app):
           if book_id.isnumeric():
             postedPos.update({'id_book':book_id, 'shift':shift_position})
             shift_position = 0
+          counter += 1
+          # save position and reinit led column order 
+          db.update_position_before_order(app_id, counter, postedPos['id_book'], current_row, globalVars, int(postedPos['shift']))
         
-          # find current postion in all shelfs, get size and remove it
-          position = db.get_position_for_book(app_id, postedPos['id_book'], True)
-          if position:
-            interval = position['range']
-            db.del_item_position(position['id_app'], postedPos['id_book'], 'book', position['row'])
-          else:
-            book = db.get_book_not_ranged(postedPos['id_book'], globalVars['arduino_map']['user_id'])
-            interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
-          i+=1
-          #app.logger.info('id %s, shift %s', postedPos['id_book'], postedPos['shift'])
-          #reinit led column + store shift led position if needed 
-          db.set_position(app_id, postedPos['id_book'], i, current_row, interval, 'book', 0, int(postedPos['shift'])) 
-        
-        app.logger.info('%s', postedPos)
+        #app.logger.info('%s', postedPos)
         #update new leds number
         positions = db.get_positions_for_row(app_id, current_row)
         for pos in positions:

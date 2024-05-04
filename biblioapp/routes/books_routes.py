@@ -491,8 +491,8 @@ def set_routes_for_books(app):
       #force position in current app
       if forcePosition == 'true':
         # force new position 
-        address = db.update_position(session.get('app_id'), book, numshelf, globalVars, True)
-      
+        address = db.force_new_position(session.get('app_id'), book, numshelf, globalVars)
+        
       #confirm message
       if bookId:
         message['result'] = 'success'
@@ -703,6 +703,7 @@ def set_routes_for_books(app):
     if request.method == 'POST' and session.get('app_id'):# and request.is_json:       
       # book must have title to perform search
       ocrbook = request.form
+      app_id = session.get('app_id')
       if 'title' in ocrbook and len(ocrbook['title']) < 2:
         searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
       else:
@@ -710,13 +711,12 @@ def set_routes_for_books(app):
         data = db.search_book_title(globalVars['arduino_map']['user_id'], ocrbook['title'])
         if data:
           searchedbook = data[0]
-          searchedbook.update({'authors':searchedbook['author'].split(',')})
-          searchedbook.update({'found':'local'})
-          address = db.get_book_position_for_user(globalVars['arduino_map']['user_id'], searchedbook['id'])
+          searchedbook['authors'] = searchedbook['author'].split(',')
+          searchedbook['found'] = 'local'
           app.logger.info('ocr 3 : book search local result "%s"', searchedbook['title'])
+          address = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], int(ocrbook['numshelf']), globalVars)
           if address:
-            #print(searchedbook['title'], address)
-            searchedbook.update({'address':address})
+            searchedbook['address'] = address
         else:
         #second search with api
           query = ocrbook['title']
@@ -735,7 +735,15 @@ def set_routes_for_books(app):
               test = tools.matchApiSearchResults(ocrbook['title'], data, 'api-in-ocr')
             if test:
               searchedbook = tools.formatBookApi('googleapis', test, None, True)
-            # no search result is found            
+              #autmatic save process              
+              if 'width' not in searchedbook:
+                searchedbook['width'] = round(tools.set_book_width(searchedbook['pages']))              
+              bookId = db.bookSave(searchedbook, globalVars['arduino_map']['user_id'], session.get('app_id'), None)
+              searchedbook['id'] = bookId['id']
+              searchedbook['found'] = 'local'
+              searchedbook['address'] = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], int(ocrbook['numshelf']), globalVars)
+              app.logger.info('ocr 5 : book saved from api result "%s"', searchedbook['title'])
+            # no search result is found
             else:
               searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)  
           else:
@@ -748,7 +756,7 @@ def set_routes_for_books(app):
   def ocrAnalyse(img_path):
     #return json.loads('{"success": 1, "response": [{"title": "Paris ne finit jamais", "author": "Enrique Vila-Matas", "editor": "José Corti"}, {"title": "Tigre en papier", "author": "Olivier Rolin", "editor": "Hachette"}, {"title": "Le Monde grec antique", "author": "Thomas Piketty", "editor": "Hachette"}, {"title": "Capital et idéologie", "author": "Thomas Piketty", "editor": "Hachette"}, {"title": "Il faut dire que les temps ont changé...", "author": "Daniel Cohen", "editor": "Albin Michel"}, {"title": "La philosophie du catharisme", "author": "René Nelli", "editor": "Seuil"}, {"title": "La vie quotidienne des cathares", "author": "René Nelli", "editor": "Hachette"}, {"title": "Problèmes de linguistique générale", "author": "Benveniste", "editor": "Gallimard"}, {"title": "Histoire du mouvement ouvrier français", "author": "Jacques Girault, Jean-Louis Robert", "editor": "Messioon"}, {"title": "La révolution anarchiste", "author": "Nataf", "editor": "Jurassienne"}, {"title": "Surveiller et punir", "author": "Michel Foucault", "editor": "Gallimard"}, {"title": "Réflexions sur la peine capitale", "author": "Albert Camus", "editor": "Gallimard"}, {"title": "Les esclaves en Grèce ancienne", "author": "Yvon Garlan", "editor": "La Découverte"}, {"title": "Théâtre comique du Moyen Age", "author": "Michel Vovelle", "editor": "Hachette"}, {"title": "Piété baroque et déchristianisation en Provence au XVIIIe siècle", "author": "Michel Vovelle", "editor": "Hachette"}]}')
     
-    #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}, {"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Oeuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures tamudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "Capital et idéologie", "author": "Thomas Piketty", "editor": ""}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}, {"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Oeuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "Capital et idéologie", "author": "Thomas Piketty", "editor": ""}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
     #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()
