@@ -606,7 +606,7 @@ def set_routes_for_books(app):
           dir_list = []
           for img in img_list:
             relative_img_path = os.path.join(upload_dir, img)
-            dir_list.append({"path":relative_img_path, "filename":img})
+            dir_list.append({"path":relative_img_path, "filename":img, "modal":img.split('.')[0]})
             #print(dir_list)   
           rendered = render_template('upload_bookshelf_render.html', img_paths = dir_list, numshelf = numshelf, module_name=globalVars['arduino_map']['arduino_name'], user_login=globalVars['user_login'], shelf_infos=globalVars['arduino_map'])
           return rendered
@@ -618,6 +618,29 @@ def set_routes_for_books(app):
     # manage post pictures + resize
     if request.method == 'POST':
 
+        # delete existing image 
+        if 'delete' in  request.form and 'numshelf' in request.form and 'filename' in request.form:
+          filename = secure_filename(request.form['filename'])
+          numshelf = str(request.form['numshelf'])
+          upload_dir = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], 'users', \
+            str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf)
+          delete_path = os.path.join(upload_dir, filename)
+          delete_path_resize = os.path.join(upload_dir, 'resize', filename)
+          if os.path.exists(delete_path) and os.path.exists(delete_path_resize):
+            os.remove(delete_path)
+            os.remove(delete_path_resize)
+            output = {'success': True, 'response':filename+' deleted'}
+          else:
+            output = {'success': False, 'response':filename+' not exists'}
+          app.logger.info('delete: %s', output)
+          # display result
+          response = app.response_class(
+            response=json.dumps(output),
+            mimetype='application/json'
+          )
+          return response
+        
+        # upload new image for given numshelf
         if 'shelf_img' not in request.files:
             flash('Veuillez sélectionner un dossier')
             return redirect(url_for('upload_bookshelf', _scheme='https', _external=True))
@@ -628,9 +651,9 @@ def set_routes_for_books(app):
         if tools.allowed_file(shelf_img.filename) is False:
           flash('Format de fichier non autorisé', 'warning')
           return redirect(url_for('upload_bookshelf', _scheme='https', _external=True))
-        if shelf_img and 'shelf' in request.form:
+        if shelf_img and 'numshelf' in request.form:
             filename = secure_filename(shelf_img.filename)
-            numshelf = str(request.form['shelf'])
+            numshelf = str(request.form['numshelf'])
             upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'users', str(globalVars['arduino_map']['user_id']), str(session.get('app_id')), numshelf)
             #create user dir if not exists
             user_dir = os.path.join(app.root_path, upload_dir)

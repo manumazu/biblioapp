@@ -25,8 +25,8 @@
 			<form method="post" enctype="multipart/form-data">
 				<fieldset>
 					<div class="form-group">
-						<label for="shelf">Select a shelf to index :</label> 
-						<select name="shelf">
+						<label for="numshelf">Select a shelf to index :</label> 
+						<select name="numshelf">
 							{% for line in range(nb_lines) %}
 								<option value="{{(line+1)}}">shelf {{(line+1)}}</option>
 							{% endfor %}

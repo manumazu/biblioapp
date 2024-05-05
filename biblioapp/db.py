@@ -605,7 +605,7 @@ def update_position_before_order(app_id, counter, id_book, numshelf, globalVars,
   if position:
     interval = position['range']
     # save shift book for update : what happen if I had new book not in ocr ?
-    shift_position = position['shiftpos']
+    #shift_position = position['shiftpos']
     del_item_position(position['id_app'], id_book, 'book', position['row'])
   else:
     book = get_book_not_ranged(id_book, globalVars['arduino_map']['user_id'])

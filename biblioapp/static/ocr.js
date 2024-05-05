@@ -262,3 +262,17 @@ async function ajax_postOrder(elements) {
   });
 }
 
+function deleteImage(img_name, numshelf) {
+  const test = confirm(img_name + ' will be destroyed. Are you sure ?');
+  if(test) {
+    $.ajax({
+      data: 'delete=1&numshelf='+numshelf+'&filename='+img_name,
+      type: 'POST',
+      url: window.location.pathname,
+      success: function(res) {
+        window.location = window.location.href    
+      }
+    });
+  }
+}
+
