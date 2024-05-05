@@ -1,16 +1,22 @@
 $(document).ready(function() {
 
   $('#start-ocr').on('click', function() {
-      $(this).text("Indexation in process");
+      $(this).text("Analyze in process");
       $(this).addClass('btn-warning');
       $('#ocrResult').empty();
 
       const timer = waitingButton(this, 20);
       var numshelf = $('#numshelf').val();
       var button = this;
-      
-      $(':checkbox:checked').each(async function(){
+      let autoindex = 0;
+      if($('#autoindex').is(':checked')){
+        autoindex = 1;
+      }
+      let params = ''; 
 
+      $('input[name=shelf-pictures]:checked').each(async function(){
+
+          // set params for selected images
           const filename = $(this).val();
           const img_num = filename.split('_')[0];
           const resultListId =  'ocrResultFound_' + img_num;
@@ -21,7 +27,7 @@ $(document).ready(function() {
           $('#' + resultListId).hide();
 
           //start ocr
-          const params = 'img='+filename+'&numshelf='+numshelf+'&img_num='+img_num;
+          params = 'img='+filename+'&numshelf='+numshelf+'&img_num='+img_num+'&autoindex='+autoindex;
           const ocr = await ajax_postOcr(params, timer);
           //console.log(ocr); 
 
@@ -33,7 +39,7 @@ $(document).ready(function() {
             for(let j = 0; j<books.length; j++) 
             {
               let index = (j+1)
-              let result = await ajax_indexBook(books[j], index, numshelf, ocr.img_num)
+              let result = await ajax_indexBook(books[j], index, numshelf, ocr.img_num, autoindex)
               //console.log(result)
               $('#' + resultListId + ' ul').append(result);
               
@@ -45,7 +51,9 @@ $(document).ready(function() {
             console.log("ocr books found:", ocr.ocr_nb_books);
 
             // reorder all books for indexed items in list
-            postOrder(resultListId, numshelf, ocr.img_num);            
+            if(autoindex) {
+              postOrder(resultListId, numshelf, ocr.img_num);  
+            }          
 
           }
           // display ocr error
@@ -53,10 +61,20 @@ $(document).ready(function() {
             $('#ocrResult').append('<div class="error"><hr><h2>OCR error for image ' + filename + '</h2><p>' + ocr.response + '</p></div>');
           }
           // set button in normal mode
-          $(button).text("Start indexation");
+          $(button).text("Start analyze");
           $(button).removeClass('btn-warning');
-          clearInterval(timer);           
+          clearInterval(timer);          
     });
+
+    // verif params
+    if(params == '') {
+      alert('you should check image');
+      $(button).text("Start analyze");
+      $(button).removeClass('btn-warning');
+      clearInterval(timer);   
+      return false;
+    }
+
   });
 });
 
@@ -87,7 +105,7 @@ async function ajax_postOcr(params, timer) {
 }
 
 // request for search api using ocr result
-async function ajax_indexBook(ocr, index, numshelf, img_num) {
+async function ajax_indexBook(ocr, index, numshelf, img_num, autoindex) {
   var elem = [];
   //console.log(ocr)
   elem.push('title='+ocr.title)
@@ -96,7 +114,9 @@ async function ajax_indexBook(ocr, index, numshelf, img_num) {
   elem.push('numbook='+index)
   elem.push('numshelf='+numshelf)
   elem.push('img_num='+img_num)
+  elem.push('autoindex='+autoindex)
   params = elem.join('&');
+  //console.log(params)
   return $.ajax({
     data: params,
     type: 'POST',
@@ -117,7 +137,7 @@ function waitingButton(button, seconds) {
     var str = ".";
     function run() {
       str+=".";
-      $(button).text("Indexation in process "+str);
+      $(button).text("Analyze in process "+str);
       if(str.length > 20)
         str = '.';
     }
@@ -131,13 +151,13 @@ function doNotIndex(form_id) {
 }
 
 //index book position using api
-async function saveBook(form_id, numbook, numshelf) {
+async function saveBook(form_id, numbook, numshelf, force_order_books = false) {
   const reference = $('#' + form_id + " > form > input[name=reference]").val()
   const title = $('#' + form_id + " > form > input[name=title]").val()
   const author = $('#' + form_id + " > form > input[name='authors[]']").val()
   const index = form_id.split('_');
   const img_num = $('#' + form_id + " > form > input[name='source_img_num']").val()
-  console.log('img_num', img_num)
+  //console.log('img_num', img_num)
 
   // save book
   const data = await ajax_saveBook(reference, numshelf, index);
@@ -149,14 +169,18 @@ async function saveBook(form_id, numbook, numshelf) {
   if(data['result'] == 'success' && typeof data['book'] !== 'undefined') {
       $('#' + form_id).removeClass('list-group-item-warning');
       $('#' + form_id).addClass('list-group-item-success');     
-      //udapte id of book as added
-      const newId = 'indexed_' + data['book']['id_book']; 
+      //udapte id of book as added or indexed
+      let newId = 'book_';
+      if(force_order_books)
+       newId = 'indexed_';
+      newId += data['book']['id_book']; 
       $('#' + form_id).attr('id', newId)     
       //get list of books ids by order : 
       const resultListId =  $('#' + newId).parent().parent().attr('id');
-
       // build request for sorting book's postion by order in shelf
-      postOrder(resultListId, numshelf, img_num);
+      if(force_order_books) {
+        postOrder(resultListId, numshelf, img_num);
+      }
   }
 }
 

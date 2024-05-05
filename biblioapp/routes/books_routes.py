@@ -736,7 +736,11 @@ def set_routes_for_books(app):
           searchedbook['authors'] = searchedbook['author'].split(',')
           searchedbook['found'] = 'local'
           app.logger.info('ocr 3 : book found local "%s"', searchedbook['title'])
-          address = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], int(ocrbook['numshelf']), globalVars)
+          # for automatic indexation : set position 
+          if int(ocrbook['autoindex']) == 1:
+            address = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], int(ocrbook['numshelf']), globalVars)
+          else:
+            address = db.get_position_for_book(app_id, searchedbook['id'], True)
           if address:
             searchedbook['address'] = address
         else:
@@ -758,16 +762,19 @@ def set_routes_for_books(app):
             if test:
               searchedbook = tools.formatBookApi('googleapis', test, None, True)
               #autmatic save process              
-              if 'width' not in searchedbook:
-                searchedbook['width'] = round(tools.set_book_width(searchedbook['pages']))              
-              bookId = db.bookSave(searchedbook, globalVars['arduino_map']['user_id'], session.get('app_id'), None, ocrbook['title'])
-              searchedbook['id'] = bookId['id']
-              searchedbook['found'] = 'local'
-              searchedbook['address'] = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], int(ocrbook['numshelf']), globalVars)
-              app.logger.info('ocr 5 : book saved from api "%s"', searchedbook['title'])
+              #app.logger.info('autoindex %s', ocrbook['autoindex'])
+              if int(ocrbook['autoindex']) == 1:
+                if 'width' not in searchedbook:
+                  searchedbook['width'] = round(tools.set_book_width(searchedbook['pages']))                
+                bookId = db.bookSave(searchedbook, globalVars['arduino_map']['user_id'], session.get('app_id'), None, ocrbook['title'])
+                searchedbook['id'] = bookId['id']
+                searchedbook['found'] = 'local'
+                searchedbook['address'] = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], \
+                  int(ocrbook['numshelf']), globalVars)
+                app.logger.info('ocr 5 : book saved from api "%s"', searchedbook['title'])
             # no search result is found
             else:
-              searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)  
+              searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
           else:
             searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
 

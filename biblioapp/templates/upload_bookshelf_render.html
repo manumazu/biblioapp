@@ -47,14 +47,22 @@
 			      </div>
 			    </div>
 			  </div>
-			</div>			
-
+			</div>
 			{% endfor %}
 			</div>
 		</fieldset>
+
+		<fieldset>
+			<div class="form-check">
+				<input name="autoindex" id="autoindex" class="form-check-input" type="checkbox" value="autoindex">
+				<label class="form-check-label" for="autoindex">Use auto indexation</label>
+			</div>
+		</fieldset>
 		<input type="hidden" name="numshelf" id="numshelf" value="{{ numshelf }}">
+
 		</form>
-		<button class="btn btn-info" id="start-ocr">Start indexation</button>
+
+		<button class="btn btn-info mt-4" id="start-ocr">Start analyze</button>
 
 		<div id="ocrResult"></div>
 		<br/>
@@ -64,7 +72,7 @@
 
 {% block scripts %}
 {{super()}}
-  <script src="{{url_for('static', filename='ocr.js', version='2405051126')}}"></script>
+  <script src="{{url_for('static', filename='ocr.js', version='2405052129')}}"></script>
 {% endblock %}
 
 {% endblock %}

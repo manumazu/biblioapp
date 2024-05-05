@@ -102,10 +102,12 @@
 
 	{% if book['found'] %}
 		<!-- display button for saving book or changing position -->
-		{% if not book['address'] or numshelf|int != book['address']['row']|int or app_id|int != book['address']['id_app']|int %}
-			<button class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }})">Save position</button>
-			<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
+		{% if not 'id' in book %}
+			<button class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }})">Save book</button>
+		{% elif not book['address'] or numshelf|int != book['address']['row']|int or app_id|int != book['address']['id_app']|int %}
+			<button class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }}, 1)">Save position</button>
 		{% endif %}
+		<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
 	{% else %}
 		<!-- book not found in search api result -->
 		<button type="submit" class="btn btn-warning btn-sm" {% if numbook %}onClick="searchBook('{{ book_id }}', {{ numshelf }})"{% endif %}>search again...</button>
