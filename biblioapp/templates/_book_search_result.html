@@ -18,11 +18,7 @@
 
 	{%- set book_id -%}
 		{%- if book['found'] == 'local' -%}
-			{%- if book['address'] -%}
-				indexed_{{ book['id'] }}
-			{%- else -%}
-				book_{{ book['id'] }}
-			{%- endif -%}
+			indexed_{{ book['id'] }}
 		{%- else -%}
 			newbook_{{ numbook }}		
 		{%- endif -%}
@@ -80,7 +76,7 @@
 			{% elif app_id|int != book['address']['id_app']|int %}
 				Book is in another bookshelf "{{ book['address']['arduino_name'] }}"
 			{% endif %}
-			(position n° {{ book['address']['position'] }} and LED n°{{ book['address']['led_column'] }})
+			(position n°{{ book['address']['position'] }} and LED n°{{ book['address']['led_column'] }})
 		{% endif %}
 		</span>	
 
@@ -104,10 +100,8 @@
 		<!-- display button for saving book or changing position -->
 		{% if not 'id' in book %}
 			<button class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }})">Save book</button>
-		{% elif not book['address'] or numshelf|int != book['address']['row']|int or app_id|int != book['address']['id_app']|int %}
-			<button class="btn btn-primary btn-sm" onClick="saveBook('{{ book_id }}', {{ numbook }}, {{ numshelf }}, 1)">Save position</button>
+			<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
 		{% endif %}
-		<button class="btn btn-sm btn-secondary" {% if numbook %}onClick="doNotIndex('{{ book_id }}')"{% endif %}>cancel</button>
 	{% else %}
 		<!-- book not found in search api result -->
 		<button type="submit" class="btn btn-warning btn-sm" {% if numbook %}onClick="searchBook('{{ book_id }}', {{ numshelf }})"{% endif %}>search again...</button>

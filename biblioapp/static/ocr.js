@@ -36,13 +36,23 @@ $(document).ready(function() {
             $('#' + resultListId).show();
             // use search book api for each ocr result
             const books = ocr.response;
+            let previousBook = null;
             for(let j = 0; j<books.length; j++) 
             {
               let index = (j+1)
-              let result = await ajax_indexBook(books[j], index, numshelf, ocr.img_num, autoindex)
+              // need the previous indexed book id in list for finding next position
+              if(j>0) {
+                previousBook = $('#' + resultListId + ' ul li')[j-1];
+                previousBook = $(previousBook).attr('id')
+              }              
+              //console.log('previousIndex:', previousBook)
+              let result = await ajax_indexBook(books[j], index, numshelf, ocr.img_num, autoindex, previousBook)
               //console.log(result)
-              $('#' + resultListId + ' ul').append(result);
-              
+              const resultList = $('#' + resultListId + ' ul') 
+              resultList.append(result);
+              //const currentIndex = $(result)[2];//.attr('id');
+              //const previousIndex = $(currentIndex).parent().parent().attr('id');
+
               // force forms created not being submited
               $('form').on('submit', function(e){
                 e.preventDefault();
@@ -50,10 +60,16 @@ $(document).ready(function() {
             }
             console.log("ocr books found:", ocr.ocr_nb_books);
 
-            // reorder all books for indexed items in list
+            // automatic reorder all books for indexed items in list
             if(autoindex) {
               postOrder(resultListId, numshelf, ocr.img_num);  
-            }          
+            }
+            else {
+              //button save position at the end of book list
+              const button = `<button class="btn btn-success" onClick="postOrder('${resultListId}', ${numshelf}, ${ocr.img_num})" \
+              style="display:block; margin:10px auto">Save all positions</button>`
+              $('#' + resultListId).append(button)
+            }
 
           }
           // display ocr error
@@ -105,9 +121,11 @@ async function ajax_postOcr(params, timer) {
 }
 
 // request for search api using ocr result
-async function ajax_indexBook(ocr, index, numshelf, img_num, autoindex) {
+async function ajax_indexBook(ocr, index, numshelf, img_num, autoindex, previousBook) {
   var elem = [];
   //console.log(ocr)
+  if('id_book' in ocr)
+    elem.push('id_book='+ocr.id_book)
   elem.push('title='+ocr.title)
   elem.push('author='+ocr.author)
   elem.push('editor='+ocr.editor)
@@ -115,6 +133,8 @@ async function ajax_indexBook(ocr, index, numshelf, img_num, autoindex) {
   elem.push('numshelf='+numshelf)
   elem.push('img_num='+img_num)
   elem.push('autoindex='+autoindex)
+  // if(previousIndex != null)
+  //   elem.push('previousbook='+previousBook)
   params = elem.join('&');
   //console.log(params)
   return $.ajax({
@@ -151,51 +171,22 @@ function doNotIndex(form_id) {
 }
 
 //index book position using api
-async function saveBook(form_id, numbook, numshelf, force_order_books = false) {
+async function saveBook(form_id, numbook, numshelf) {
   const reference = $('#' + form_id + " > form > input[name=reference]").val()
   const title = $('#' + form_id + " > form > input[name=title]").val()
   const author = $('#' + form_id + " > form > input[name='authors[]']").val()
+  const editor = $('#' + form_id + " > form > input[name=editor]").val()
+  const book_id = $('#' + form_id + " > form > input[name=id]").val()
   const index = form_id.split('_');
   const img_num = $('#' + form_id + " > form > input[name='source_img_num']").val()
-  //console.log('img_num', img_num)
-
+  const resultListId =  $('#' + form_id).parent().parent().attr('id');
+  
   // save book
-  const data = await ajax_saveBook(reference, numshelf, index);
-  //console.log(data);
+  const book = {'title':title, 'author':author, 'numbook':numbook, 'numshelf':numshelf, 'img_num':img_num, 'id_book':book_id}
+  let result = await ajax_indexBook(book, numbook, numshelf, img_num, 'save_book')//, previousBook)
+  //console.log(result)
+  $('#' + form_id).replaceWith(result);
 
-  if(data['result'] == 'error') {
-      $('#' + form_id).addClass('list-group-item-danger');
-  }                         
-  if(data['result'] == 'success' && typeof data['book'] !== 'undefined') {
-      $('#' + form_id).removeClass('list-group-item-warning');
-      $('#' + form_id).addClass('list-group-item-success');     
-      //udapte id of book as added or indexed
-      let newId = 'book_';
-      if(force_order_books)
-       newId = 'indexed_';
-      newId += data['book']['id_book']; 
-      $('#' + form_id).attr('id', newId)     
-      //get list of books ids by order : 
-      const resultListId =  $('#' + newId).parent().parent().attr('id');
-      // build request for sorting book's postion by order in shelf
-      if(force_order_books) {
-        postOrder(resultListId, numshelf, img_num);
-      }
-  }
-}
-
-async function ajax_saveBook(reference, numshelf, index) {
-  let params = 'numshelf='+numshelf+'&ref='+reference+'&save_bookapi=googleapis&token=ocr'; //&forcePosition=true
-  //for book already index, get info by id
-  if(index[0] == 'book')
-    params += '&id_book='+index[1]
-  return $.ajax({
-    data: params, 
-    url: '/api/bookreferencer/', 
-    complete: function(res) {
-      return res.responseText;
-    }
-  })
 }
 
 // search book and return results
@@ -243,12 +234,12 @@ async function postOrder(resultListId, numshelf, img_num) {
     
     const listId = $(this).attr('id');
     
-    //increase interval for books not found or not in position index
-    if(listId.indexOf('newbook') == 0 || listId.indexOf('book') == 0) {
+    //increase position interval for books not indexed
+    if(listId.indexOf('newbook') == 0) {
       cpt++;
     }
 
-    if(listId.indexOf('indexed') == 0) {
+    if(listId.indexOf('indexed') == 0 || listId.indexOf('book') == 0) {
       const Id = listId.split('_');
       if(cpt>0)
         reqStr += '&book[]=empty_' + cpt; 
@@ -265,6 +256,10 @@ async function postOrder(resultListId, numshelf, img_num) {
     // update content book form content
     const newId = 'indexed_' + newBookOrder[i]['book'];      
     const msg = '(position n°' + newBookOrder[i]['position'] + ' and LED n°' + newBookOrder[i]['led_column'] + ')';
+    // update class if needed
+    if($('#' + newId).hasClass('list-group-item-success') == false) {
+      $('#' + newId).addClass('list-group-item-success');
+    }
     $('#' + newId + ' > form > span').html(msg);
     //hide form buttons
     $('#' + newId + ' > form > .btn').each(function(){

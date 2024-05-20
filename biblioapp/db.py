@@ -580,16 +580,20 @@ def del_item_position(app_id, item_id, item_type, numrow) :
   return True
 
 #get address for max position in all rows
-def get_last_saved_position(id_app, numshelf = None):
+def get_last_saved_position(id_app, numshelf = None, previous_book_id = 0):
   mysql = get_db()
-  if numshelf > 0:
-    mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and row = %s and item_type='book' and \
-      position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and row = %s and item_type='book' GROUP by row) \
-      ORDER BY row DESC LIMIT 1", (id_app, numshelf, id_app, numshelf));
+  if int(numshelf) > 0:
+    if previous_book_id:
+      mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app=%s and row=%s and item_type='book' and \
+        id_item=%s", (id_app, numshelf, previous_book_id))
+    else:
+      mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and row = %s and item_type='book' and \
+        position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and row = %s and item_type='book' GROUP by row) \
+        ORDER BY row DESC LIMIT 1", (id_app, numshelf, id_app, numshelf))
   else:
     mysql['cursor'].execute("SELECT * FROM `biblio_position` WHERE id_app = %s and item_type='book' and \
       position in (SELECT max(position) FROM `biblio_position` WHERE id_app = %s and item_type='book' GROUP by row) \
-      ORDER BY row DESC LIMIT 1", (id_app, id_app));
+      ORDER BY row DESC LIMIT 1", (id_app, id_app))
   row = mysql['cursor'].fetchone()    
   mysql['cursor'].close()
   #app.logger.info('debug DB %s', mysql['cursor']._last_executed)
@@ -598,8 +602,34 @@ def get_last_saved_position(id_app, numshelf = None):
     return row
   return False
 
+# for ocr ai analyse : prevent having same position for books in different images
+def get_last_saved_position_before_item(id_app, numshelf, id_book):
+  mysql = get_db()
+  mysql['cursor'].execute("SELECT max(`position`) as lastposition FROM `biblio_position` WHERE id_app = %s and row = %s \
+    and item_type='book' and position < (select `position`  FROM `biblio_position` WHERE id_app = %s and row = %s \
+      and item_type='book' and id_item = %s)", (id_app, numshelf, id_app, numshelf, id_book))
+  pos = mysql['cursor'].fetchone()    
+  mysql['cursor'].close()
+  #app.logger.info('debug DB %s', mysql['cursor']._last_executed)
+  mysql['conn'].close()
+  if pos['lastposition'] is not None:
+    return pos
+  return False
+
 # suppr and add new position for given book
-def update_position_before_order(app_id, counter, id_book, numshelf, globalVars, shift_position = 0):
+def update_position_before_order(app_id, id_book, numshelf, globalVars, shift_position = 0, previous_book_id = 0):
+  
+  # update position counter with previous item
+  if previous_book_id:
+    lastpos = get_last_saved_position(app_id, numshelf, previous_book_id)
+    newPosition = lastpos['position'] + 1
+  else:
+    lastpos = get_last_saved_position_before_item(app_id, numshelf, id_book)
+    if lastpos:
+      newPosition = lastpos['lastposition'] + 1
+    else:
+      newPosition = 1
+
   # find current postion in all shelfs, get size and remove it
   position = get_position_for_book(app_id, id_book, True)
   if position:
@@ -611,7 +641,7 @@ def update_position_before_order(app_id, counter, id_book, numshelf, globalVars,
     book = get_book_not_ranged(id_book, globalVars['arduino_map']['user_id'])
     interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
   #save position + reinit led column + store shift led position before reorder
-  set_position(app_id, id_book, counter, numshelf, interval, 'book', 0, shift_position)
+  set_position(app_id, id_book, newPosition, numshelf, interval, 'book', 0, shift_position)
   return get_position_for_book(app_id, id_book)
 
 

@@ -731,14 +731,20 @@ def set_routes_for_books(app):
         searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
       else:
         # first, search for book inside shelf index
-        searchedbook = db.search_book_title(globalVars['arduino_map']['user_id'], ocrbook['title'])
+        if 'id_book' in ocrbook and ocrbook['id_book'].isnumeric():
+          searchedbook = db.get_book(ocrbook['id_book'], session.get('app_id'), globalVars['arduino_map']['user_id']) 
+        else:
+          searchedbook = db.search_book_title(globalVars['arduino_map']['user_id'], ocrbook['title'])
         if searchedbook:
           searchedbook['authors'] = searchedbook['author'].split(',')
           searchedbook['found'] = 'local'
-          app.logger.info('ocr 3 : book found local "%s"', searchedbook['title'])
+          #app.logger.info('ocr 3 : book found local "%s"', searchedbook['title'])
           # for automatic indexation : set position 
           if int(ocrbook['autoindex']) == 1:
-            address = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], int(ocrbook['numshelf']), globalVars)
+            previousbook = 0
+            if 'previousbook' in ocrbook:
+              previousbook = int(ocrbook['previousbook'])
+            address = db.update_position_before_order(app_id, searchedbook['id'], int(ocrbook['numshelf']), globalVars, 0, previousbook)
           else:
             address = db.get_position_for_book(app_id, searchedbook['id'], True)
           if address:
@@ -750,7 +756,7 @@ def set_routes_for_books(app):
             query += " +inauthor:" + ocrbook['author']
           query += "+intitle:"+ocrbook['title']
           #print(query)
-          app.logger.info('ocr 4 : search book api with "%s"', query)
+          app.logger.info('ocr : search book api with "%s"', query)
           data = tools.searchBookApi(query, 'googleapis')
           #print(data)
           if 'items' in data:
@@ -763,15 +769,19 @@ def set_routes_for_books(app):
               searchedbook = tools.formatBookApi('googleapis', test, None, True)
               #autmatic save process              
               #app.logger.info('autoindex %s', ocrbook['autoindex'])
-              if int(ocrbook['autoindex']) == 1:
+              if ocrbook['autoindex'] == 'save_book' or ocrbook['autoindex'] == '1':
                 if 'width' not in searchedbook:
                   searchedbook['width'] = round(tools.set_book_width(searchedbook['pages']))                
                 bookId = db.bookSave(searchedbook, globalVars['arduino_map']['user_id'], session.get('app_id'), None, ocrbook['title'])
                 searchedbook['id'] = bookId['id']
                 searchedbook['found'] = 'local'
-                searchedbook['address'] = db.update_position_before_order(app_id, ocrbook['numbook'], searchedbook['id'], \
-                  int(ocrbook['numshelf']), globalVars)
                 app.logger.info('ocr 5 : book saved from api "%s"', searchedbook['title'])
+              if ocrbook['autoindex'] == '1':
+                previousbook = 0
+                if 'previousbook' in ocrbook:
+                  previousbook = int(ocrbook['previousbook'])
+                searchedbook['address'] = db.update_position_before_order(app_id, searchedbook['id'], \
+                  int(ocrbook['numshelf']), globalVars, 0, previousbook)
             # no search result is found
             else:
               searchedbook = tools.formatBookApi('ocr', ocrbook, None, False)
@@ -785,7 +795,7 @@ def set_routes_for_books(app):
   def ocrAnalyse(img_path):
     #return json.loads('{"success": 1, "response": [{"title": "Paris ne finit jamais", "author": "Enrique Vila-Matas", "editor": "José Corti"}, {"title": "Tigre en papier", "author": "Olivier Rolin", "editor": "Hachette"}, {"title": "Le Monde grec antique", "author": "Thomas Piketty", "editor": "Hachette"}, {"title": "Capital et idéologie", "author": "Thomas Piketty", "editor": "Hachette"}, {"title": "Il faut dire que les temps ont changé...", "author": "Daniel Cohen", "editor": "Albin Michel"}, {"title": "La philosophie du catharisme", "author": "René Nelli", "editor": "Seuil"}, {"title": "La vie quotidienne des cathares", "author": "René Nelli", "editor": "Hachette"}, {"title": "Problèmes de linguistique générale", "author": "Benveniste", "editor": "Gallimard"}, {"title": "Histoire du mouvement ouvrier français", "author": "Jacques Girault, Jean-Louis Robert", "editor": "Messioon"}, {"title": "La révolution anarchiste", "author": "Nataf", "editor": "Jurassienne"}, {"title": "Surveiller et punir", "author": "Michel Foucault", "editor": "Gallimard"}, {"title": "Réflexions sur la peine capitale", "author": "Albert Camus", "editor": "Gallimard"}, {"title": "Les esclaves en Grèce ancienne", "author": "Yvon Garlan", "editor": "La Découverte"}, {"title": "Théâtre comique du Moyen Age", "author": "Michel Vovelle", "editor": "Hachette"}, {"title": "Piété baroque et déchristianisation en Provence au XVIIIe siècle", "author": "Michel Vovelle", "editor": "Hachette"}]}')
     
-    #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}, {"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Oeuvres romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "Capital et idéologie", "author": "Thomas Piketty", "editor": ""}]}')
+    #return json.loads('{"success": 1, "response": [{"title": "Donne-moi quelque chose qui ne meure pas", "author": "Bobin-Boubat", "editor": "nrf"}, {"title": "Paraboles de Jesus", "author": "Alphonse Maillot", "editor": "None"}, {"title": "La crise de la culture", "author": "Hannah Arendt", "editor": "None"}, {"title": "Thème et variations", "author": "Léo Ferré", "editor": "Le Castor Astral"}, {"title": "Oeuvre romanesques", "author": "Sartre", "editor": ""}, {"title": "Les beaux textes de l\'antiquité", "author": "Emmanuel Levinas", "editor": "GIF"}, {"title": "Nouvelles lectures talmudiques", "author": "", "editor": "NAGEL"}, {"title": "Le banquet", "author": "Platon", "editor": ""}, {"title": "L\'existentialisme", "author": "Sartre", "editor": "lexique des sciences sociales"}, {"title": "Capital et idéologie", "author": "Thomas Piketty", "editor": ""}]}')
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
     #ocr_output = os.popen("cd " + ocr_path + " && ./ocr_wrapper.sh " + " ".join(img_paths)).read()

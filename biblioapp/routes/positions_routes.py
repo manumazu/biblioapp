@@ -377,24 +377,27 @@ def set_routes_for_positions(app):
         app_id = session.get('app_id')
         sortable = []
         postedPos = {}
-        counter=0
         shift_position = 0   
-        # for ocr ai analyse : prevent having same position for books in different images
-        # retrieve last book position for bookshelf's image   
-        if source_img_num and int(source_img_num) > 1:
-          lastPos = db.get_last_saved_position(app_id, int(current_row))
-          counter = lastPos['position']
-          #app.logger.info('lastPos %s', lastPos)     
-        for book_id in book_ids:
+        previousbook = 0
+        decrease = 0
+
+        for i, book_id in enumerate(book_ids):  
+          
           # store shift position counter for indexed book when it follows books not indexed in list (cf ocr-ai analyse)
           if book_id.startswith('empty'):
-            shift_position = book_id.split('_')[1]
+            shift_position = int(book_id.split('_')[1])
+            decrease = 1
           if book_id.isnumeric():
             postedPos.update({'id_book':book_id, 'shift':shift_position})
+            i -= decrease #decrease index counter for book not indexed
             shift_position = 0
-          counter += 1
+            decrease = 0
+          if i > 0:
+            previousbook = book_ids[i-1]  # get previous book id in list
+
           # save position and reinit led column order 
-          db.update_position_before_order(app_id, counter, postedPos['id_book'], current_row, globalVars, int(postedPos['shift']))
+          if len(postedPos) > 0:
+            db.update_position_before_order(app_id, postedPos['id_book'], current_row, globalVars, postedPos['shift'], previousbook)
         
         #app.logger.info('%s', postedPos)
         #update new leds number
