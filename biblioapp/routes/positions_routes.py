@@ -362,6 +362,7 @@ def set_routes_for_positions(app):
 
     if request.method == 'POST' and session.get('app_id'):
   
+      reset_positions = False
       if request.is_json and 'book_ids' in request.json:
         book_ids = request.json['book_ids']
         current_row = request.json['row']
@@ -372,6 +373,8 @@ def set_routes_for_positions(app):
         source_img_num = 0
         if 'source_img_num' in request.form:
           source_img_num = request.form['source_img_num'] 
+        if 'reset_positions' in request.form:
+          reset_positions = True        
 
       if len(book_ids) > 0:
         app_id = session.get('app_id')
@@ -380,6 +383,10 @@ def set_routes_for_positions(app):
         shift_position = 0   
         previousbook = 0
         decrease = 0
+
+        #clean positions for current shelf
+        if reset_positions:
+          db.del_positions_for_shelf(app_id, current_row)
 
         for i, book_id in enumerate(book_ids):  
           

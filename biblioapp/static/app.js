@@ -5,7 +5,7 @@
        order = $(element).sortable('serialize');*/
        console.log(elements);
        $.ajax({
-		    data: elements,
+		    data: elements+'&reset_positions=1',
 		    type: 'POST',
 		    url: '/ajax_sort/',
 		    success: function(res){

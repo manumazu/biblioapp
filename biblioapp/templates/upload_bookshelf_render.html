@@ -53,9 +53,15 @@
 		</fieldset>
 
 		<fieldset>
-			<div class="form-check">
-				<input name="autoindex" id="autoindex" class="form-check-input" type="checkbox" value="autoindex">
-				<label class="form-check-label" for="autoindex">Use auto indexation</label>
+			<div class="form-group row">
+				<div class="form-check mr-4">
+					<input name="autoindex" id="autoindex" class="form-check-input" type="checkbox" value="autoindex">
+					<label class="form-check-label" for="autoindex">Use auto indexation</label>
+				</div>
+				<div class="form-check">
+					<input name="reset_positions" id="reset_positions" class="form-check-input" type="checkbox" value="1">
+					<label class="form-check-label" for="reset_positions">Reset positions</label>
+				</div>
 			</div>
 		</fieldset>
 		<input type="hidden" name="numshelf" id="numshelf" value="{{ numshelf }}">
@@ -72,7 +78,7 @@
 
 {% block scripts %}
 {{super()}}
-  <script src="{{url_for('static', filename='ocr.js', version='2405201038')}}"></script>
+  <script src="{{url_for('static', filename='ocr.js', version='2405212346')}}"></script>
 {% endblock %}
 
 {% endblock %}

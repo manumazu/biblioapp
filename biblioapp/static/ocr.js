@@ -45,7 +45,7 @@ $(document).ready(function() {
                 previousBook = $('#' + resultListId + ' ul li')[j-1];
                 previousBook = $(previousBook).attr('id')
               }              
-              //console.log('previousIndex:', previousBook)
+              console.log('previousIndex:', previousBook)
               let result = await ajax_indexBook(books[j], index, numshelf, ocr.img_num, autoindex, previousBook)
               //console.log(result)
               const resultList = $('#' + resultListId + ' ul') 
@@ -229,6 +229,9 @@ async function ajax_searchBook(title, index, numshelf, img_num) {
 async function postOrder(resultListId, numshelf, img_num) {
   //build request for sorting book's postion by order in shelf
   let reqStr = "row="+numshelf+"&source_img_num="+img_num
+  if($('#reset_positions').is(':checked')){
+      reqStr += '&reset_positions=1';
+  }      
   let cpt = 0;
   $('#' + resultListId + ' > ul > li').each(function(){ 
     

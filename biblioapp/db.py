@@ -579,6 +579,16 @@ def del_item_position(app_id, item_id, item_type, numrow) :
     update_app_book(None, item_id)  
   return True
 
+def del_positions_for_shelf(app_id, numshelf) :
+  mysql = get_db()
+  mysql['cursor'].execute("DELETE FROM biblio_position WHERE `item_type`='book' and `id_app`=%s and `row`=%s", \
+    (app_id, numshelf))
+  mysql['conn'].commit()
+  mysql['cursor'].close()
+  mysql['conn'].close()
+  #app.logger.info('debug %s', mysql['cursor']._last_executed)
+  return True
+
 #get address for max position in all rows
 def get_last_saved_position(id_app, numshelf = None, previous_book_id = 0):
   mysql = get_db()
@@ -602,33 +612,22 @@ def get_last_saved_position(id_app, numshelf = None, previous_book_id = 0):
     return row
   return False
 
-# for ocr ai analyse : prevent having same position for books in different images
-def get_last_saved_position_before_item(id_app, numshelf, id_book):
-  mysql = get_db()
-  mysql['cursor'].execute("SELECT max(`position`) as lastposition FROM `biblio_position` WHERE id_app = %s and row = %s \
-    and item_type='book' and position < (select `position`  FROM `biblio_position` WHERE id_app = %s and row = %s \
-      and item_type='book' and id_item = %s)", (id_app, numshelf, id_app, numshelf, id_book))
-  pos = mysql['cursor'].fetchone()    
-  mysql['cursor'].close()
-  #app.logger.info('debug DB %s', mysql['cursor']._last_executed)
-  mysql['conn'].close()
-  if pos['lastposition'] is not None:
-    return pos
-  return False
-
 # suppr and add new position for given book
 def update_position_before_order(app_id, id_book, numshelf, globalVars, shift_position = 0, previous_book_id = 0):
   
   # update position counter with previous item
-  if previous_book_id:
+  if int(previous_book_id) > 0:
     lastpos = get_last_saved_position(app_id, numshelf, previous_book_id)
     newPosition = lastpos['position'] + 1
+    #app.logger.info('lastpos1 %s', newPosition)
   else:
-    lastpos = get_last_saved_position_before_item(app_id, numshelf, id_book)
+    lastpos = get_last_saved_position(app_id, numshelf)
     if lastpos:
-      newPosition = lastpos['lastposition'] + 1
+      newPosition = lastpos['position'] + 1
+      #app.logger.info('lastpos2 %s', newPosition)
     else:
       newPosition = 1
+      #app.logger.info('lastpos3 %s', newPosition)
 
   # find current postion in all shelfs, get size and remove it
   position = get_position_for_book(app_id, id_book, True)
