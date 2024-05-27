@@ -388,25 +388,40 @@ def set_routes_for_positions(app):
         if reset_positions:
           db.del_positions_for_shelf(app_id, current_row)
 
-        for i, book_id in enumerate(book_ids):  
+        # merge positions already in shelf with new positions
+        new_positions = []
+        bdd_positions = []
+        current_positions = db.get_positions_for_row(app_id, current_row)
+        if current_positions:
+          for pos in current_positions:
+            bdd_positions.append(str(pos['id_item']))
+        
+        # prevent not changing order for ocr position 
+        for bid in bdd_positions:
+          if bid not in new_positions and bid not in book_ids:
+            new_positions.append(bid)
+             
+        for bid in book_ids:
+          if bid not in new_positions:
+            new_positions.append(bid)
+
+        # update all positions for current shelf
+        pos = 0
+        for i, book_id in enumerate(new_positions):
           
-          # store shift position counter for indexed book when it follows books not indexed in list (cf ocr-ai analyse)
+          # shift book position for books not found in ocr result
           if book_id.startswith('empty'):
             shift_position = int(book_id.split('_')[1])
-            decrease = 1
-          if book_id.isnumeric():
-            postedPos.update({'id_book':book_id, 'shift':shift_position})
-            i -= decrease #decrease index counter for book not indexed
-            shift_position = 0
-            decrease = 0
-          if i > 0:
-            previousbook = book_ids[i-1]  # get previous book id in list
 
-          # save position and reinit led column order 
-          if len(postedPos) > 0:
-            db.update_position_before_order(app_id, postedPos['id_book'], current_row, globalVars, postedPos['shift'], previousbook)
-        
-        #app.logger.info('%s', postedPos)
+          # save position
+          if book_id.isnumeric():
+            pos += 1
+            db.update_position_before_order(app_id, book_id, current_row, globalVars, pos, shift_position)
+            #app.logger.info('id %s, pos %s shift_position %s', book_id, pos, shift_position)
+            shift_position = 0
+                
+        #app.logger.info('new positions %s', new_positions)
+
         #update new leds number
         positions = db.get_positions_for_row(app_id, current_row)
         for pos in positions:

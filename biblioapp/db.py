@@ -613,34 +613,20 @@ def get_last_saved_position(id_app, numshelf = None, previous_book_id = 0):
   return False
 
 # suppr and add new position for given book
-def update_position_before_order(app_id, id_book, numshelf, globalVars, shift_position = 0, previous_book_id = 0):
-  
-  # update position counter with previous item
-  if int(previous_book_id) > 0:
-    lastpos = get_last_saved_position(app_id, numshelf, previous_book_id)
-    newPosition = lastpos['position'] + 1
-    #app.logger.info('lastpos1 %s', newPosition)
-  else:
-    lastpos = get_last_saved_position(app_id, numshelf)
-    if lastpos:
-      newPosition = lastpos['position'] + 1
-      #app.logger.info('lastpos2 %s', newPosition)
-    else:
-      newPosition = 1
-      #app.logger.info('lastpos3 %s', newPosition)
+def update_position_before_order(app_id, id_book, numshelf, globalVars, new_position, shift_position = 0):
 
-  # find current postion in all shelfs, get size and remove it
+  # find current interval for book
   position = get_position_for_book(app_id, id_book, True)
   if position:
     interval = position['range']
     # save shift book for update : what happen if I had new book not in ocr ?
     #shift_position = position['shiftpos']
-    del_item_position(position['id_app'], id_book, 'book', position['row'])
+    #del_item_position(position['id_app'], id_book, 'book', position['row'])
   else:
     book = get_book_not_ranged(id_book, globalVars['arduino_map']['user_id'])
     interval = tools.led_range(book, globalVars['arduino_map']['leds_interval'])
   #save position + reinit led column + store shift led position before reorder
-  set_position(app_id, id_book, newPosition, numshelf, interval, 'book', 0, shift_position)
+  set_position(app_id, id_book, new_position, numshelf, interval, 'book', 0, shift_position)
   return get_position_for_book(app_id, id_book)
 
 

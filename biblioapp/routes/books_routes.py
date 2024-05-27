@@ -587,7 +587,7 @@ def set_routes_for_books(app):
   #upload users's  bookshelves pictures and start OCR with IA on it
   @app.route('/bookindexer', methods=['GET', 'POST'])
   @flask_login.login_required
-  def upload_bookshelf():
+  def bookIndexerAI():
     globalVars = tools.initApp()
     #print(globalVars)
     
@@ -643,14 +643,14 @@ def set_routes_for_books(app):
         # upload new image for given numshelf
         if 'shelf_img' not in request.files:
             flash('Veuillez sélectionner un dossier')
-            return redirect(url_for('upload_bookshelf', _scheme='https', _external=True))
+            return redirect(url_for('bookIndexerAI', _scheme='https', _external=True))
         shelf_img = request.files['shelf_img']
         if shelf_img.filename == '':
             flash('Aucun fichier sélectionné', 'warning')
-            return redirect(url_for('upload_bookshelf', _scheme='https', _external=True))
+            return redirect(url_for('bookIndexerAI', _scheme='https', _external=True))
         if tools.allowed_file(shelf_img.filename) is False:
           flash('Format de fichier non autorisé', 'warning')
-          return redirect(url_for('upload_bookshelf', _scheme='https', _external=True))
+          return redirect(url_for('bookIndexerAI', _scheme='https', _external=True))
         if shelf_img and 'numshelf' in request.form:
             filename = secure_filename(shelf_img.filename)
             numshelf = str(request.form['numshelf'])
@@ -682,7 +682,7 @@ def set_routes_for_books(app):
             img_resized_path = os.path.join(resize_dir, filename)
             img_resized.save(img_resized_path)
             
-            return redirect(url_for('upload_bookshelf', numshelf=numshelf, _scheme='https', _external=True))
+            return redirect(url_for('bookIndexerAI', numshelf=numshelf, _scheme='https', _external=True))
 
   #used for ocr indexation
   @app.route('/api/ajax_ocr/', methods=['POST'])
