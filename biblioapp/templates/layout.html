@@ -41,7 +41,7 @@
 							<div class="dropdown-menu" aria-labelledby="navbarDropdown">
 								<a class="dropdown-item" href="{{ url_for('myBookShelf') }}">Manage books</a>
 								<a class="dropdown-item" href="{{ url_for('searchBookReference') }}">Add new book</a>
-								<a class="dropdown-item" href="{{ url_for('bookIndexerAI', numshelf=shelf_infos['id']) }}">Index books with AI</a>
+								<a class="dropdown-item" href="{{ url_for('bookIndexerAI', numshelf=1) }}">Index books with AI</a>
 								<a class="dropdown-item" href="{{ url_for('editArduino', app_id=shelf_infos['id']) }}">Edit bookshelf</a>
 					    		<a class="dropdown-item" href="{{ url_for('customColors', app_id=shelf_infos['id']) }}">Customize colors</a>
 								<a class="dropdown-item" href="{{ url_for('selectArduino') }}">Change bookshelf</a>	

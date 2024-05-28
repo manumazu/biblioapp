@@ -600,7 +600,7 @@ def set_routes_for_books(app):
           full_path_dir = os.path.join(app.root_path, upload_dir)
           #get uploaded image list
           if os.path.isdir(full_path_dir) is False:
-            abort(404)
+            os.makedirs(full_path_dir)
           img_list = os.listdir(full_path_dir)
           img_list = sorted(img_list)
           dir_list = []
