@@ -974,23 +974,50 @@ def sort_customcodes(user_id, app_id, codes) :
   return sortable
 
 def search_book_title(user_id, keyword) :
-  #use fulltext index search
-  searchArray = keyword.split(' ')
-  #build search string using double quote for the 5 first words in string for better result
-  if len(searchArray) > 5:
-    searchTerm = '+\"' + searchArray[0] + ' ' + searchArray[1] + ' ' + searchArray[2] + ' ' + searchArray[3] + ' ' + searchArray[4] + '\"'
-    for i in range(5, len(searchArray)):
-      searchTerm += ' ' + searchArray[i]
+  searchTerm = formatTextQuery(keyword)
+  result = search_full_text(user_id, searchTerm, keyword)
+  if not result:
+    # for strings with more than 4 words, format search term
+    searchTerm = formatTextQuery(keyword, 'start', 4)
+    # test fulltext index search
+    result = search_full_text(user_id, searchTerm, keyword)
+    if not result:
+      searchTerm = formatTextQuery(keyword, 'end', 4)
+      result = search_full_text(user_id, searchTerm, keyword)
+      # search last 2 words for keywords
+      if not result:
+        searchTerm = formatTextQuery(keyword, 'end', 2)
+        result = search_full_text(user_id, searchTerm, keyword)
+  #app.logger.info('result for search_book_title : "%s"', result)        
+  return result
+
+def formatTextQuery(keyword, direction = None, scope = 3):
+  if direction is not None:
+    searchArray = keyword.split(' ')
+     #build search string using double quote for the 5 first words in string for better result
+    if len(searchArray) > scope:
+      if direction == 'start':
+        searchTerm = '+\"' + ' '.join([searchArray[i] for i in range(0, scope)]) + '\" '
+        searchTerm += ' '.join([searchArray[i] for i in range(scope, len(searchArray))])
+      if direction == 'end':
+        searchTerm = ' '.join([searchArray[i] for i in range(0, len(searchArray)-scope)])
+        searchTerm += ' +\"' + ' '.join([searchArray[i] for i in range(-scope, 0)]) + '\"'
+      #app.logger.info('searchTerm : %s, direction %s, scope %s', searchTerm, direction, scope)
+    else:
+      searchTerm = '\"' + keyword + '\"'
   else:
     searchTerm = '\"' + keyword + '\"'
-  app.logger.info('ocr 2 : search book db for "%s"', searchTerm)
-  #searchTerm = "%"+keyword+"%"
+  #app.logger.info('ocr 2 : search book db for "%s"', searchTerm)    
+  return searchTerm
+
+
+def search_full_text(user_id, searchTerm, keyword) :
   mysql = get_db()
   mysql['cursor'].execute("SELECT * FROM biblio_book where id_user=%s and (MATCH(title) AGAINST(%s IN BOOLEAN MODE) \
-    or MATCH(ocr_keywords) AGAINST(\"%s\"))", (user_id, searchTerm, keyword)) 
+    or MATCH(ocr_keywords) AGAINST(%s))", (user_id, searchTerm, '\"' + keyword + '\"')) 
   #and title like %s", (user_id, searchTerm))
   row = mysql['cursor'].fetchone()
-  #print(mysql['cursor']._last_executed)
+  #app.logger.info('search title query : %s ', mysql['cursor']._last_executed)
   mysql['cursor'].close()
   mysql['conn'].close()
   if row:

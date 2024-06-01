@@ -758,7 +758,7 @@ def set_routes_for_books(app):
           #print(query)
           app.logger.info('ocr : search book api with "%s"', query)
           data = tools.searchBookApi(query, 'googleapis')
-          #print(data)
+          #app.logger.info('searchBookApi %s', data)
           if 'items' in data:
             # first test  : match ocr title into api title 
             test = tools.matchApiSearchResults(ocrbook['title'], data, 'ocr-in-api')
