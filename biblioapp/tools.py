@@ -197,6 +197,9 @@ def sortIndexBlocks(elem):
 def sortPositions(address):
   return address['row']*100+address['led_column']
 
+def sortRevelencyCounter(elem):
+  return elem['counter'] 
+
 def sortCoords(coords):
   return coords[0]
 
@@ -205,7 +208,7 @@ def match_words(words, string):
   s = unidecode(string).lower()
   # search words inside string
   compare = re.search(re.escape(w), s, re.IGNORECASE)
-  #print(compare)
+  #app.logger.info('compare %s', compare)
   if compare and compare.start() < 2:
     return True
   return False
@@ -227,6 +230,34 @@ def matchApiSearchResults(title, data, way):
         return item
   return False
 
+def match_search_results(searchedbooks, ocr_title):
+  # compare titles btw index and ocr strings : count amount of common words
+  import re
+  resultArray = []
+  totalFound = len(searchedbooks)
+  for book in searchedbooks:
+    if book['ocr_keywords'] is not None: 
+      searchArray = book['ocr_keywords'].split(' ')
+    else:
+      searchArray = book['title'].split(' ')
+    poscount = 0
+    for w in searchArray:
+      # count words found in title
+      compareTitle = re.search(re.escape(w), ocr_title, re.IGNORECASE)
+      if compareTitle and compareTitle.start() >= 0:
+        poscount += 1
+      else:
+        poscount -= 1
+    # when at least result is positive, then it's possible to be good 
+    if poscount >= 0:
+      book.update({'counter':poscount})
+      resultArray.append(book)
+  # sort results with best score counter
+  if len(resultArray):
+    resultArray.sort(key=sortRevelencyCounter)
+    return resultArray[0]
+  return False
+
 # Search books with open api
 def searchBookApi(query, api, ref = None):
   import requests
@@ -238,6 +269,7 @@ def searchBookApi(query, api, ref = None):
     url = "https://www.googleapis.com/books/v1/volumes/"
     query = ref
 
+  app.logger.info('ocr : search book api with "%s"', query)
   data = {}
   r = requests.get(url + query)
   data = r.json()
