@@ -247,14 +247,16 @@ def match_search_results(searchedbooks, ocr_title):
       if compareTitle and compareTitle.start() >= 0:
         poscount += 1
       else:
-        poscount -= 1
+        poscount -= .8
     # when at least result is positive, then it's possible to be good 
+    #app.logger.info('ocr : match book counter : %s, title results "%s", for : "%s"', poscount, book['title'], ocr_title)
     if poscount >= 0:
       book.update({'counter':poscount})
       resultArray.append(book)
   # sort results with best score counter
   if len(resultArray):
     resultArray.sort(key=sortRevelencyCounter)
+    #app.logger.info('ocr : search results : %s', resultArray)
     return resultArray[0]
   return False
 
@@ -273,7 +275,6 @@ def searchBookApi(query, api, ref = None):
   data = {}
   r = requests.get(url + query)
   data = r.json()
-  print(query)
   return data
 
 def formatBookApi(api, data, isbn, found = False):

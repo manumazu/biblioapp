@@ -758,7 +758,6 @@ def set_routes_for_books(app):
         #second search with api
           query = ocrbook['title']
           if 'author' in ocrbook and ocrbook['author'] is not None and ocrbook['author'] != 'None' and len(ocrbook['author'])>0 :
-            app.logger.info('ocr : author "%s"', len(ocrbook['author']))
             query += " +inauthor:" + ocrbook['author']
           query += "+intitle:"+ocrbook['title']
 
@@ -799,7 +798,7 @@ def set_routes_for_books(app):
   # use subprocess to gemeni ocr analyse
   def ocrAnalyse(img_path):
 
-    #return json.loads('{"success": 1, "response": [{"title": "Trilogie New-Yorkaise - Tome 1", "author": "Paul Auster", "editor": "Actes Sud"}, {"title": "Brooklyn Follies", "author": "Paul Auster", "editor": "Babel"}, {"title": "La conférence de Cintegabelle", "author": "Lydie Salvayre", "editor": "Verticales"}, {"title": "Les Premières Images Chrétiennes", "author": "Collectif", "editor": "Atelier Cercle"}, {"title": "Achever Clausewitz", "author": "Frédérick Tristan", "editor": "Editions du Seuil"}, {"title": "Fragments d\'un discours amoureux", "author": "Roland Barthes", "editor": "Editions du Seuil"}, {"title": "Le Promeneur de Paris - 10 Promenades de la Rive Droite", "author": "Inconnu", "editor": "Musees / Actes Sud"}, {"title": "Conte de Lautreamont", "author": "", "editor": ""}]}')
+    #return json.loads('{"success": 1, "response": [{    "title": "Histoires d\'un fonctionnaire",     "author": "André Dhotel",     "editor": "F & Cie"  },   {    "title": "Je n\'ai pas grand-chose à raconter",     "author": "J. Robert Lennon",     "editor": "nrf"  },   {    "title": "Des choses mortes",     "author": "Steve Tesich",     "editor": "Gallimard"  },   {    "title": "Monsieur Toussaint Louverture",     "author": "inconnu",     "editor": "Seuil"  }, {"title": "L\'homme expliqué aux femmes", "author": "Vincent Cespedes", "editor": "Livre de Poche"}, {"title": "Trilogie New-Yorkaise - Tome 1", "author": "Paul Auster", "editor": "Actes Sud"}, {"title": "Nick Cave King Ink", "author": "Nick Cave", "editor": "Le Serpent à Plumes"}, {"title": "Nick Cave King Ink2", "author": "Nick Cave", "editor": "P2813"}, {"title": "Conte de Lautreamont", "author": "", "editor": ""}, {"title": "Mort de Bunny Munro", "author": "Alice Munro", "editor": "Points"}, {"title": "Les femmes mal aimées", "author": "Mariela Michelena", "editor": "PBP"}]}')
 
 
     ocr_path = os.path.join(app.root_path, "../../bibliobus-ocr-ia")
