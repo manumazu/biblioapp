@@ -247,9 +247,9 @@ def match_search_results(searchedbooks, ocr_title):
       if compareTitle and compareTitle.start() >= 0:
         poscount += 1
       else:
-        poscount -= .8
+        poscount -= .75
     # when at least result is positive, then it's possible to be good 
-    #app.logger.info('ocr : match book counter : %s, title results "%s", for : "%s"', poscount, book['title'], ocr_title)
+    app.logger.info('ocr : match book counter : %s, title results "%s", for : "%s"', poscount, book['title'], ocr_title)
     if poscount >= 0:
       book.update({'counter':poscount})
       resultArray.append(book)
