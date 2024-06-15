@@ -385,19 +385,19 @@ def set_book(bookapi, user_id, app_id, ocr_title = None) :
   hasBook = {}
   if 'id' in bookapi:
     mysql = get_db()
-    mysql['cursor'].execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, `reference`=%s, \
-    `description`=%s, `width`=%s, `ocr_keywords`=%s  WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], \
-      bookapi['editor'], bookapi['year'], bookapi['pages'], bookapi['reference'], bookapi['description'], bookapi['width'], \
-      ocr_title, bookapi['id']))
+    mysql['cursor'].execute("UPDATE biblio_book SET `isbn`=%s, `title`=%s, `subtitle`=%s, `author`=%s, `editor`=%s, `year`=%s, `pages`=%s, \
+      `reference`=%s, `description`=%s, `width`=%s, `ocr_keywords`=%s  WHERE id=%s", (bookapi['isbn'], bookapi['title'].strip(), \
+       bookapi['subtitle'], bookapi['author'], bookapi['editor'], bookapi['year'], bookapi['pages'], bookapi['reference'], \
+       bookapi['description'], bookapi['width'], ocr_title, bookapi['id']))
     mysql['conn'].commit()
     mysql['cursor'].close()
     mysql['conn'].close()
-    hasBook['id'] = bookapi['id']    
+    hasBook['id'] = bookapi['id']
   else:
     mysql = get_db()
-    mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `id_app`, `isbn`, `title`, `author`, `editor`, `year`, `pages`, \
-      `reference`, `description`, `width`, `ocr_keywords`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, app_id, \
-      bookapi['isbn'], bookapi['title'].strip(), bookapi['author'], bookapi['editor'], bookapi['year'], bookapi['pages'], \
+    mysql['cursor'].execute("INSERT INTO biblio_book (`id_user`, `id_app`, `isbn`, `title`, `subtitle`, `author`, `editor`, `year`, `pages`, \
+      `reference`, `description`, `width`, `ocr_keywords`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, app_id, \
+      bookapi['isbn'], bookapi['title'].strip(), bookapi['subtitle'], bookapi['author'], bookapi['editor'], bookapi['year'], bookapi['pages'], \
       bookapi['reference'], bookapi['description'], bookapi['width'], ocr_title))
     mysql['conn'].commit()
     mysql['cursor'].execute("SELECT LAST_INSERT_ID() as id")

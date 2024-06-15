@@ -286,6 +286,7 @@ def formatBookApi(api, data, isbn, found = False):
     authors = authors[:3]
     bookapi['author'] = ', '.join(authors)
     bookapi['title'] = data['title']
+    bookapi['subtitle'] = data['subtitle']
     bookapi['reference'] = data['reference']
     bookapi['isbn'] = isbn
     bookapi['description'] = data['description']
@@ -313,7 +314,7 @@ def formatBookApi(api, data, isbn, found = False):
     bookapi['author'] = ', '.join(authors)
     bookapi['title'] = data['title']
     if 'subtitle' in data:
-      bookapi['title'] += ' - '+data['subtitle']
+      bookapi['subtitle'] = data['subtitle']
     bookapi['reference'] = data['key']
     bookapi['isbn'] = isbn
     bookapi['editor'] = data['publishers'][0]['name'] if 'publishers' in data else ""
@@ -330,7 +331,7 @@ def formatBookApi(api, data, isbn, found = False):
     bookapi['author'] = ', '.join(authors)
     bookapi['title'] = data['volumeInfo']['title']
     if 'subtitle' in data['volumeInfo']:
-      bookapi['title'] += ' - '+data['volumeInfo']['subtitle']
+      bookapi['subtitle'] = data['volumeInfo']['subtitle']
     bookapi['reference'] = data['id']
     bookapi['isbn'] = ''
     if isbn is not None:
