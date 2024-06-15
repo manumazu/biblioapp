@@ -303,6 +303,7 @@ def formatBookApi(api, data, isbn, found = False):
     bookapi['authors'] = [data['author']]
     bookapi['title'] = data['title']
     bookapi['editor'] = data['editor']
+    bookapi['subtitle'] = ''
 
   if api == 'openlibrary':
     authors = []
@@ -313,6 +314,7 @@ def formatBookApi(api, data, isbn, found = False):
     authors = authors[:3]
     bookapi['author'] = ', '.join(authors)
     bookapi['title'] = data['title']
+    bookapi['subtitle'] = ''
     if 'subtitle' in data:
       bookapi['subtitle'] = data['subtitle']
     bookapi['reference'] = data['key']
@@ -330,6 +332,7 @@ def formatBookApi(api, data, isbn, found = False):
     authors = authors[:3]
     bookapi['author'] = ', '.join(authors)
     bookapi['title'] = data['volumeInfo']['title']
+    bookapi['subtitle'] = ''
     if 'subtitle' in data['volumeInfo']:
       bookapi['subtitle'] = data['volumeInfo']['subtitle']
     bookapi['reference'] = data['id']
